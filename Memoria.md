@@ -69,3 +69,9 @@ Estado: el usuario autorizo explicitamente publicar el contenido revisable compl
 Decisiones: Danix1219 sera el unico responsable por ahora. Exigir PR y CI, con cero aprobaciones obligatorias para permitir trabajo individual sin fingir revision independiente; sin bypass de checks.
 Deuda: incorporar revisor independiente y aumentar aprobaciones a uno cuando exista; contratos/Ready/stack y CD siguen pendientes.
 A evitar: interpretar la autorizacion de publicacion como aceptacion funcional o revision independiente.
+
+## Publicacion y CI remoto verificados (2026-11-02)
+Estado: contenido autorizado publicado en https://github.com/Danix1219/NexoLocalApi; primer workflow SDD documentation y job SDD / docs concluyeron success: https://github.com/Danix1219/NexoLocalApi/actions/runs/41548573146. Upstream local/remoto 0/0 verificado despues del push inicial.
+Decisiones: proteger main con PR, conversaciones resueltas y SDD / docs emitido por GitHub Actions (integration_id 15368), rama actualizada y sin force-push/borrado; cero aprobaciones por trabajo individual. La activacion se ejecuta tras verificar CI del commit que registra esta evidencia; resultado administrativo final en docs_nexo/INICIO_DESARROLLO_Y_REPOS.md.
+Deuda: no existe revision independiente; Ready, contratos formales/stack y CI/CD de producto pendientes. No se han ejecutado builds, pruebas funcionales ni despliegues.
+A evitar: confundir CI documental exitoso con aceptacion funcional, seguridad completa o CD.
