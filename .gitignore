@@ -1,0 +1,16 @@
+.vs/
+**/bin/
+**/obj/
+.dart_tool/
+**/build/
+.env
+.env.*
+!.env.example
+*.user
+*.suo
+*.jks
+*.keystore
+*.p12
+*.pfx
+**/key.properties
+**/service-account*.json

@@ -1,0 +1,21 @@
+# TAREAS — nv-24
+
+[Spec](spec.md), [plan](plan.md). Todo pendiente; diseño no es producto.
+
+- [ ] T-006 →FR-090,NFR-090. Refinar fuente/actor/precondiciones/contrato. Acepta: AC-090 documentados y después comprobados con evidencia apropiada, sin éxito ficticio. Depende de: fuentes/dependencias de spec.
+- [ ] T-020 →FR-100,NFR-100. Precisar escenario propio. Acepta: AC-100 documentados y después comprobados con evidencia apropiada, sin éxito ficticio. Depende de: T-006.
+- [ ] T-001 →FR-001,FR-002,FR-003,NFR-002. Cerrar Ready con decisiones y revisión humana. Acepta: AC-090 documentados y después comprobados con evidencia apropiada, sin éxito ficticio. Depende de: T-006, T-020.
+- [ ] T-002 →FR-001,FR-002,FR-003,NFR-003. Concretar cambio y archivos al encargar. Acepta: AC-001, AC-002, AC-003 documentados y después comprobados con evidencia apropiada, sin éxito ficticio. Depende de: T-001 y encargo correspondiente.
+- [ ] T-010 →FR-001,NFR-001. Proteger cola de reportes y decisiones administrativas con aplicación por propietario. Acepta: AC-001 documentados y después comprobados con evidencia apropiada, sin éxito ficticio. Depende de: T-002.
+- [ ] T-011 →FR-002,NFR-001. Moderador separado del reportante; auditoría mínima; no escritura cruzada de bases. Acepta: AC-002 documentados y después comprobados con evidencia apropiada, sin éxito ficticio. Depende de: T-002.
+- [ ] T-012 →FR-003,NFR-003. Integrar/reintentar/recuperar. Acepta: AC-003 documentados y después comprobados con evidencia apropiada, sin éxito ficticio. Depende de: T-002.
+- [ ] T-021 →FR-100,NFR-100. Cuenta normal no lista ni decide; reentrega no duplica efecto; ocultar/restaurar lo aplica dueño sin logs privados. Acepta: AC-100 documentados y después comprobados con evidencia apropiada, sin éxito ficticio. Depende de: T-002, T-020.
+- [ ] T-003 →NFR-003. Integrar consumidor/provider o entregable operativo. Acepta: AC-001, AC-002, AC-003 documentados y después comprobados con evidencia apropiada, sin éxito ficticio. Depende de: T-010, T-011, T-012, T-021, T-280, T-281.
+- [ ] T-004 →NFR-001,NFR-100. Verificar aislamiento y permiso. Acepta: AC-002, AC-100 documentados y después comprobados con evidencia apropiada, sin éxito ficticio. Depende de: T-003.
+- [ ] T-007 →FR-090,NFR-090,NFR-002. Comprobar refinamiento. Acepta: AC-090 documentados y después comprobados con evidencia apropiada, sin éxito ficticio. Depende de: T-004.
+- [ ] T-005 →NFR-002,NFR-003. Conciliar evidencia/Memoria y revisión. Acepta: AC-001, AC-002, AC-003, AC-090, AC-100 documentados y después comprobados con evidencia apropiada, sin éxito ficticio. Depende de: T-007.
+
+## Historias de operación — refinamiento e implementación futura
+
+- [ ] T-280 →FR-280,NFR-001,NFR-003. Definir y después construir/comprobar EP-080 (GET /admin/reports) en S06; entradas/salida e invariantes enlazadas en fichas autoritativas, sin duplicar operación. Acepta: AC-280: EP-080: Acceso administrativo separado; auditoría de consulta sensible Actor permitido recibe el resultado previsto; validación, permiso/estado y fallo/reintento se comprueban sin exponer datos fuera del DTO. Previsto en línea base; contrato formal y aceptación pendientes. Depende de: T-002 y contrato formal/decisiones de esta historia; no exige construir todo el dominio.
+- [ ] T-281 →FR-281,NFR-001,NFR-003. Definir y después construir/comprobar EP-081 (POST /admin/reports/{id}/decision) en S06; entradas/salida e invariantes enlazadas en fichas autoritativas, sin duplicar operación. Acepta: AC-281: EP-081: No escribir base ajena; propietario aplica evento idempotente Actor permitido recibe el resultado previsto; validación, permiso/estado y fallo/reintento se comprueban sin exponer datos fuera del DTO. Previsto en línea base; contrato formal y aceptación pendientes. Depende de: T-002 y contrato formal/decisiones de esta historia; no exige construir todo el dominio.
