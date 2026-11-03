@@ -1,8 +1,9 @@
 name: SDD documentation
 on:
   push:
-    branches: [main]
+    branches: [main, develop, 'release/**']
   pull_request:
+    types: [opened, synchronize, reopened, edited, ready_for_review]
   workflow_dispatch:
 permissions:
   contents: read
@@ -23,3 +24,15 @@ jobs:
       - name: Validate documentary context and SDD
         shell: powershell
         run: ./API_NexoLocal/.ci/verify-sdd.ps1 -WorkspaceRoot "$env:GITHUB_WORKSPACE"
+  flow:
+    name: Git / flow
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout validator
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6 pinned
+        with:
+          persist-credentials: false
+      - name: Validate PR routing
+        run: python3 .ci/check-branch-flow.py "$GITHUB_EVENT_PATH"

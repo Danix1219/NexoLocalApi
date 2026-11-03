@@ -69,3 +69,15 @@ Estado: el usuario autorizo explicitamente publicar el contenido revisable compl
 Decisiones: Danix1219 sera el unico responsable por ahora. Exigir PR y CI, con cero aprobaciones obligatorias para permitir trabajo individual sin fingir revision independiente; sin bypass de checks.
 Deuda: incorporar revisor independiente y aumentar aprobaciones a uno cuando exista; contratos/Ready/stack y CD siguen pendientes.
 A evitar: interpretar la autorizacion de publicacion como aceptacion funcional o revision independiente.
+
+## Publicacion y CI remoto verificados (2026-11-02)
+Estado: contenido autorizado publicado en https://github.com/Danix1219/NexoLocalApi; primer workflow SDD documentation y job SDD / docs concluyeron success: https://github.com/Danix1219/NexoLocalApi/actions/runs/41548573146. Upstream local/remoto 0/0 verificado despues del push inicial.
+Decisiones: proteger main con PR, conversaciones resueltas y SDD / docs emitido por GitHub Actions (integration_id 15368), rama actualizada y sin force-push/borrado; cero aprobaciones por trabajo individual. La activacion se ejecuta tras verificar CI del commit que registra esta evidencia; resultado administrativo final en docs_nexo/INICIO_DESARROLLO_Y_REPOS.md.
+Deuda: no existe revision independiente; Ready, contratos formales/stack y CI/CD de producto pendientes. No se han ejecutado builds, pruebas funcionales ni despliegues.
+A evitar: confundir CI documental exitoso con aceptacion funcional, seguridad completa o CD.
+
+## Flujo de equipo acordado (2026-11-02)
+Estado: el usuario aclara que incorporara equipo y acuerda feature/*→develop→release/*→main. develop creada desde main; configuracion se entrega por PR, no push directo a ramas compartidas. Resultado final de PR/CI/rulesets se registra en docs_nexo/FLUJO_GIT_EQUIPO.md.
+Decisiones: main principal; ramas por tarea/spec, candidato por entrega, estabilizacion fix→release y reintegracion main/release→develop. Checks SDD / docs y Git / flow, PR y conversaciones resueltas; merge commit en promociones, sin force-push/bypass. Dependabot a develop; borrado automatico deshabilitado para no perder ramas antes de reintegrar.
+Deuda: solo Danix1219 figura hoy como colaborador; al aceptar el primer revisor Write, subir aprobaciones de 0 a 1 en los tres rulesets de ambos repositorios antes del trabajo de equipo. CD/CI de producto y Ready permanecen pendientes.
+A evitar: PR feature/develop directo a main, funcionalidades nuevas en release, olvidar reintegracion, borrar develop o presentar la fase transitoria como revision independiente. El acuerdo anterior de trabajo individual queda sustituido por este flujo de equipo.
