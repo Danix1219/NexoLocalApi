@@ -1,0 +1,3 @@
+<Solution>
+  <Project Path="nexolocal.Api/nexolocal.Api.csproj" />
+</Solution>

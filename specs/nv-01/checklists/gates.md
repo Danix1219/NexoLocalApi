@@ -43,3 +43,15 @@
 - [ ] Operaciones, funciones y obligaciones de esta spec tienen FR/tarea/AC y contrato/consumo correspondiente.
 - [ ] No se implementan de nuevo operaciones delegadas a otra spec ni se invocan internas/admin desde Flutter.
 - [ ] Estado opcional/complemento/pendiente no se convierte en cumplimiento obligatorio o aprobado por existir en catálogo.
+
+## Preparacion estructural y orden 0.4.1
+
+- [ ] AC-950 / T-950: rutas actuales/objetivo, dueño, decisiones, dependencia de entrada, suites y evidencia definidos en plan; T-001 no pasa Ready sin esta preparacion. No marcar porque exista el mapa general.
+- [ ] Construccion usa solo el propietario habilitado y no accede a proyectos/bases ajenos; todo comando de producto apunta a una ruta existente y su resultado real.
+- [ ] Jira/Confluence pospuestos siguen pendientes sin enlaces inventados; CI documental y revision de diseño no equivalen a aceptacion funcional.
+- [ ] AC-951 / T-951: Archivo de origen/destino trazado, sin .vs/bin/obj/*.user/secretos; solucion y contenedor apuntan al host real; build/arranque se documentan despues de configurar CI real de nv-03. No exige completar toda nv-03 antes de crear el scaffold que esa fase valida. Resultado/entorno/revisor y limitaciones registrados; estado pendiente hasta comprobacion real.
+- [ ] AC-952 / T-952: Dependencias permitidas pasan y una referencia cruzada prohibida se rechaza en comprobacion reproducible; cada proyecto tiene dueño y rollback del traslado comprobable, sin generar ocho servicios vacios. Resultado/entorno/revisor y limitaciones registrados; estado pendiente hasta comprobacion real.
+
+- [ ] AC-960 / T-960: perfil propio refinado para la historia, patrones justificados, fallos y suites definidos; T-001 espera esta salida y revisión humana. Sin aprobación por existir documentación.
+
+- [ ] AC-961 / T-961: base física de todos los propietarios conciliada con build, límites y arranque reales; S08 condicional, sin negocio y sin confundir scaffold con aceptación funcional. Revisión humana pendiente identificada.

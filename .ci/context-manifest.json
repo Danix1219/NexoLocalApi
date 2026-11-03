@@ -1,12 +1,12 @@
 {
-  "revision": "SDD-0.4.0",
+  "revision": "SDD-publicacion-2026-11-03",
   "repoFolder": "API_NexoLocal",
   "allowedRoots": [
     "App_NexoLocal",
     "docs_nexo",
     "requerimientos_nexolocal"
   ],
-  "archiveSha256": "336c957da44fbb6ddb95ed32ca4a47d2511406ad6bb5ed4f52a6cc452890d841",
+  "archiveSha256": "cc7d003ee89b3e42d37d2bb734a804e38eab7401126eac9033002610c9074b82",
   "files": [
     {
       "path": "App_NexoLocal/specs/004-identidad-sesion/spec.md",
@@ -90,7 +90,7 @@
     },
     {
       "path": "docs_nexo/INICIO_DESARROLLO_Y_REPOS.md",
-      "sha256": "c477411d4ee17805b6dfd409fce91ec364d48a86c78c98100a57a9d418a3c1eb"
+      "sha256": "b6a3a9ea360dce044aa99913371c39eeee922892115d4385edb042e95c8d14c3"
     },
     {
       "path": "docs_nexo/Nexo_Local_Requerimientos_y_Arquitectura.md",
@@ -98,7 +98,7 @@
     },
     {
       "path": "docs_nexo/SDD_ALINEACION.md",
-      "sha256": "22be32c885afc29a68b095713c2fc93eccaafa7b10467e6e71f59ae3d50d764d"
+      "sha256": "27ed96a9d72925106632584ecccd49f16fcca611df5b849f83d7ab6a123d66b4"
     },
     {
       "path": "docs_nexo/SDD_COBERTURA_FUNCIONAL.md",
@@ -106,7 +106,7 @@
     },
     {
       "path": "docs_nexo/SDD_COBERTURA_Y_BRECHAS.md",
-      "sha256": "ce66caa007343b9ffc1972102cb5f6ae198caaa34a32df293e3a1b750e39db93"
+      "sha256": "089aab913780eef38fdc7eee5a5d510c1b4be1a879518e0236e6547aefc95c71"
     },
     {
       "path": "docs_nexo/SDD_HERRAMIENTAS_IA.md",
@@ -118,19 +118,19 @@
     },
     {
       "path": "docs_nexo/SDD_VERSIONES.md",
-      "sha256": "1a4ffeec48d9b6462b787d7f776068302a196f74c5216aeddca118af56e75935"
+      "sha256": "578f168a234d931600dbfb1d9129d641bd64d438f1b313ddbf08b16f365afcfa"
     },
     {
       "path": "requerimientos_nexolocal/docs/REFERENCIA_PROFESOR.md",
       "sha256": "5e532a6c9d604794bc84ee0e5291e40f6533fed3994af1268f6fa307ebaf746d"
     },
     {
-      "path": "requerimientos_nexolocal/sdd/architecture/README.md",
-      "sha256": "cc88b49524d45795b49e4a269add4c7bca84d305d2a8a72528df4ca3e9bb65c6"
-    },
-    {
       "path": "requerimientos_nexolocal/sdd/architecture/estados-y-permisos.md",
       "sha256": "6f2ae289bedca7cdc633eda761b6685bdb6d83049a9fb3f67441fc1a81b92f0c"
+    },
+    {
+      "path": "requerimientos_nexolocal/sdd/architecture/README.md",
+      "sha256": "cc88b49524d45795b49e4a269add4c7bca84d305d2a8a72528df4ca3e9bb65c6"
     },
     {
       "path": "requerimientos_nexolocal/sdd/governance/decisiones.md",
@@ -140,5 +140,6 @@
       "path": "requerimientos_nexolocal/sdd/specs/001-identidad-sesion/incremento-01.md",
       "sha256": "30393a36fa57f72ed7d7532d0563897d92967f9c7fdac55f345959e2b035b0d8"
     }
-  ]
+  ],
+  "snapshotNote": "Refresh of existing public documentary references only; no newly exported PDFs/workbooks or bulk counterpart copy."
 }

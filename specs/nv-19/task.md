@@ -4,7 +4,7 @@
 
 - [ ] T-006 →FR-090,NFR-090. Refinar fuente/actor/precondiciones/contrato. Acepta: AC-090 documentados y después comprobados con evidencia apropiada, sin éxito ficticio. Depende de: fuentes/dependencias de spec.
 - [ ] T-020 →FR-100,NFR-100. Precisar escenario propio. Acepta: AC-100 documentados y después comprobados con evidencia apropiada, sin éxito ficticio. Depende de: T-006.
-- [ ] T-001 →FR-001,FR-002,FR-003,NFR-002. Cerrar Ready con decisiones y revisión humana. Acepta: AC-090 documentados y después comprobados con evidencia apropiada, sin éxito ficticio. Depende de: T-006, T-020.
+- [ ] T-001 →FR-001,FR-002,FR-003,NFR-002,FR-950,NFR-950. Cerrar Ready con decisiones y revisión humana. Acepta: AC-950 con rutas y orden explicitados; AC-090 documentados y después comprobados con evidencia apropiada, sin éxito ficticio. Depende de: T-950, T-006, T-020.
 - [ ] T-002 →FR-001,FR-002,FR-003,NFR-003. Concretar cambio y archivos al encargar. Acepta: AC-001, AC-002, AC-003 documentados y después comprobados con evidencia apropiada, sin éxito ficticio. Depende de: T-001 y encargo correspondiente.
 - [ ] T-010 →FR-001,NFR-001. Publicar, editar y retirar experiencia declarada o vinculada, recalculando reputación. Acepta: AC-001 documentados y después comprobados con evidencia apropiada, sin éxito ficticio. Depende de: T-002.
 - [ ] T-011 →FR-002,NFR-001. Autoría por ID, destinatario único y elegibilidad interna; no autoevaluación. Acepta: AC-002 documentados y después comprobados con evidencia apropiada, sin éxito ficticio. Depende de: T-002.
@@ -26,3 +26,9 @@
 - [ ] T-295 →FR-295,NFR-001,NFR-003. Definir y después construir/comprobar EP-095 (GET /reviews/{id}) en S03; entradas/salida e invariantes enlazadas en fichas autoritativas, sin duplicar operación. Acepta: AC-295: EP-095: Complemento de navegación: necesario para enlace estable/notificación propuesta, no pantalla individual confirmada en maqueta. Actor permitido recibe el resultado previsto; validación, permiso/estado y fallo/reintento se comprueban sin exponer datos fuera del DTO. Complemento de diseño; condición/UX y alcance se ratifican antes de Ready, sin pantalla inventada. Depende de: T-002 y contrato formal/decisiones de esta historia; no exige construir todo el dominio.
 
 - [ ] T-704 →FR-704,NFR-001,NFR-003. Corregir y comprobar H04: Mención reactiva. Acepta: AC-704: Quitar/cambiar prestador actualiza relación estructurada, chip y diálogo; registeredOrder no cambia destinatario fuera del pedido. Reproducir negativo auditado y resultado corregido en superficie propia; backend prueba DTO/permiso, app vista/estado; no usar maqueta como integración productiva. Depende de: T-002 y contratos/capacidades implicados.
+
+## Preparacion de rutas antes de Ready (0.4.1)
+
+- [ ] T-950 →FR-950,NFR-950. Concretar dueño S03 con contratos S02/S04, ubicacion objetivo services/community/src/ y pruebas de contrato con Directory/Orders, archivos reales actuales y alcance: experiencias/menciones/reputacion sin referencias de proyecto a Domain de otro servicio. Registrar decisiones, contratos, dependencias de entrada y suites por caso; enlazar el mapa sin fabricar scaffolding o comandos de proyectos inexistentes. Acepta: AC-950 queda refinado en plan y evidencia documental, con limites/pendientes y revisor identificable antes de Ready; no ejecuta producto ni resuelve proveedores por inferencia. Depende de: T-006, T-020.
+
+Orden aplicable: refinamiento y preparacion de rutas preceden Ready; construccion solo tras encargo/Ready, integracion espera las tareas propias adicionales, seguridad y cierre conservan sus dependencias. No esperar cierre completo de otra fase cuando solo se requiere su entrada concreta.

@@ -1,6 +1,6 @@
 # NV-01 — Fundación de servicios y entorno
 
-Versión: 0.4.0 | Fecha: 2026-11-02 | Rama prevista: `nv-01`
+Versión: 0.4.1 | Fecha: 2026-11-02 | Rama prevista: `nv-01`
 
 ## 1. Objetivo
 
@@ -132,3 +132,53 @@ Las historias de EP tienen un único dueño primario en el inventario y mapa bil
 | FR-403 | T-403 | AC-403 |
 
 Cobertura de diseño, no ejecución aprobada. Contratos formales, decisiones y evidencia real siguen pendientes.
+
+## Preparacion de estructura y secuencia 0.4.1
+
+Dueño de este incremento: G01/S01 y fundamento comun. [Mapa backend](../../docs/estructura-backend.md) y [orden SDD](../../docs/orden-desarrollo-backend.md) concretan la propuesta; no ratifican proveedores ni crean proyectos. Las rutas siguientes son objetivo hasta ejecutarse.
+
+- FR-950: Antes de Ready, concretar archivos/rutas, dueño, referencias y pruebas del alcance: consolidacion de plantilla, capas, referencias, lanzamiento y Docker de primera vertical. Ubicacion objetivo: nexolocal.Api/, services/identity/src/, services/identity/tests/ y solucion raiz.
+- NFR-950: Separar preparacion documental de ejecucion; respetar capas y datos por propietario, conservar Git/SDD y exigir CI de producto al introducir codigo. Jira/Confluence pospuestos no se inventan; ningun endpoint, estado Ready o aceptacion se deriva de una carpeta.
+
+- [ ] AC-950 → FR-950/NFR-950: Plan contiene rutas actuales/objetivo, decisiones previas, dependencia de entrada, historia seleccionada, suites/evidencia y dueño; matriz de tareas cubre el cambio y Ready espera esa preparacion. Si una ruta no aplica, justificar con superficie/autoridad, sin crear un proyecto artificial. Verificacion de producto queda pendiente hasta ejecutarse.
+
+| Requisito local | Tareas definidas | Criterios vinculados |
+|---|---|---|
+| FR-950 | T-950, T-001 | AC-950 |
+| NFR-950 | T-950, T-001 | AC-950 |
+
+- FR-951: Consolidar la primera plantilla en el checkout backend.
+- [ ] AC-951 → FR-951/NFR-950: Archivo de origen/destino trazado, sin .vs/bin/obj/*.user/secretos; solucion y contenedor apuntan al host real; build/arranque se documentan despues de configurar CI real de nv-03. No exige completar toda nv-03 antes de crear el scaffold que esa fase valida.
+
+| Requisito local | Tareas definidas | Criterios vinculados |
+|---|---|---|
+| FR-951 | T-951, T-003 | AC-951 |
+
+- FR-952: Comprobar limites entre proyectos y servicios.
+- [ ] AC-952 → FR-952/NFR-950: Dependencias permitidas pasan y una referencia cruzada prohibida se rechaza en comprobacion reproducible; cada proyecto tiene dueño y rollback del traslado comprobable, sin generar ocho servicios vacios.
+
+| Requisito local | Tareas definidas | Criterios vinculados |
+|---|---|---|
+| FR-952 | T-952, T-003 | AC-952 |
+
+## Perfil de arquitectura del propietario (2026-11-03)
+
+[Perfil G01](../../docs/arquitectura/servicios/g01-gateway.md) y [políticas comunes](../../docs/arquitectura/politicas-comunes.md). Diseño propuesto; no selecciona proveedores ni acredita implementación.
+
+- FR-960: Refinar la historia de G01 con su estructura, puertos, invariantes, frontera de datos e integración del perfil; justificar los patrones aplicables y excluir los innecesarios.
+- NFR-960: Definir concurrencia, idempotencia, permisos y recuperación pertinentes sin dependencias de proyectos/datos ajenos ni datos privados en eventos; mantener carácter condicional de S08.
+- [ ] AC-960 → FR-960/NFR-960: Antes de Ready, plan registra patrones elegidos y motivo, rutas reales/objetivo, contrato, atomicidad y escenarios positivo/negativo/fallo con suites y evidencia esperada. Decisiones bloqueantes resueltas y revisión humana identificada; diseño no equivale a producto.
+
+| Requisito local | Tareas definidas | Criterios vinculados |
+|---|---|---|
+| FR-960 | T-960 | AC-960 |
+| NFR-960 | T-960 | AC-960 |
+
+## Extensión autorizada del scaffold
+
+- FR-961: Aplicar el encargo explícito de base física de G01 y S01–S08 en la solución original, con hosts/capas por propietario y Worker S07 separado; conservar S08 condicional y sin lógica de negocio.
+- [ ] AC-961 → FR-961/NFR-960: Proyectos compilan; solución y referencias respetan propietarios; prueba negativa rechaza referencias ajenas; hosts arrancan independientemente. Reportar resultados reales y límites, sin afirmar patrones o integración funcional por disponer de carpetas. Revisión humana y consolidación Git/CI pendientes se registran.
+
+| Requisito local | Tareas definidas | Criterios vinculados |
+|---|---|---|
+| FR-961 | T-961 | AC-961 |

@@ -1,0 +1,26 @@
+name: PR governance
+on:
+  pull_request_target:
+    branches: [main, develop, 'release/**']
+    types: [opened, synchronize, reopened, edited, ready_for_review]
+permissions:
+  contents: read
+concurrency:
+  group: pr-governance-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+jobs:
+  traceability:
+    name: PR / traceability
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      # Run only trusted code from the protected default branch; never PR head code.
+      - name: Checkout trusted governance
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # pinned official action
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - name: Test governance rules
+        run: python3 -B -m unittest discover -s .ci -p 'test_pr_traceability.py' -v
+      - name: Validate Jira and mandatory Confluence documentation
+        run: python3 -B .ci/check-pr-traceability.py "$GITHUB_EVENT_PATH" .github/change-policy.json

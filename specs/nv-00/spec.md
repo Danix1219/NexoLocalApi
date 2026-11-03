@@ -1,6 +1,6 @@
 # NV-00 — Constitución y gobierno
 
-Versión: 0.4.0 | Fecha: 2026-11-02 | Rama prevista: `nv-00`
+Versión: 0.4.2 | Fecha: 2026-11-03 | Rama prevista: tarea Jira real pendiente; no publicar la rama temporal
 
 ## 1. Objetivo
 
@@ -91,7 +91,7 @@ Suites y gate: [roles y gates](../../docs/roles-y-gates.md). Todo pendiente de i
 
 - [ ] AC-402 → FR-402/NFR-002/NFR-003: Reconstruir requisito/spec/tarea/contrato/prueba/evidencia y recorrido interactivo sin respuestas inventadas. API entrega su parte y enlaza evidencia móvil/web, sin administrar Flutter.
 - [ ] AC-405 → FR-405/NFR-002/NFR-003: Aplicar constitución/spec/plan/tareas/checklist y controles de calidad desde cada incremento en ambos contextos. API entrega su parte y enlaza evidencia móvil/web, sin administrar Flutter.
-- [ ] AC-406 → FR-406/NFR-002/NFR-003: Usar Codex/Claude Code con contexto, cambios acotados, bitácora de intervención real y revisión humana; OpenCode solo referencia docente. API entrega su parte y enlaza evidencia móvil/web, sin administrar Flutter.
+- [ ] AC-406 → FR-406/NFR-002/NFR-003: Usar Codex/Claude Code con contexto, cambios acotados, bitácora de intervención real y revisión humana; las herramientas respetan la misma constitucion y autoridad de contratos. API entrega su parte y enlaza evidencia móvil/web, sin administrar Flutter.
 - [ ] AC-411 → FR-411/NFR-002/NFR-003: Definir antes del desarrollo versiones de servicios/API/contratos/eventos/datos/app/landing/infra y manifiesto por despliegue. API entrega su parte y enlaza evidencia móvil/web, sin administrar Flutter.
 - [ ] AC-412 → FR-412/NFR-002/NFR-003: Si se adopta, registrar origen, versión, finalidad y permisos mínimos; ausencia de MCP no bloquea producto ni autoriza instalaciones. API entrega su parte y enlaza evidencia móvil/web, sin administrar Flutter.
 - [ ] AC-418 → FR-418/NFR-002/NFR-003: Cuenta GitHub única del proyecto y carpeta compartida; registrar accesos y responsables. Correo de proyecto recomendado, sin compartir secretos. API entrega su parte y enlaza evidencia móvil/web, sin administrar Flutter.
@@ -109,7 +109,7 @@ Spec→plan→task→tests/gates→Memoria→checklist→revisión→release. No
 ## Aprobación
 
 Estado: Borrador documental; sin implementación ni evidencia de producto.
-- [ ] Revisor humano identificado — nombre y fecha pendientes.
+- [ ] Revisor provisional designado: Danix1219; revision/fecha pendientes, sin revision independiente atribuida.
 - [ ] CHECKLIST_PR.md completado con evidencia propia.
 - [ ] Sin conflicto con constitución y requisitos del proyecto.
 
@@ -149,3 +149,32 @@ Las historias de EP tienen un único dueño primario en el inventario y mapa bil
 | FR-456 | T-456 | AC-456 |
 
 Cobertura de diseño, no ejecución aprobada. Contratos formales, decisiones y evidencia real siguen pendientes.
+
+## Preparacion de estructura y secuencia 0.4.1
+
+Dueño de este incremento: Gobierno. [Mapa backend](../../docs/estructura-backend.md) y [orden SDD](../../docs/orden-desarrollo-backend.md) concretan la propuesta; no ratifican proveedores ni crean proyectos. Las rutas siguientes son objetivo hasta ejecutarse.
+
+- FR-950: Antes de Ready, concretar archivos/rutas, dueño, referencias y pruebas del alcance: responsables, decisiones, revisiones y trazabilidad de cambios; sin mover codigo. Ubicacion objetivo: specs/, docs/decisions/, .github/ y .specify/.
+- NFR-950: Separar preparacion documental de ejecucion; respetar capas y datos por propietario, conservar Git/SDD y exigir CI de producto al introducir codigo. Jira/Confluence pospuestos no se inventan; ningun endpoint, estado Ready o aceptacion se deriva de una carpeta.
+
+- [ ] AC-950 → FR-950/NFR-950: Plan contiene rutas actuales/objetivo, decisiones previas, dependencia de entrada, historia seleccionada, suites/evidencia y dueño; matriz de tareas cubre el cambio y Ready espera esa preparacion. Si una ruta no aplica, justificar con superficie/autoridad, sin crear un proyecto artificial. Verificacion de producto queda pendiente hasta ejecutarse.
+
+| Requisito local | Tareas definidas | Criterios vinculados |
+|---|---|---|
+| FR-950 | T-950, T-001 | AC-950 |
+| NFR-950 | T-950, T-001 | AC-950 |
+
+- FR-951: Activar gobierno de cambios con datos reales.
+- [ ] AC-951 → FR-951/NFR-950: Evidencia de PR/CI y lectura remota demuestra la activacion; antes de ello el estado permanece preparado, no activo.
+
+| Requisito local | Tareas definidas | Criterios vinculados |
+|---|---|---|
+| FR-951 | T-951, T-003 | AC-951 |
+
+## Seleccion de arranque: gobierno local (0.4.2)
+
+[Paquete de arranque](../../docs/inicio-backend/README.md), [decisiones](../../docs/decisions/registro.md), [flujo de cambios/excepciones](../../docs/inicio-backend/flujo-cambios.md), [evidencia](../../docs/inicio-backend/evidencia-nv00.md) y [guion de fuentes/evaluacion](../../docs/inicio-backend/guion-evidencias.md) concretan FR-001/FR-090/FR-100/FR-950 y las obligaciones previas ya existentes; no añaden un nuevo servicio o endpoint.
+
+Entradas disponibles: constitucion y fuentes locales, acuerdos Git/IA, mapa de arquitectura y plantilla inspeccionada. Salida de preparacion: decisiones con puerta de bloqueo, rutas/artefactos, tareas y evidencia revisables. La seleccion NO cumple entrevistas, revision docente, SMS, producto ni activacion Jira/Confluence. No cerrar la spec completa por este subset.
+
+Contratos de red propios: no aplican porque nv-00 no publica operaciones. El N/A no se extiende a nv-02/nv-04. Ready formal sigue sujeto a revision identificada y decisiones pertinentes; su tarea no espera una aplicacion o una cuenta de nube para preparar documentos. Datos Jira/Confluence pospuestos mantienen pendiente T-951 y publicacion, sin habilitar enlaces ficticios o excepciones silenciosas.

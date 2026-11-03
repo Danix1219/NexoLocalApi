@@ -4,7 +4,7 @@
 
 - [ ] T-006 →FR-090,NFR-090. Refinar fuente/actor/precondiciones/contrato. Acepta: AC-090 documentados y después comprobados con evidencia apropiada, sin éxito ficticio. Depende de: fuentes/dependencias de spec.
 - [ ] T-020 →FR-100,NFR-100. Precisar escenario propio. Acepta: AC-100 documentados y después comprobados con evidencia apropiada, sin éxito ficticio. Depende de: T-006.
-- [ ] T-001 →FR-001,FR-002,FR-003,NFR-002. Cerrar Ready con decisiones y revisión humana. Acepta: AC-090 documentados y después comprobados con evidencia apropiada, sin éxito ficticio. Depende de: T-006, T-020.
+- [ ] T-001 →FR-001,FR-002,FR-003,NFR-002,FR-950,NFR-950. Cerrar Ready con decisiones y revisión humana. Acepta: AC-950 con rutas y orden explicitados; AC-090 documentados y después comprobados con evidencia apropiada, sin éxito ficticio. Depende de: T-950, T-006, T-020.
 - [ ] T-002 →FR-001,FR-002,FR-003,NFR-003. Concretar cambio y archivos al encargar. Acepta: AC-001, AC-002, AC-003 documentados y después comprobados con evidencia apropiada, sin éxito ficticio. Depende de: T-001 y encargo correspondiente.
 - [ ] T-010 →FR-001,NFR-001. Coordinar política del prestador, permiso por pedido y consulta vigente antes de divulgar. Acepta: AC-001 documentados y después comprobados con evidencia apropiada, sin éxito ficticio. Depende de: T-002.
 - [ ] T-011 →FR-002,NFR-001. ShowPhone/chatEnabled y both vigentes; contacto no cacheable; no nuevo microservicio. Acepta: AC-002 documentados y después comprobados con evidencia apropiada, sin éxito ficticio. Depende de: T-002.
@@ -24,3 +24,9 @@
 - [ ] T-300 →FR-300,NFR-001,NFR-003. Definir y después construir/comprobar EP-100 (GET /internal/providers/{id}/contact-policy) en S02; entradas/salida e invariantes enlazadas en fichas autoritativas, sin duplicar operación. Acepta: AC-300: EP-100: Solo servicios permitidos; S05 verifica antes de nueva conversación y S04 antes de contacto. No conceder por caché obsoleta; dependencia caída niega divulgación. Actor permitido recibe el resultado previsto; validación, permiso/estado y fallo/reintento se comprueban sin exponer datos fuera del DTO. Previsto en línea base; contrato formal y aceptación pendientes. Depende de: T-002 y contrato formal/decisiones de esta historia; no exige construir todo el dominio.
 
 - [ ] T-701 →FR-701,NFR-001,NFR-003. Corregir y comprobar H01: No revelar teléfono de cliente pendiente. Acepta: AC-701: Participante prestador obtiene teléfono cliente solo en ok/done y both vigente; dato no existe en DTO ni copia no autorizados. Reproducir negativo auditado y resultado corregido en superficie propia; backend prueba DTO/permiso, app vista/estado; no usar maqueta como integración productiva. Depende de: T-002 y contratos/capacidades implicados.
+
+## Preparacion de rutas antes de Ready (0.4.1)
+
+- [ ] T-950 →FR-950,NFR-950. Concretar dueño S02/S04/S05 por regla propia, ubicacion objetivo Application/Features de Directory/Orders/Messaging y pruebas de contrato, archivos reales actuales y alcance: consentimiento/estado de contacto por propietario; no servicio duplicado de permisos. Registrar decisiones, contratos, dependencias de entrada y suites por caso; enlazar el mapa sin fabricar scaffolding o comandos de proyectos inexistentes. Acepta: AC-950 queda refinado en plan y evidencia documental, con limites/pendientes y revisor identificable antes de Ready; no ejecuta producto ni resuelve proveedores por inferencia. Depende de: T-006, T-020.
+
+Orden aplicable: refinamiento y preparacion de rutas preceden Ready; construccion solo tras encargo/Ready, integracion espera las tareas propias adicionales, seguridad y cierre conservan sus dependencias. No esperar cierre completo de otra fase cuando solo se requiere su entrada concreta.

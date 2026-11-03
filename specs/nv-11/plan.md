@@ -68,3 +68,25 @@ FR-705 → T-705 → AC-705: Respuesta rápida y manual usan la misma intención
 ### Regresión H11
 
 FR-711 → T-711 → AC-711: Nueva orden no reescribe contexto histórico; mensaje/evento tiene orderId/requestId autorizado y cabecera muestra pedido activo. Fuente: auditoría 1.2.0; prueba nueva de producto pendiente.
+
+## Rutas, propietario y orden verificable 0.4.1
+
+Dueño: S05 Messaging. Rutas objetivo: `services/messaging/src/ y services/messaging/tests/` (no creadas por este plan). Alcance propio: mensajes, pertenencia e idempotencia; upgrade WS de Gateway no posee mensajes. Leer [mapa de carpetas](../../docs/estructura-backend.md) y [secuencia SDD](../../docs/orden-desarrollo-backend.md).
+
+Actual: SDD/validadores en este checkout y plantilla Visual Studio separada, sin consolidacion ejecutada. Antes de Ready, T-950 concreta archivos existentes/objetivo y decisiones de la historia; T-001 depende de esa salida ademas del refinamiento. Preservar dependencias de negocio ya declaradas, contratos formales y autoridad API/app.
+
+Durante implementacion, usar Domain→reglas, Application→casos/puertos, Infrastructure→adaptadores propios y Api→HTTP/composicion solo cuando corresponda a este propietario. No crear un servicio por spec; gobierno, contratos, infraestructura y expediente tienen artefactos propios, no Domain ficticio. La construccion concreta reutiliza fundamentos y verifica rutas/suites segun producto real.
+
+Validacion: AC-950 se revisa con lista de archivos/dueño/entrada/salida/suites, mediante T-950 y gate Ready. Es plan de comprobacion, no evidencia de ejecucion. Las tareas de integracion, seguridad y cierre mantienen evidencia por caso positivo/negativo/fallo.
+
+## Refinamiento de patrones del propietario
+
+T-960 atiende FR-960/NFR-960 y AC-960 con el [perfil S05](../../docs/arquitectura/servicios/s05-messaging.md). Orden: T-950 → T-960 → T-001. Registrar para la historia patrón/motivo, capas/puertos, frontera atómica, contrato, concurrencia y recuperación, suites y evidencia esperada. Las carpetas objetivo del perfil no son proyectos creados. [Políticas comunes](../../docs/arquitectura/politicas-comunes.md) aplican según la superficie; S08 permanece condicional.
+
+## Base física ampliada por encargo explícito
+
+El usuario autoriza el scaffold de todos los propietarios, además de G01/S01. [Estado y evidencia](../../docs/inicio-backend/base-todos-microservicios.md). Proyectos/carpetas según perfil y host independiente; no equivale a implementación de patrones de negocio, Ready o aceptación. S08 permanece condicional; sin proveedores nuevos ni publicación. Consolidación Git/CI real y revisión siguen pendientes.
+
+## Arquitectura interna revisada por responsabilidad
+
+Perfil S05: **ports-adapters-realtime**; proyectos activos: Core, Adapters, Api. Escritura durable y recuperación de historial se separan del transporte efímero de tiempo real. Patrones: Comandos/consultas, secuencia por conversación, deduplicación y fan-out posterior al commit. La [selección por caso de uso](../../docs/arquitectura/seleccion-arquitecturas.md) sustituye la plantilla común de cuatro capas donde no aplica. Refinamiento y comprobación de la tarea de perfil ya existente; no añade operaciones ni declara Ready.

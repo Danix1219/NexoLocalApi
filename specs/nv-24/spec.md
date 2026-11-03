@@ -1,6 +1,6 @@
 # NV-24 — Administración de confianza
 
-Versión: 0.4.0 | Fecha: 2026-11-02 | Rama prevista: `nv-24`
+Versión: 0.4.1 | Fecha: 2026-11-02 | Rama prevista: `nv-24`
 
 ## 1. Objetivo
 
@@ -94,3 +94,17 @@ Las historias de EP tienen un único dueño primario en el inventario y mapa bil
 | FR-281 | T-281 | AC-281 |
 
 Cobertura de diseño, no ejecución aprobada. Contratos formales, decisiones y evidencia real siguen pendientes.
+
+## Preparacion de estructura y secuencia 0.4.1
+
+Dueño de este incremento: S06 Trust con eventos por dueño. [Mapa backend](../../docs/estructura-backend.md) y [orden SDD](../../docs/orden-desarrollo-backend.md) concretan la propuesta; no ratifican proveedores ni crean proyectos. Las rutas siguientes son objetivo hasta ejecutarse.
+
+- FR-950: Antes de Ready, concretar archivos/rutas, dueño, referencias y pruebas del alcance: reportes/decisiones administrativas; cada dueño aplica cambios en su propia base. Ubicacion objetivo: services/trust/src/ y contratos/pruebas del consumidor.
+- NFR-950: Separar preparacion documental de ejecucion; respetar capas y datos por propietario, conservar Git/SDD y exigir CI de producto al introducir codigo. Jira/Confluence pospuestos no se inventan; ningun endpoint, estado Ready o aceptacion se deriva de una carpeta.
+
+- [ ] AC-950 → FR-950/NFR-950: Plan contiene rutas actuales/objetivo, decisiones previas, dependencia de entrada, historia seleccionada, suites/evidencia y dueño; matriz de tareas cubre el cambio y Ready espera esa preparacion. Si una ruta no aplica, justificar con superficie/autoridad, sin crear un proyecto artificial. Verificacion de producto queda pendiente hasta ejecutarse.
+
+| Requisito local | Tareas definidas | Criterios vinculados |
+|---|---|---|
+| FR-950 | T-950, T-001 | AC-950 |
+| NFR-950 | T-950, T-001 | AC-950 |

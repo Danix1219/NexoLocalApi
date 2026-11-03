@@ -1,7 +1,7 @@
 name: SDD documentation
 on:
   push:
-    branches: [main, develop, 'release/**']
+    branches: ['**']
   pull_request:
     types: [opened, synchronize, reopened, edited, ready_for_review]
   workflow_dispatch:
@@ -11,13 +11,17 @@ concurrency:
   group: sdd-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 jobs:
+  product:
+    name: Backend scaffold verification
+    uses: ./.github/workflows/backend-base.yml
   docs:
+    needs: product
     name: SDD / docs
     runs-on: windows-latest
     timeout-minutes: 10
     steps:
       - name: Checkout reviewed repository
-        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6, verified from official repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v6, verified from official repository
         with:
           path: API_NexoLocal
           persist-credentials: false
@@ -31,7 +35,7 @@ jobs:
     timeout-minutes: 5
     steps:
       - name: Checkout validator
-        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6 pinned
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v6 pinned
         with:
           persist-credentials: false
       - name: Validate PR routing
