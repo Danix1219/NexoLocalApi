@@ -22,3 +22,11 @@ Plantilla preparada; no demuestra que exista repositorio remoto, rama protegida,
 - [ ] Herramienta IA y traspaso registrados sin secretos; revisión humana pendiente hasta identificar persona y fecha.
 
 - [ ] Integridad de FR/NFR/AC/T-ID y dependencias revisada además de lint; cambios de estructura enlazan mapa local y constitución.
+
+## Ruta y entrega
+
+Base/origen: indicar ramas y justificar segun [flujo Git](../docs/flujo-git.md). Trabajo normal a develop; release a main; estabilizacion fix a release; reintegracion main/release a develop.
+
+- [ ] Destino correcto y checks SDD / docs + Git / flow correctos.
+- [ ] Revisor humano distinto del autor identificado para trabajo de equipo; si aun no existe, registrar pendiente sin fingir aprobacion.
+- [ ] Si es entrega: version/alcance, compatibilidad API/app, evidencia, rollback y PR de reintegracion documentados; merge commit en promociones.
