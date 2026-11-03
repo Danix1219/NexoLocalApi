@@ -1,6 +1,6 @@
 # Constitución — API_NexoLocal
 
-Versión: 0.3.0 documental. Estado: Borrador; pendiente de ratificación técnica. Fuente de verdad: `.specify/memory/constitution.md`.
+Versión: 0.3.1 documental. Estado: Borrador; pendiente de ratificación técnica. Fuente de verdad: `.specify/memory/constitution.md`.
 
 ## 1. Propósito y alcance
 
@@ -52,10 +52,18 @@ Registrar diferencia con el profesor y razón de producto, manteniendo formato y
 
 ## 12. Herramientas y coordinación acordadas
 
-El equipo utilizará Codex y Claude Code; OpenCode/WARP pertenece al ejemplo docente. AGENTS es el procedimiento común y CLAUDE es entrada de lectura, sin duplicar reglas. Ejecución secuencial y revisión humana; roles documentados no activan subagentes.
+El equipo utilizará Codex y Claude Code. AGENTS es el procedimiento común y CLAUDE es entrada de lectura, sin duplicar reglas. Ejecución secuencial y revisión humana; roles documentados no activan subagentes.
 
 Aplicar el [acuerdo SDD](../../../docs_nexo/SDD_ALINEACION.md), [cobertura de requisitos](../../../docs_nexo/SDD_COBERTURA_Y_BRECHAS.md) y [protocolo IA](../../../docs_nexo/SDD_HERRAMIENTAS_IA.md). La matriz de versiones precede al desarrollo; CI/CD y canal móvil se preparan desde primera vertical, mientras entrega cierra evidencia global. Mantener propuestas técnicas como tales hasta ratificar y resolver bloqueantes de la historia antes de Ready.
 
 ## Flujo Git del equipo (acuerdo 2026-11-02)
 
 Aplicar [flujo Git](../../docs/flujo-git.md): ramas por tarea desde develop, PR a develop, candidato release/* y PR de release a main; reintegrar main a develop. main permanece principal. CI y PR obligatorios; revision independiente exigible al incorporar revisor real. No declarar Ready o aceptacion por publicar o fusionar documentacion.
+
+## Trazabilidad de cambios Jira/Confluence (2026-11-02)
+
+Aplicar [convencion de cambios](../../docs/trazabilidad-jira-confluence.md): rama de trabajo con clave Jira y PR con titulo/clave coincidentes, enlace al ticket y enlace obligatorio a la pagina Confluence del cambio. API y app conservan su autoridad SDD; Confluence no reemplaza contratos versionados. No inventar tickets, enlaces ni firmas; activar el check requerido solo con configuracion real y ejecucion verificada.
+
+## Preparacion estructural antes de Ready
+
+Cada incremento concreta dueño, rutas actuales/objetivo, entrada de contrato/decision, referencias permitidas y suites/evidencia en su plan y una tarea trazada a requisito/criterio. Ready espera esa preparacion documental; la construccion autorizada e integracion son posteriores. Los fundamentos poseen migracion de plantilla y fronteras de proyectos, calidad la transicion CI, y cada dominio reutiliza esas capacidades. No duplicar servicios por spec ni exigir cierre completo de una fase si solo se necesita una entrada concreta. Aplicar [orden backend](../../docs/orden-desarrollo-backend.md), sin ratificar proveedores por inferencia.

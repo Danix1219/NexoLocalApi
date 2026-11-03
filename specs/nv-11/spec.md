@@ -1,6 +1,6 @@
 # NV-11 — Conversaciones, mensajes y avisos en vivo
 
-Versión: 0.4.0 | Fecha: 2026-11-02 | Rama prevista: `nv-11`
+Versión: 0.4.1 | Fecha: 2026-11-02 | Rama prevista: `nv-11`
 
 ## 1. Objetivo
 
@@ -168,3 +168,30 @@ Las historias de EP tienen un único dueño primario en el inventario y mapa bil
 | FR-711 | T-711 | AC-711 |
 
 Cobertura de diseño, no ejecución aprobada. Contratos formales, decisiones y evidencia real siguen pendientes.
+
+## Preparacion de estructura y secuencia 0.4.1
+
+Dueño de este incremento: S05 Messaging. [Mapa backend](../../docs/estructura-backend.md) y [orden SDD](../../docs/orden-desarrollo-backend.md) concretan la propuesta; no ratifican proveedores ni crean proyectos. Las rutas siguientes son objetivo hasta ejecutarse.
+
+- FR-950: Antes de Ready, concretar archivos/rutas, dueño, referencias y pruebas del alcance: mensajes, pertenencia e idempotencia; upgrade WS de Gateway no posee mensajes. Ubicacion objetivo: services/messaging/src/ y services/messaging/tests/.
+- NFR-950: Separar preparacion documental de ejecucion; respetar capas y datos por propietario, conservar Git/SDD y exigir CI de producto al introducir codigo. Jira/Confluence pospuestos no se inventan; ningun endpoint, estado Ready o aceptacion se deriva de una carpeta.
+
+- [ ] AC-950 → FR-950/NFR-950: Plan contiene rutas actuales/objetivo, decisiones previas, dependencia de entrada, historia seleccionada, suites/evidencia y dueño; matriz de tareas cubre el cambio y Ready espera esa preparacion. Si una ruta no aplica, justificar con superficie/autoridad, sin crear un proyecto artificial. Verificacion de producto queda pendiente hasta ejecutarse.
+
+| Requisito local | Tareas definidas | Criterios vinculados |
+|---|---|---|
+| FR-950 | T-950, T-001 | AC-950 |
+| NFR-950 | T-950, T-001 | AC-950 |
+
+## Perfil de arquitectura del propietario (2026-11-03)
+
+[Perfil S05](../../docs/arquitectura/servicios/s05-messaging.md) y [políticas comunes](../../docs/arquitectura/politicas-comunes.md). Diseño propuesto; no selecciona proveedores ni acredita implementación.
+
+- FR-960: Refinar la historia de S05 con su estructura, puertos, invariantes, frontera de datos e integración del perfil; justificar los patrones aplicables y excluir los innecesarios.
+- NFR-960: Definir concurrencia, idempotencia, permisos y recuperación pertinentes sin dependencias de proyectos/datos ajenos ni datos privados en eventos; mantener carácter condicional de S08.
+- [ ] AC-960 → FR-960/NFR-960: Antes de Ready, plan registra patrones elegidos y motivo, rutas reales/objetivo, contrato, atomicidad y escenarios positivo/negativo/fallo con suites y evidencia esperada. Decisiones bloqueantes resueltas y revisión humana identificada; diseño no equivale a producto.
+
+| Requisito local | Tareas definidas | Criterios vinculados |
+|---|---|---|
+| FR-960 | T-960 | AC-960 |
+| NFR-960 | T-960 | AC-960 |

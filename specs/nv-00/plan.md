@@ -56,3 +56,29 @@ Tipo de evidencia: documental hoy; al implementar, unitario con doble separado d
 ## Orden y frontera vigentes 0.4.0
 
 Cada operación/función/obligación desglosada tiene requisito, tarea y AC en la spec. T-003 espera también esas tareas, no solo el bloque base. La tarea concreta se refina con contrato/revisión, decisión bloqueante y rutas reales antes de ejecutar; no construir todas las historias de una fase de una vez. [Cobertura bilateral](../../../docs_nexo/SDD_COBERTURA_FUNCIONAL.md) indica primario, integración, opcional o superficie excluida.
+
+## Rutas, propietario y orden verificable 0.4.1
+
+Dueño: Gobierno. Rutas objetivo: `specs/, docs/decisions/, .github/ y .specify/` (no creadas por este plan). Alcance propio: responsables, decisiones, revisiones y trazabilidad de cambios; sin mover codigo. Leer [mapa de carpetas](../../docs/estructura-backend.md) y [secuencia SDD](../../docs/orden-desarrollo-backend.md).
+
+Actual: SDD/validadores en este checkout y plantilla Visual Studio separada, sin consolidacion ejecutada. Antes de Ready, T-950 concreta archivos existentes/objetivo y decisiones de la historia; T-001 depende de esa salida ademas del refinamiento. Preservar dependencias de negocio ya declaradas, contratos formales y autoridad API/app.
+
+Durante implementacion, usar Domain→reglas, Application→casos/puertos, Infrastructure→adaptadores propios y Api→HTTP/composicion solo cuando corresponda a este propietario. No crear un servicio por spec; gobierno, contratos, infraestructura y expediente tienen artefactos propios, no Domain ficticio. La construccion concreta reutiliza fundamentos y verifica rutas/suites segun producto real.
+
+Validacion: AC-950 se revisa con lista de archivos/dueño/entrada/salida/suites, mediante T-950 y gate Ready. Es plan de comprobacion, no evidencia de ejecucion. Las tareas de integracion, seguridad y cierre mantienen evidencia por caso positivo/negativo/fallo.
+
+T-951 / FR-951 / AC-951: Activar gobierno de cambios con datos reales. Completar tarea Jira, pagina Confluence y politica real, publicar por develop→release→main y verificar check de metadatos antes de exigirlo en seis rulesets. Mientras el usuario posponga esos datos, registrar pendiente de publicacion sin bloquear el analisis local ni inventar enlaces. Orden local: T-002, T-950 → T-951 → T-003. Comprobacion esperada: Evidencia de PR/CI y lectura remota demuestra la activacion; antes de ello el estado permanece preparado, no activo.
+
+## Paquete ejecutable de preparacion documental nv-00 (0.4.2)
+
+Entrada principal: [inicio nv-00](../../docs/inicio-backend/README.md). Archivos preparados actuales y de mantenimiento: docs/decisions/registro.md, docs/inicio-backend/README.md, flujo-cambios.md, evidencia-nv00.md, guion-evidencias.md e inventario-fuentes.json en esa carpeta; cuatro piezas de nv-00 y Memoria. No hay cambios de csproj o Docker en esta seleccion.
+
+T-006 contrasta alcance/fuentes y decide que falta; T-020 usa registro y flujo para diferenciar propuesta/ratificacion/excepcion; T-950 concreta estas rutas y la salida para fundacion. T-001 requiere revision humana real antes de Ready; contratos HTTP propios son N/A justificado solo para nv-00. Los documentos se pueden refinar antes de Ready y permanecen borradores.
+
+T-002/T-010 consolidan documentos de la seleccion cuando corresponda; tareas de obligaciones contrastan su evidencia por separado. T-003 conserva espera de activacion para el cierre GLOBAL, no impide el refinamiento documental o entregar entradas parciales no aceptadas a nv-01/nv-02. T-004 revisa privacidad/secretos y T-007/T-005 concilian evidencia/limites. T-951 no se ejecuta mientras el usuario posponga datos reales.
+
+Validacion local: lint, integridad y ocho pruebas del verificador desde la raiz segun README de arranque. Inventario de fuentes registra presencia/hash y alcance de lectura, no respuestas de entrevista ni revision del contenido binario. Resultado real se incorpora a evidencia/Memoria; no convertir PASS en ratificacion.
+
+## Perfiles de arquitectura aplicables
+
+Consultar [índice de propietarios](../../docs/arquitectura/README.md) y las [políticas comunes](../../docs/arquitectura/politicas-comunes.md) al concretar la preparación estructural de esta historia. Reutilizar el propietario y su contrato; no crear un servicio por spec. Distinguir diseño propuesto, base física y comprobación de producto.

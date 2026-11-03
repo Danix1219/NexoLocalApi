@@ -15,3 +15,7 @@ Herramientas: Codex y Claude Code; [roles secuenciales](../../docs_nexo/SDD_HERR
 Un gate documental no ejecuta producto. Unitario con doble, prueba de contrato, integración real con NoSQL/Redis/proveedor y recorrido Android se reportan por separado. Si faltan credenciales, una prueba simulada puede verificar lógica y deja la aceptación real pendiente. No aprobar SMS/moderación/ML/GenAI con heurísticas. Los umbrales docentes no se ratifican por instalar una skill.
 
 La API verifica transiciones/aislamiento/concurrencia/outbox/revocación entre réplicas; Flutter verifica intención/estados, limpieza local, permisos, accesibilidad, reconexión y consumo del contrato. El recorrido conjunto enlaza resultados de ambos. Las carpetas de suites son objetivo futuro, no evidencia de creación.
+
+## Preparacion estructural 0.4.1
+
+Las 26 specs integran FR-950/NFR-950 → T-950 → AC-950; Ready espera esa preparacion. Consolidacion de plantilla y referencias tienen dueño nv-01; cambio a CI de producto, nv-03; activacion Jira/Confluence, nv-00 (datos pospuestos). [Orden verificable](orden-desarrollo-backend.md) y [mapa backend](estructura-backend.md) describen entradas/salidas sin exigir el cierre completo de cada fase. No hay proyectos nuevos, tareas ejecutadas o Ready por esta actualizacion documental.

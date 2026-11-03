@@ -12,13 +12,13 @@ Patrón de referencia: API_SDD. Flujo: `specs/nv-XX/spec.md → plan.md → task
 
 ## Carpetas presentes
 
-`specs/`: qué hacer, cómo, tareas y comprobación. `docs/`: referencias vivas. `scripts/check_sdd.ps1`: validación documental. `AGENTS.md` y `CLAUDE.md`: entradas de Codex y Claude Code; `.opencode/README.md`: aviso histórico, sin OpenCode activo. `.specify/`: constitución y plantillas.
+`specs/`: qué hacer, cómo, tareas y comprobación. `docs/`: referencias vivas. `scripts/check_sdd.ps1`: validación documental. [AGENTS.md](AGENTS.md): entrada y procedimiento comun para Codex; [CLAUDE.md](CLAUDE.md): entrada de Claude Code, que remite a las mismas reglas. `.specify/`: constitución y plantillas.
 
 ## Validación disponible ahora
 
 Desde esta carpeta: `powershell -NoProfile -File scripts/check_sdd.ps1`.
 
-Solo verifica estructura, enlaces de fases y trazabilidad documental. No ejecuta build, APIs, Flutter, tests o CI. No existen todavía proyectos compilables. Los comandos de compilación/seguridad del profesor se configurarán al implementar nv-01/nv-03 o 001/002.
+Solo verifica estructura, enlaces de fases y trazabilidad documental. No ejecuta build, APIs, Flutter, tests o CI. Existe una base compilable separada en nexolocal.Api, creada por encargo posterior; aun no se consolida en este checkout Git. Los comandos de compilación/seguridad del profesor se configurarán al implementar nv-01/nv-03 o 001/002.
 
 ## Adaptación del producto
 
@@ -39,3 +39,19 @@ Leer [mapa de estructura](docs/estructura-sdd.md) y [trazabilidad de la constitu
 ## Cobertura vigente 0.4.0
 
 El desglose vigente contiene 26 specs en este contexto. Consultar [cobertura local](docs/cobertura-funcional.md) y [operaciones/funciones bilaterales](../docs_nexo/SDD_COBERTURA_FUNCIONAL.md). Cada EP propio y cada función/obligación de fuente tiene FR/tarea/AC, no solo mención en índice. Las asignaciones de fases de versiones anteriores quedan como historia; el inventario API y el índice actual son autoridad vigente.
+
+## Herramientas IA del proyecto
+
+Usamos Codex y Claude Code con una unica autoridad de reglas: AGENTS, constitucion, Memoria y spec objetivo. Ver [guia local de herramientas](docs/herramientas-ia.md). No hay configuracion de otra herramienta en este repositorio.
+
+## Base fisica creada (2026-11-03)
+
+El usuario encargo carpetas y proyectos sin logica de negocio. La solucion local nexolocal.Api.slnx tiene cuatro proyectos Identity y build verificado; consultar [evidencia del scaffold](docs/inicio-backend/correccion-base-microservicios.md). El checkout mantiene su historial y no se publica mientras Jira/Confluence esten pospuestos.
+
+## Correccion de base solicitada por el usuario
+
+Se conserva nexolocal.Api.slnx; nexolocal.Api existente es G01 Gateway y S01 tiene host propio en services/identity/src/Api. Se retira la solucion paralela anterior. [Arquitectura vigente](docs/estructura-backend.md) y [evidencia](docs/inicio-backend/correccion-base-microservicios.md).
+
+## Solución backend consolidada
+
+Abrir `nexolocal.Api.slnx` en la raíz de este repositorio. G01 conserva el proyecto `nexolocal.Api`; los ocho servicios y Worker S07 están en `services/`. [Arquitectura vigente](docs/arquitectura/README.md) y [comandos de desarrollo](docs/base-microservicios.md). Son 28 proyectos sin negocio; no hay despliegue ni proveedores activos.

@@ -1,6 +1,6 @@
 # NV-22 — Operación de datos, migraciones y recuperación
 
-Versión: 0.4.0 | Fecha: 2026-11-02 | Rama prevista: `nv-22`
+Versión: 0.4.1 | Fecha: 2026-11-02 | Rama prevista: `nv-22`
 
 ## 1. Objetivo
 
@@ -93,3 +93,17 @@ Las historias de EP tienen un único dueño primario en el inventario y mapa bil
 | FR-414 | T-414 | AC-414 |
 
 Cobertura de diseño, no ejecución aprobada. Contratos formales, decisiones y evidencia real siguen pendientes.
+
+## Preparacion de estructura y secuencia 0.4.1
+
+Dueño de este incremento: Cada propietario de datos habilitado. [Mapa backend](../../docs/estructura-backend.md) y [orden SDD](../../docs/orden-desarrollo-backend.md) concretan la propuesta; no ratifican proveedores ni crean proyectos. Las rutas siguientes son objetivo hasta ejecutarse.
+
+- FR-950: Antes de Ready, concretar archivos/rutas, dueño, referencias y pruebas del alcance: versionar cambios de datos y ensayar restauracion sin base compartida universal. Ubicacion objetivo: Infrastructure/Persistence/, scripts/ operativos y pruebas de recuperacion por servicio.
+- NFR-950: Separar preparacion documental de ejecucion; respetar capas y datos por propietario, conservar Git/SDD y exigir CI de producto al introducir codigo. Jira/Confluence pospuestos no se inventan; ningun endpoint, estado Ready o aceptacion se deriva de una carpeta.
+
+- [ ] AC-950 → FR-950/NFR-950: Plan contiene rutas actuales/objetivo, decisiones previas, dependencia de entrada, historia seleccionada, suites/evidencia y dueño; matriz de tareas cubre el cambio y Ready espera esa preparacion. Si una ruta no aplica, justificar con superficie/autoridad, sin crear un proyecto artificial. Verificacion de producto queda pendiente hasta ejecutarse.
+
+| Requisito local | Tareas definidas | Criterios vinculados |
+|---|---|---|
+| FR-950 | T-950, T-001 | AC-950 |
+| NFR-950 | T-950, T-001 | AC-950 |

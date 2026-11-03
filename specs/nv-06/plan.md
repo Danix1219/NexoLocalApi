@@ -77,3 +77,25 @@ FR-709 → T-709 → AC-709: Tras completar horario/precios/condiciones/contacto
 ### Regresión H10
 
 FR-710 → T-710 → AC-710: Radio cero en local no vuelve invisible negocio ni muestra menos de 0 km a domicilio; selector y búsqueda respetan modalidad. Fuente: auditoría 1.2.0; prueba nueva de producto pendiente.
+
+## Rutas, propietario y orden verificable 0.4.1
+
+Dueño: S02 Directory. Rutas objetivo: `services/directory/src/ y services/directory/tests/` (no creadas por este plan). Alcance propio: perfiles/cobertura/edicion y consumo del catalogo de nv-17 sin reimplementarlo. Leer [mapa de carpetas](../../docs/estructura-backend.md) y [secuencia SDD](../../docs/orden-desarrollo-backend.md).
+
+Actual: SDD/validadores en este checkout y plantilla Visual Studio separada, sin consolidacion ejecutada. Antes de Ready, T-950 concreta archivos existentes/objetivo y decisiones de la historia; T-001 depende de esa salida ademas del refinamiento. Preservar dependencias de negocio ya declaradas, contratos formales y autoridad API/app.
+
+Durante implementacion, usar Domain→reglas, Application→casos/puertos, Infrastructure→adaptadores propios y Api→HTTP/composicion solo cuando corresponda a este propietario. No crear un servicio por spec; gobierno, contratos, infraestructura y expediente tienen artefactos propios, no Domain ficticio. La construccion concreta reutiliza fundamentos y verifica rutas/suites segun producto real.
+
+Validacion: AC-950 se revisa con lista de archivos/dueño/entrada/salida/suites, mediante T-950 y gate Ready. Es plan de comprobacion, no evidencia de ejecucion. Las tareas de integracion, seguridad y cierre mantienen evidencia por caso positivo/negativo/fallo.
+
+## Refinamiento de patrones del propietario
+
+T-960 atiende FR-960/NFR-960 y AC-960 con el [perfil S02](../../docs/arquitectura/servicios/s02-directory.md). Orden: T-950 → T-960 → T-001. Registrar para la historia patrón/motivo, capas/puertos, frontera atómica, contrato, concurrencia y recuperación, suites y evidencia esperada. Las carpetas objetivo del perfil no son proyectos creados. [Políticas comunes](../../docs/arquitectura/politicas-comunes.md) aplican según la superficie; S08 permanece condicional.
+
+## Base física ampliada por encargo explícito
+
+El usuario autoriza el scaffold de todos los propietarios, además de G01/S01. [Estado y evidencia](../../docs/inicio-backend/base-todos-microservicios.md). Proyectos/carpetas según perfil y host independiente; no equivale a implementación de patrones de negocio, Ready o aceptación. S08 permanece condicional; sin proveedores nuevos ni publicación. Consolidación Git/CI real y revisión siguen pendientes.
+
+## Arquitectura interna revisada por responsabilidad
+
+Perfil S02: **vertical-slices**; proyectos activos: Features, Adapters, Api. Catálogo, edición y búsqueda cambian por funcionalidad; reglas de contacto y visibilidad permanecen en su slice. Patrones: Separación lógica de consulta/comando; cache-aside solo público, índices y proyecciones por contrato. La [selección por caso de uso](../../docs/arquitectura/seleccion-arquitecturas.md) sustituye la plantilla común de cuatro capas donde no aplica. Refinamiento y comprobación de la tarea de perfil ya existente; no añade operaciones ni declara Ready.

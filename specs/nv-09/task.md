@@ -8,7 +8,7 @@ Estado: documentación propuesta; todas las casillas pendientes. Preparación do
 
 - [ ] T-006 →FR-090,NFR-090. Definir necesidad, interés y consulta de interesados por propietario; separar preselección opcional de capacidad visible. Acepta: AC-090 tiene precondición, resultado, fuente, contraparte y evidencia esperada definidos; decisiones pertinentes D01–D08 registradas sin firmas ficticias. Depende de: fuentes y dependencias explícitas en spec; sin dependencia de construcción local.
 - [ ] T-020 →FR-100,NFR-100. Desglosar el escenario propio: Precisar permisos de listado/detalle e interesados, cierre de solicitud y consistencia de interés al cambiar visibilidad o estado. Acepta: AC-100 documenta caso positivo, negativo, fallo/reintento y responsable de cada superficie; exclusiones identificadas. Depende de: T-006.
-- [ ] T-001 →FR-001,FR-002,NFR-002. Preparar Ready de una historia acotada. Acepta: requisitos y AC seleccionados, contratos pertinentes formalizados antes de consumo, decisiones bloqueantes resueltas, revisión humana identificada y plan/tareas conciliados; sin declarar Ready por lint. Depende de: T-006, T-020 y entradas de la spec; no requiere completar todo el dominio.
+- [ ] T-001 →FR-001,FR-002,NFR-002,FR-950,NFR-950. Preparar Ready de una historia acotada. Acepta: AC-950 con rutas y orden explicitados; requisitos y AC seleccionados, contratos pertinentes formalizados antes de consumo, decisiones bloqueantes resueltas, revisión humana identificada y plan/tareas conciliados; sin declarar Ready por lint. Depende de: T-950, T-006, T-020 y entradas de la spec; no requiere completar todo el dominio.
 
 ## Fase B — Entregable y ejecución posterior
 
@@ -38,3 +38,9 @@ Hoy: powershell -NoProfile -File scripts/check_sdd.ps1 desde la raíz correspond
 - [ ] T-252 →FR-252,NFR-001,NFR-003. Definir y después construir/comprobar EP-052 (DELETE /requests/{id}) en S04; entradas/salida e invariantes enlazadas en fichas autoritativas, sin duplicar operación. Acepta: AC-252: EP-052: No borrar un pedido activo en cascada; ocultar y auditar Actor permitido recibe el resultado previsto; validación, permiso/estado y fallo/reintento se comprueban sin exponer datos fuera del DTO. Previsto en línea base; contrato formal y aceptación pendientes. Depende de: T-002 y contrato formal/decisiones de esta historia; no exige construir todo el dominio.
 
 - [ ] T-712 →FR-712,NFR-001,NFR-003. Corregir y comprobar H12: Límites y filtros reales. Acepta: AC-712: Tres precios, seis fotos portafolio/cuatro por trabajo se conservan en sus dueños; urgencia Hoy no es fecha de creación y shortlist sigue opcional. Reproducir negativo auditado y resultado corregido en superficie propia; backend prueba DTO/permiso, app vista/estado; no usar maqueta como integración productiva. Depende de: T-002 y contratos/capacidades implicados.
+
+## Preparacion de rutas antes de Ready (0.4.1)
+
+- [ ] T-950 →FR-950,NFR-950. Concretar dueño S04 Orders, ubicacion objetivo services/orders/src/ y services/orders/tests/, archivos reales actuales y alcance: solicitudes y coordinacion de intereses con nv-20. Registrar decisiones, contratos, dependencias de entrada y suites por caso; enlazar el mapa sin fabricar scaffolding o comandos de proyectos inexistentes. Acepta: AC-950 queda refinado en plan y evidencia documental, con limites/pendientes y revisor identificable antes de Ready; no ejecuta producto ni resuelve proveedores por inferencia. Depende de: T-006, T-020.
+
+Orden aplicable: refinamiento y preparacion de rutas preceden Ready; construccion solo tras encargo/Ready, integracion espera las tareas propias adicionales, seguridad y cierre conservan sus dependencias. No esperar cierre completo de otra fase cuando solo se requiere su entrada concreta.

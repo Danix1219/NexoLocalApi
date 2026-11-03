@@ -8,7 +8,7 @@ Estado: documentación propuesta; todas las casillas pendientes. Preparación do
 
 - [ ] T-006 →FR-090,NFR-090. Separar identidad mínima de recuperación, listado/revocación de sesiones y arranque de borrado; revocación durable más Redis entre réplicas. Acepta: AC-090 tiene precondición, resultado, fuente, contraparte y evidencia esperada definidos; decisiones pertinentes D01–D08 registradas sin firmas ficticias. Depende de: fuentes y dependencias explícitas en spec; sin dependencia de construcción local.
 - [ ] T-020 →FR-100,NFR-100. Desglosar el escenario propio: Especificar recuperación, sesiones por dispositivo y logout/revocación inmediata durable compartida, con refresh concurrente/replay y cierre de WS/dispositivo push. Acepta: AC-100 documenta caso positivo, negativo, fallo/reintento y responsable de cada superficie; exclusiones identificadas. Depende de: T-006.
-- [ ] T-001 →FR-001,FR-002,FR-003,NFR-002. Preparar Ready de una historia acotada. Acepta: requisitos y AC seleccionados, contratos pertinentes formalizados antes de consumo, decisiones bloqueantes resueltas, revisión humana identificada y plan/tareas conciliados; sin declarar Ready por lint. Depende de: T-006, T-020 y entradas de la spec; no requiere completar todo el dominio.
+- [ ] T-001 →FR-001,FR-002,FR-003,NFR-002,FR-950,NFR-950. Preparar Ready de una historia acotada. Acepta: AC-950 con rutas y orden explicitados; requisitos y AC seleccionados, contratos pertinentes formalizados antes de consumo, decisiones bloqueantes resueltas, revisión humana identificada y plan/tareas conciliados; sin declarar Ready por lint. Depende de: T-960, T-950, T-006, T-020 y entradas de la spec; no requiere completar todo el dominio.
 
 ## Fase B — Entregable y ejecución posterior
 
@@ -47,3 +47,13 @@ Hoy: powershell -NoProfile -File scripts/check_sdd.ps1 desde la raíz correspond
 - [ ] T-410 →FR-410,NFR-002,NFR-003. Definir y atender R10 Logout. Acepta: AC-410: Revocar en backend y limpiar móvil; rechazo entre dos réplicas y WS; offline solo acredita cierre local mientras remoto siga pendiente. API entrega su parte y enlaza evidencia móvil/web, sin administrar Flutter. Planear método de comprobación, entorno/responsable y evidencia; no aprobar mientras falten decisiones/contratos o ejecución real cuando corresponda. Evidencia real cuando corresponda; diseño solo no acredita aceptación. Depende de: T-002 y entradas/decisiones de la historia; trabajo documental previo no requiere código.
 
 - [ ] T-703 →FR-703,NFR-001,NFR-003. Corregir y comprobar H03: Aislamiento entre cuentas. Acepta: AC-703: Ana publica/guarda y sale; Carlos no recibe como propia autoría, borrador, cola o caché de Ana; IDs del token, nunca Tú/me. Reproducir negativo auditado y resultado corregido en superficie propia; backend prueba DTO/permiso, app vista/estado; no usar maqueta como integración productiva. Depende de: T-002 y contratos/capacidades implicados.
+
+## Preparacion de rutas antes de Ready (0.4.1)
+
+- [ ] T-950 →FR-950,NFR-950. Concretar dueño S01 Identity, ubicacion objetivo services/identity/src/ y services/identity/tests/, archivos reales actuales y alcance: subset inicial EP-001/002/003/004/005/007/008; reutilizar scaffold de nv-01. Registrar decisiones, contratos, dependencias de entrada y suites por caso; enlazar el mapa sin fabricar scaffolding o comandos de proyectos inexistentes. Acepta: AC-950 queda refinado en plan y evidencia documental, con limites/pendientes y revisor identificable antes de Ready; no ejecuta producto ni resuelve proveedores por inferencia. Depende de: T-006, T-020.
+
+Orden aplicable: refinamiento y preparacion de rutas preceden Ready; construccion solo tras encargo/Ready, integracion espera las tareas propias adicionales, seguridad y cierre conservan sus dependencias. No esperar cierre completo de otra fase cuando solo se requiere su entrada concreta.
+
+## Refinamiento del perfil de arquitectura
+
+- [ ] T-960 →FR-960,NFR-960. Refinar el [perfil S01](../../docs/arquitectura/servicios/s01-identity.md) para la historia seleccionada, sin crear servicios vacíos. Acepta: AC-960 con patrón/motivo, invariantes, contrato, rutas, atomicidad, permisos y fallos comprobables; proveedores y revisión pendientes se registran sin inventarlos. Depende de: T-950.

@@ -45,3 +45,29 @@ Tipo de evidencia: documental hoy; al implementar, unitario con doble separado d
 ## Orden y frontera vigentes 0.4.0
 
 Cada operación/función/obligación desglosada tiene requisito, tarea y AC en la spec. T-003 espera también esas tareas, no solo el bloque base. La tarea concreta se refina con contrato/revisión, decisión bloqueante y rutas reales antes de ejecutar; no construir todas las historias de una fase de una vez. [Cobertura bilateral](../../../docs_nexo/SDD_COBERTURA_FUNCIONAL.md) indica primario, integración, opcional o superficie excluida.
+
+## Rutas, propietario y orden verificable 0.4.1
+
+Dueño: Calidad por proyecto habilitado. Rutas objetivo: `.github/workflows/, .ci/, scripts/ y tests/ del propietario` (no creadas por este plan). Alcance propio: transicion de CI documental a CI de producto y dependencias de arquitectura verificables. Leer [mapa de carpetas](../../docs/estructura-backend.md) y [secuencia SDD](../../docs/orden-desarrollo-backend.md).
+
+Actual: SDD/validadores en este checkout y plantilla Visual Studio separada, sin consolidacion ejecutada. Antes de Ready, T-950 concreta archivos existentes/objetivo y decisiones de la historia; T-001 depende de esa salida ademas del refinamiento. Preservar dependencias de negocio ya declaradas, contratos formales y autoridad API/app.
+
+Durante implementacion, usar Domain→reglas, Application→casos/puertos, Infrastructure→adaptadores propios y Api→HTTP/composicion solo cuando corresponda a este propietario. No crear un servicio por spec; gobierno, contratos, infraestructura y expediente tienen artefactos propios, no Domain ficticio. La construccion concreta reutiliza fundamentos y verifica rutas/suites segun producto real.
+
+Validacion: AC-950 se revisa con lista de archivos/dueño/entrada/salida/suites, mediante T-950 y gate Ready. Es plan de comprobacion, no evidencia de ejecucion. Las tareas de integracion, seguridad y cierre mantienen evidencia por caso positivo/negativo/fallo.
+
+T-951 / FR-951 / AC-951: Sustituir el bloqueo documental por CI real de producto. En el mismo PR que incorpora el primer csproj, conservar SDD/gobierno y agregar restore/build/test, contrato/seguridad y evidencia segun riesgo. Reemplazar el rechazo incondicional de manifiesto por una transicion explicita que exija los gates reales; no simplemente eliminarlo. Coordinar scaffold nv-01 sin ciclo de prerrequisitos. Orden local: T-002, T-950 → T-951 → T-003. Comprobacion esperada: Con proyecto existente, CI ejecuta comandos de rutas reales y falla al romper build/test o arquitectura; lint no puede ser el unico gate verde. Registrar resultados/limites sin afirmar ejecuciones aun pendientes.
+
+## Evidencia parcial de scaffold autorizado (2026-11-03)
+
+Estado corregido por indicacion del usuario: la solucion original nexolocal.Api.slnx contiene el proyecto original como G01 Gateway y cuatro proyectos S01 en services/identity/src. Dos hosts separados, cinco proyectos en total, sin logica de negocio. [Archivos y validacion real vigente](../../docs/inicio-backend/correccion-base-microservicios.md). La propuesta paralela anterior fue retirada; no es la estructura activa.
+
+La tarea propietaria de consolidacion y las de CI/referencias NO se marcan completas: codigo aun fuera del checkout Git, ensayo de imagenes Docker pendiente; los Dockerfiles de ambos hosts estan preparados, Ready/ratificacion y revision pertinentes pendientes; workflow de producto preparado sin ejecucion remota. El guard documental actual se mantiene; al consolidar csproj al checkout, la transicion a CI real debe ir en ese cambio. Esta evidencia parcial no ratifica proveedores ni contratos.
+
+## Correccion solicitada: solucion original y microservicios
+
+El usuario confirma G01 en el proyecto nexolocal.Api ya existente, y hosts propios para microservicios. La solucion unica sigue nexolocal.Api.slnx; el nombre paralelo anterior se retira. S01 usa services/identity/src/{Domain,Application,Infrastructure,Api}; no referencias de proyecto desde G01 a negocio S01. [Evidencia vigente](../../docs/inicio-backend/correccion-base-microservicios.md) sustituye la organizacion del scaffold anterior. Las tareas de consolidacion/revision y ejecucion remota no se marcan completas por compilar localmente.
+
+## Perfiles de arquitectura aplicables
+
+Consultar [índice de propietarios](../../docs/arquitectura/README.md) y las [políticas comunes](../../docs/arquitectura/politicas-comunes.md) al concretar la preparación estructural de esta historia. Reutilizar el propietario y su contrato; no crear un servicio por spec. Distinguir diseño propuesto, base física y comprobación de producto.

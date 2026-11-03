@@ -1,0 +1,6 @@
+@nexolocal.Api_HostAddress = http://localhost:5079
+
+GET {{nexolocal.Api_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

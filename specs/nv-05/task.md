@@ -8,7 +8,7 @@ Estado: documentación propuesta; todas las casillas pendientes. Preparación do
 
 - [ ] T-006 →FR-090,NFR-090. Diseñar moderación previa y medios privados/públicos, reportes y decisiones; una red interna no sustituye autenticación. Acepta: AC-090 tiene precondición, resultado, fuente, contraparte y evidencia esperada definidos; decisiones pertinentes D01–D08 registradas sin firmas ficticias. Depende de: fuentes y dependencias explícitas en spec; sin dependencia de construcción local.
 - [ ] T-020 →FR-100,NFR-100. Desglosar el escenario propio: Definir trazabilidad y ciclo de vida de medios, decisiones de moderación y reportes sin persistir bytes/cuerpos rechazados en producto, proxy, temporales o logs. Acepta: AC-100 documenta caso positivo, negativo, fallo/reintento y responsable de cada superficie; exclusiones identificadas. Depende de: T-006.
-- [ ] T-001 →FR-001,FR-002,NFR-002. Preparar Ready de una historia acotada. Acepta: requisitos y AC seleccionados, contratos pertinentes formalizados antes de consumo, decisiones bloqueantes resueltas, revisión humana identificada y plan/tareas conciliados; sin declarar Ready por lint. Depende de: T-006, T-020 y entradas de la spec; no requiere completar todo el dominio.
+- [ ] T-001 →FR-001,FR-002,NFR-002,FR-950,NFR-950. Preparar Ready de una historia acotada. Acepta: AC-950 con rutas y orden explicitados; requisitos y AC seleccionados, contratos pertinentes formalizados antes de consumo, decisiones bloqueantes resueltas, revisión humana identificada y plan/tareas conciliados; sin declarar Ready por lint. Depende de: T-960, T-950, T-006, T-020 y entradas de la spec; no requiere completar todo el dominio.
 
 ## Fase B — Entregable y ejecución posterior
 
@@ -42,3 +42,13 @@ Hoy: powershell -NoProfile -File scripts/check_sdd.ps1 desde la raíz correspond
 
 - [ ] T-607 →FR-607,NFR-002,NFR-003. Definir y atender S06 Confianza y contenido. Acepta: AC-607: Rechazados no se persisten; medios privados no son públicos. Tecnología/protocolo del libro son propuesta sujeta a constitución, no instalación aprobada. Delimitar S06 con REST pública/interna y eventos, dependencias Content Safety, modelo Azure, CDN y propietario de datos; probar aislamiento, fallo y observabilidad sin duplicar base. Evidencia real cuando corresponda; diseño solo no acredita aceptación. Depende de: T-002 y entradas/decisiones de la historia; trabajo documental previo no requiere código.
 - [ ] T-416 →FR-416,NFR-002,NFR-003. Definir y atender R16 Móvil completo. Acepta: AC-416: Demostrar moderación antes de persistir, push, aviso/datos/borrado, permisos, continuidad de sesión, SQLite/sincronización aplicable y funciones ML y GenAI reales distintas. API entrega su parte y enlaza evidencia móvil/web, sin administrar Flutter. Planear método de comprobación, entorno/responsable y evidencia; no aprobar mientras falten decisiones/contratos o ejecución real cuando corresponda. Evidencia real cuando corresponda; diseño solo no acredita aceptación. Depende de: T-002 y entradas/decisiones de la historia; trabajo documental previo no requiere código.
+
+## Preparacion de rutas antes de Ready (0.4.1)
+
+- [ ] T-950 →FR-950,NFR-950. Concretar dueño S06 Trust, ubicacion objetivo services/trust/src/ y services/trust/tests/, archivos reales actuales y alcance: moderacion y medios antes de persistir, con adaptadores y datos de S06. Registrar decisiones, contratos, dependencias de entrada y suites por caso; enlazar el mapa sin fabricar scaffolding o comandos de proyectos inexistentes. Acepta: AC-950 queda refinado en plan y evidencia documental, con limites/pendientes y revisor identificable antes de Ready; no ejecuta producto ni resuelve proveedores por inferencia. Depende de: T-006, T-020.
+
+Orden aplicable: refinamiento y preparacion de rutas preceden Ready; construccion solo tras encargo/Ready, integracion espera las tareas propias adicionales, seguridad y cierre conservan sus dependencias. No esperar cierre completo de otra fase cuando solo se requiere su entrada concreta.
+
+## Refinamiento del perfil de arquitectura
+
+- [ ] T-960 →FR-960,NFR-960. Refinar el [perfil S06](../../docs/arquitectura/servicios/s06-trust.md) para la historia seleccionada, sin crear servicios vacíos. Acepta: AC-960 con patrón/motivo, invariantes, contrato, rutas, atomicidad, permisos y fallos comprobables; proveedores y revisión pendientes se registran sin inventarlos. Depende de: T-950.

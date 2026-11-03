@@ -1,0 +1,134 @@
+{
+  "Identity": {
+    "architecture": "hexagonal",
+    "reason": "Sesiones, OTP y borrado requieren invariantes aisladas y proveedores reemplazables.",
+    "patterns": "Rotación atómica, revocación durable, outbox y recuperación hacia adelante.",
+    "references": {
+      "Domain": [],
+      "Application": [
+        "Domain"
+      ],
+      "Infrastructure": [
+        "Application",
+        "Domain"
+      ],
+      "Api": [
+        "Application",
+        "Infrastructure"
+      ]
+    }
+  },
+  "Directory": {
+    "architecture": "vertical-slices",
+    "reason": "Catálogo, edición y búsqueda cambian por funcionalidad; reglas de contacto y visibilidad permanecen en su slice.",
+    "patterns": "Separación lógica de consulta/comando; cache-aside solo público, índices y proyecciones por contrato.",
+    "references": {
+      "Features": [],
+      "Adapters": [
+        "Features"
+      ],
+      "Api": [
+        "Features",
+        "Adapters"
+      ]
+    }
+  },
+  "Community": {
+    "architecture": "feature-modules",
+    "reason": "Publicaciones, reseñas, reacciones y guardados tienen reglas propias, con lecturas de feed que las combinan.",
+    "patterns": "Módulos locales, moderación previa, unicidad idempotente y proyecciones de métricas.",
+    "references": {
+      "Modules": [],
+      "Adapters": [
+        "Modules"
+      ],
+      "Api": [
+        "Modules",
+        "Adapters"
+      ]
+    }
+  },
+  "Orders": {
+    "architecture": "ddd-hexagonal",
+    "reason": "Asignación y pedido requieren transiciones, permisos y concurrencia bajo una frontera atómica local.",
+    "patterns": "Agregados y máquina de estados, versión optimista, idempotencia y transactional outbox.",
+    "references": {
+      "Domain": [],
+      "Application": [
+        "Domain"
+      ],
+      "Infrastructure": [
+        "Application",
+        "Domain"
+      ],
+      "Api": [
+        "Application",
+        "Infrastructure"
+      ]
+    }
+  },
+  "Messaging": {
+    "architecture": "ports-adapters-realtime",
+    "reason": "Escritura durable y recuperación de historial se separan del transporte efímero de tiempo real.",
+    "patterns": "Comandos/consultas, secuencia por conversación, deduplicación y fan-out posterior al commit.",
+    "references": {
+      "Core": [],
+      "Adapters": [
+        "Core"
+      ],
+      "Api": [
+        "Core",
+        "Adapters"
+      ]
+    }
+  },
+  "Trust": {
+    "architecture": "evaluation-pipeline",
+    "reason": "La decisión combina políticas y proveedores externos; un fallo no puede aprobar contenido por omisión.",
+    "patterns": "Pipeline de evaluación con Policy/Strategy; decisión vinculada al contenido y adaptadores reemplazables.",
+    "references": {
+      "Evaluation": [],
+      "Adapters": [
+        "Evaluation"
+      ],
+      "Api": [
+        "Evaluation",
+        "Adapters"
+      ]
+    }
+  },
+  "Notifications": {
+    "architecture": "event-driven-delivery",
+    "reason": "El registro/consulta HTTP y la entrega asíncrona tienen tiempos y fallos distintos.",
+    "patterns": "API y Worker separados, inbox durable, planificación, reintentos acotados y cola de errores.",
+    "references": {
+      "Delivery": [],
+      "Adapters": [
+        "Delivery"
+      ],
+      "Api": [
+        "Delivery",
+        "Adapters"
+      ],
+      "Worker": [
+        "Delivery",
+        "Adapters"
+      ]
+    }
+  },
+  "Relations": {
+    "architecture": "read-projections",
+    "reason": "Consulta derivada y reconstruible sin autoridad de escritura o permisos de otros servicios.",
+    "patterns": "Vista materializada, consumidores idempotentes y control de versiones/tombstones.",
+    "references": {
+      "Projections": [],
+      "Adapters": [
+        "Projections"
+      ],
+      "Api": [
+        "Projections",
+        "Adapters"
+      ]
+    }
+  }
+}

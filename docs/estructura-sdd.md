@@ -1,6 +1,6 @@
 # Estructura documental y autoridad local
 
-Revisión 0.3.0, 2026-11-02. Estado: diseño pendiente de revisión humana. La constitución es fuente rectora; este mapa asigna responsabilidades y no introduce otra jerarquía.
+Revisión 0.4.1, 2026-11-02. Estado: diseño pendiente de revisión humana. La constitución es fuente rectora; este mapa asigna responsabilidades y no introduce otra jerarquía.
 
 ## Carpetas presentes
 
@@ -13,7 +13,7 @@ Revisión 0.3.0, 2026-11-02. Estado: diseño pendiente de revisión humana. La c
 | docs/ | Diseño vivo del propietario e índices | Enlazar contrato/consumo, datos, gates y runbook; no duplicar payloads |
 | scripts/check_sdd.ps1 | Comprobación documental existente | Ejecutar desde la raíz; PASS no acredita seguridad ni producto |
 | .github/ | Plantilla PR documental | Su presencia no prueba Git remoto/CI/PR publicado |
-| .opencode/README.md | Aviso histórico | No herramienta activa ni instrucciones de agentes ejecutables |
+| docs/herramientas-ia.md | Guia local para Codex y Claude Code | Enlaza las entradas y el procedimiento comun, sin duplicar reglas |
 
 Constitución: [fuente única](../.specify/memory/constitution.md). Plantillas: `.specify/templates/`; alias raíz constitution.md y specs/_template.md enlazan autoridad.
 
@@ -36,3 +36,9 @@ No existen proyectos compilables, scaffolding, dependencias, perfiles de agentes
 ## Cobertura vigente 0.4.0
 
 El desglose vigente contiene 26 specs en este contexto. Consultar [cobertura local](cobertura-funcional.md) y [operaciones/funciones bilaterales](../../docs_nexo/SDD_COBERTURA_FUNCIONAL.md). Cada EP propio y cada función/obligación de fuente tiene FR/tarea/AC, no solo mención en índice. Las asignaciones de fases de versiones anteriores quedan como historia; el inventario API y el índice actual son autoridad vigente.
+
+## Preparacion estructural 0.4.1
+
+Las 26 specs integran FR-950/NFR-950 → T-950 → AC-950; Ready espera esa preparacion. Consolidacion de plantilla y referencias tienen dueño nv-01; cambio a CI de producto, nv-03; activacion Jira/Confluence, nv-00 (datos pospuestos). [Orden verificable](orden-desarrollo-backend.md) y [mapa backend](estructura-backend.md) describen entradas/salidas sin exigir el cierre completo de cada fase. No hay proyectos nuevos, tareas ejecutadas o Ready por esta actualizacion documental.
+
+Base fisica posterior: por encargo del usuario se crean cuatro proyectos Identity en el directorio separado nexolocal.Api, sin dependencias de aplicacion. Este checkout aun no los contiene; [evidencia y limite de consolidacion](inicio-backend/base-fisica.md). No se cambia el inventario de contratos ni se habilita producto por el lint.

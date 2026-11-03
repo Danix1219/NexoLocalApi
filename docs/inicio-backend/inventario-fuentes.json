@@ -1,0 +1,72 @@
+{
+  "recordedDate": "2026-11-03",
+  "purpose": "Evidence of local sources and review limits for nv-00; not a CI fixture or approval",
+  "files": [
+    {
+      "pathFromApiRoot": ".specify/memory/constitution.md",
+      "present": true,
+      "sha256": "a1ee34f130a3d3a342bfc2056fb9555f12d31fc65f9ca4b6faebfd97b81e1734",
+      "reviewScope": "Reglas rectoras leidas; borrador no ratificado",
+      "previousSha256": "262bc9962ac33f0efd89baa1b26beae4a6ca27cb72d05398ac692799a1a39f77",
+      "revisionReason": "2026-11-03: retirada de referencia operativa a herramienta descartada; Codex y Claude Code conservan autoridad, sin nueva ratificacion"
+    },
+    {
+      "pathFromApiRoot": "docs/contracts/inventario.json",
+      "present": true,
+      "sha256": "1e5e4a1c1b3d390fc021a6e813d253572de6eee88b2c44015a592d00632e7725",
+      "reviewScope": "Catalogo consultado; no contrato formal ni producto"
+    },
+    {
+      "pathFromApiRoot": "../docs_nexo/Nexo_Local_Requerimientos_y_Arquitectura.md",
+      "present": true,
+      "sha256": "6bd72779400ba7d0f6ab304a969e6cf43ec4d0e7e3d04c2a9baf42c14291d84d",
+      "reviewScope": "Referencia de arquitectura previa y fronteras; no ratifica proveedor"
+    },
+    {
+      "pathFromApiRoot": "../docs_nexo/Nexo_Local_Auditoria_Modulos_y_Grafo.md",
+      "present": true,
+      "sha256": "29679e00b8c5f565df75c0988521fe5e3def701a3da0e099bc2401db6cc8447c",
+      "reviewScope": "Informe previo referenciado; no nueva auditoria de producto"
+    },
+    {
+      "pathFromApiRoot": "../docs_nexo/Nexo_Local_Propuesta_de_proyecto.pdf",
+      "present": true,
+      "sha256": "a9d9c7b046802b1c57115414c0176a6868257826153ee197f833b377fcb3664e",
+      "reviewScope": "Presencia y hash; no nueva lectura integral PDF"
+    },
+    {
+      "pathFromApiRoot": "../docs_nexo/Requerimientos para el desarrollo del proyecto Móvil v2.pdf",
+      "present": true,
+      "sha256": "75af9fd559436ef020b410e332743ac6641ad6dbcfba260abd9fddd7c1b3d4c8",
+      "reviewScope": "Presencia y hash; no nueva lectura integral PDF"
+    },
+    {
+      "pathFromApiRoot": "../docs_nexo/Nexo_Local_Matrices.xlsx",
+      "present": true,
+      "sha256": "71fd0a3e7c25365dda8bc61dfcc26b650c074e23b8853688d2914facd6b15f2b",
+      "reviewScope": "Presencia y hash; no revision celda a celda"
+    },
+    {
+      "pathFromApiRoot": "../docs_nexo/SDD_ALINEACION.md",
+      "present": true,
+      "sha256": "27ed96a9d72925106632584ecccd49f16fcca611df5b849f83d7ab6a123d66b4",
+      "reviewScope": "Acuerdo/decisiones consultados; revisiones y ratificaciones pendientes"
+    },
+    {
+      "pathFromApiRoot": "../docs_nexo/SDD_VERSIONES.md",
+      "present": true,
+      "sha256": "578f168a234d931600dbfb1d9129d641bd64d438f1b313ddbf08b16f365afcfa",
+      "reviewScope": "Revision documental separada de versiones de producto",
+      "revisions": [
+        {
+          "previousSha256": "d80a09fea9c03fac55e595ec948f174c02b5a3d23502600fd79dc7334fc8d71f",
+          "reason": "2026-11-03: registro del scaffold fisico autorizado y version tecnica local, sin ratificacion funcional"
+        },
+        {
+          "previousSha256": "3cc133715c63229c2cd430295a07f104b3d14567afa5e8c24ee2af0c57eb2149",
+          "reason": "2026-11-03: correccion explicita a solucion original y roles G01/S01 separados"
+        }
+      ]
+    }
+  ]
+}

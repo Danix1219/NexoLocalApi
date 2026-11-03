@@ -43,3 +43,17 @@ Cada operación/función/obligación desglosada tiene requisito, tarea y AC en l
 ### Regresión H04
 
 FR-704 → T-704 → AC-704: Quitar/cambiar prestador actualiza relación estructurada, chip y diálogo; registeredOrder no cambia destinatario fuera del pedido. Fuente: auditoría 1.2.0; prueba nueva de producto pendiente.
+
+## Rutas, propietario y orden verificable 0.4.1
+
+Dueño: S03 con contratos S02/S04. Rutas objetivo: `services/community/src/ y pruebas de contrato con Directory/Orders` (no creadas por este plan). Alcance propio: experiencias/menciones/reputacion sin referencias de proyecto a Domain de otro servicio. Leer [mapa de carpetas](../../docs/estructura-backend.md) y [secuencia SDD](../../docs/orden-desarrollo-backend.md).
+
+Actual: SDD/validadores en este checkout y plantilla Visual Studio separada, sin consolidacion ejecutada. Antes de Ready, T-950 concreta archivos existentes/objetivo y decisiones de la historia; T-001 depende de esa salida ademas del refinamiento. Preservar dependencias de negocio ya declaradas, contratos formales y autoridad API/app.
+
+Durante implementacion, usar Domain→reglas, Application→casos/puertos, Infrastructure→adaptadores propios y Api→HTTP/composicion solo cuando corresponda a este propietario. No crear un servicio por spec; gobierno, contratos, infraestructura y expediente tienen artefactos propios, no Domain ficticio. La construccion concreta reutiliza fundamentos y verifica rutas/suites segun producto real.
+
+Validacion: AC-950 se revisa con lista de archivos/dueño/entrada/salida/suites, mediante T-950 y gate Ready. Es plan de comprobacion, no evidencia de ejecucion. Las tareas de integracion, seguridad y cierre mantienen evidencia por caso positivo/negativo/fallo.
+
+## Perfiles de arquitectura aplicables
+
+Consultar [S02](../../docs/arquitectura/servicios/s02-directory.md); [S03](../../docs/arquitectura/servicios/s03-community.md) y las [políticas comunes](../../docs/arquitectura/politicas-comunes.md) al concretar la preparación estructural de esta historia. Reutilizar el propietario y su contrato; no crear un servicio por spec. Distinguir diseño propuesto, base física y comprobación de producto.
