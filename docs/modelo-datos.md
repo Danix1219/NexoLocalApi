@@ -27,3 +27,7 @@ read_cache es derivado público con generatedAt/expiresAt; el lector comprueba c
 Teléfono y domicilio exacto dependen de participante/estado/consentimiento, nunca del modo visual. No incluirlos en eventos, telemetría o caché compartida. Cancelación retira acceso también en consumidor. Definir borrado/anonimización por entidad y acuse por servicio habilitado; bloquear cuenta al iniciar, completar solo con todos los acuses.
 
 Retención y backups requieren decisión de producto; restauración aplica supresiones antes de servir. Scripts idempotentes, índices y respaldo/restauración se preparan al implementar, sin generar scripts DB ahora. Flutter conserva su modelo local y nunca accede a estas bases. Ver [acuerdo común](../../docs_nexo/SDD_ALINEACION.md).
+
+## Perfiles por propietario
+
+El [catálogo de arquitectura](arquitectura/README.md) define estructura, patrones, puertos, consistencia y fallos de G01 y S01–S08. Aplicar sus políticas comunes al refinar cada historia; no crea proyectos, ratifica proveedores ni reemplaza contratos.

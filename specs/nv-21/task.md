@@ -4,7 +4,7 @@
 
 - [ ] T-006 →FR-090,NFR-090. Refinar fuente/actor/precondiciones/contrato. Acepta: AC-090 documentados y después comprobados con evidencia apropiada, sin éxito ficticio. Depende de: fuentes/dependencias de spec.
 - [ ] T-020 →FR-100,NFR-100. Precisar escenario propio. Acepta: AC-100 documentados y después comprobados con evidencia apropiada, sin éxito ficticio. Depende de: T-006.
-- [ ] T-001 →FR-001,FR-002,FR-003,NFR-002. Cerrar Ready con decisiones y revisión humana. Acepta: AC-090 documentados y después comprobados con evidencia apropiada, sin éxito ficticio. Depende de: T-006, T-020.
+- [ ] T-001 →FR-001,FR-002,FR-003,NFR-002,FR-950,NFR-950. Cerrar Ready con decisiones y revisión humana. Acepta: AC-950 con rutas y orden explicitados; AC-090 documentados y después comprobados con evidencia apropiada, sin éxito ficticio. Depende de: T-960, T-950, T-006, T-020.
 - [ ] T-002 →FR-001,FR-002,FR-003,NFR-003. Concretar cambio y archivos al encargar. Acepta: AC-001, AC-002, AC-003 documentados y después comprobados con evidencia apropiada, sin éxito ficticio. Depende de: T-001 y encargo correspondiente.
 - [ ] T-010 →FR-001,NFR-001. Asociar token por sesión, deduplicar bandeja/entrega y revalidar destino. Acepta: AC-001 documentados y después comprobados con evidencia apropiada, sin éxito ficticio. Depende de: T-002.
 - [ ] T-011 →FR-002,NFR-001. Push mínimo sin PII; logout desvincula; sin permiso permanece bandeja. Acepta: AC-002 documentados y después comprobados con evidencia apropiada, sin éxito ficticio. Depende de: T-002.
@@ -25,3 +25,13 @@
 ## Funcionalidades y obligaciones verificables
 
 - [ ] T-608 →FR-608,NFR-002,NFR-003. Definir y atender S07 Notificaciones. Acepta: AC-608: Deduplicación, reintento y limpieza de tokens. Tecnología/protocolo del libro son propuesta sujeta a constitución, no instalación aprobada. Delimitar S07 con REST y consumo de eventos, dependencias FCM, colas y propietario de datos; probar aislamiento, fallo y observabilidad sin duplicar base. Evidencia real cuando corresponda; diseño solo no acredita aceptación. Depende de: T-002 y entradas/decisiones de la historia; trabajo documental previo no requiere código.
+
+## Preparacion de rutas antes de Ready (0.4.1)
+
+- [ ] T-950 →FR-950,NFR-950. Concretar dueño S07 Notifications, ubicacion objetivo services/notifications/src/ y services/notifications/tests/, archivos reales actuales y alcance: dispositivos y entrega push con primer productor; desvinculacion por cuenta/sesion. Registrar decisiones, contratos, dependencias de entrada y suites por caso; enlazar el mapa sin fabricar scaffolding o comandos de proyectos inexistentes. Acepta: AC-950 queda refinado en plan y evidencia documental, con limites/pendientes y revisor identificable antes de Ready; no ejecuta producto ni resuelve proveedores por inferencia. Depende de: T-006, T-020.
+
+Orden aplicable: refinamiento y preparacion de rutas preceden Ready; construccion solo tras encargo/Ready, integracion espera las tareas propias adicionales, seguridad y cierre conservan sus dependencias. No esperar cierre completo de otra fase cuando solo se requiere su entrada concreta.
+
+## Refinamiento del perfil de arquitectura
+
+- [ ] T-960 →FR-960,NFR-960. Refinar el [perfil S07](../../docs/arquitectura/servicios/s07-notifications.md) para la historia seleccionada, sin crear servicios vacíos. Acepta: AC-960 con patrón/motivo, invariantes, contrato, rutas, atomicidad, permisos y fallos comprobables; proveedores y revisión pendientes se registran sin inventarlos. Depende de: T-950.

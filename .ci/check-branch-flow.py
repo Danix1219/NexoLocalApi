@@ -8,14 +8,14 @@ def validate(event):
     pr = event["pull_request"]
     target, source = pr["base"]["ref"], pr["head"]["ref"]
     same_repo = pr["base"]["repo"]["full_name"] == pr["head"]["repo"]["full_name"]
-    work = re.fullmatch(r"(?:feature|fix|docs|chore|refactor|test|ci)/[a-z0-9][a-z0-9._/-]*", source)
+    work = re.fullmatch(r"(?:feature|fix|docs|chore|refactor|test|ci|build|perf|revert)/[A-Za-z0-9][A-Za-z0-9._/-]*", source)
     release = re.fullmatch(r"release/[a-z0-9][a-z0-9._-]*", source)
     if target == "develop":
         allowed = bool(work) or source.startswith("dependabot/") or (same_repo and (source == "main" or bool(release)))
     elif target == "main":
         allowed = same_repo and bool(release)
     elif re.fullmatch(r"release/[a-z0-9][a-z0-9._-]*", target):
-        allowed = same_repo and bool(re.fullmatch(r"fix/[a-z0-9][a-z0-9._/-]*", source))
+        allowed = same_repo and bool(re.fullmatch(r"fix/[A-Za-z0-9][A-Za-z0-9._/-]*", source))
     else:
         allowed = False
     if not allowed:

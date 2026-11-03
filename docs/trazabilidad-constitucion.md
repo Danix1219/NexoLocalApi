@@ -1,4 +1,4 @@
-# Trazabilidad constitucional — revisión 0.4.0
+# Trazabilidad constitucional — revisión 0.4.1
 
 Constitución rectora: [API](../.specify/memory/constitution.md). Las reglas siguen vigentes; el desglose no ratifica stack/proveedores ni aprobación. [Cobertura funcional](cobertura-funcional.md).
 
@@ -36,3 +36,7 @@ Constitución rectora: [API](../.specify/memory/constitution.md). Las reglas sig
 §1: límites/propiedad y objetivo de cada incremento. §2: fuente, identidad, estados, H01–H12. §3: stack propuesto/ratificación en fundamentos. §4: dueño de datos y casos de uso. §5: contrato único API y consumo móvil. §6: seguridad/privacidad/moderación. §7: flujo y trazabilidad local. §8: gates y evidencia según superficie. §9: entrega/operación coordinada. §10: Memoria con estado/decisiones/deuda/a evitar. §11: responsables/revisión/excepciones. §12: Codex/Claude secuenciales con AGENTS/CLAUDE.
 
 Una casilla se marca solo con evidencia propia; un endpoint en catálogo o una fila en esta matriz no demuestra implementación.
+
+## Preparacion estructural 0.4.1
+
+Las 26 specs integran FR-950/NFR-950 → T-950 → AC-950; Ready espera esa preparacion. Consolidacion de plantilla y referencias tienen dueño nv-01; cambio a CI de producto, nv-03; activacion Jira/Confluence, nv-00 (datos pospuestos). [Orden verificable](orden-desarrollo-backend.md) y [mapa backend](estructura-backend.md) describen entradas/salidas sin exigir el cierre completo de cada fase. No hay proyectos nuevos, tareas ejecutadas o Ready por esta actualizacion documental.

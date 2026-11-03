@@ -8,7 +8,7 @@ Estado: documentación propuesta; todas las casillas pendientes. Preparación do
 
 - [ ] T-006 →FR-090,NFR-090. Definir persistencia de mensajes, bloqueos, ticket temporal y avisos WS; historial durable y contexto por mensaje. Acepta: AC-090 tiene precondición, resultado, fuente, contraparte y evidencia esperada definidos; decisiones pertinentes D01–D08 registradas sin firmas ficticias. Depende de: fuentes y dependencias explícitas en spec; sin dependencia de construcción local.
 - [ ] T-020 →FR-100,NFR-100. Desglosar el escenario propio: Definir ticket temporal de conexión, membresía y revocación durante WS, secuencia durable, bloqueo bilateral y reanudación tras avisos perdidos. Acepta: AC-100 documenta caso positivo, negativo, fallo/reintento y responsable de cada superficie; exclusiones identificadas. Depende de: T-006.
-- [ ] T-001 →FR-001,FR-002,NFR-002. Preparar Ready de una historia acotada. Acepta: requisitos y AC seleccionados, contratos pertinentes formalizados antes de consumo, decisiones bloqueantes resueltas, revisión humana identificada y plan/tareas conciliados; sin declarar Ready por lint. Depende de: T-006, T-020 y entradas de la spec; no requiere completar todo el dominio.
+- [ ] T-001 →FR-001,FR-002,NFR-002,FR-950,NFR-950. Preparar Ready de una historia acotada. Acepta: AC-950 con rutas y orden explicitados; requisitos y AC seleccionados, contratos pertinentes formalizados antes de consumo, decisiones bloqueantes resueltas, revisión humana identificada y plan/tareas conciliados; sin declarar Ready por lint. Depende de: T-960, T-950, T-006, T-020 y entradas de la spec; no requiere completar todo el dominio.
 
 ## Fase B — Entregable y ejecución posterior
 
@@ -46,3 +46,13 @@ Hoy: powershell -NoProfile -File scripts/check_sdd.ps1 desde la raíz correspond
 - [ ] T-705 →FR-705,NFR-001,NFR-003. Corregir y comprobar H05: Respuesta rápida real. Acepta: AC-705: Respuesta rápida y manual usan la misma intención; texto elegido no se sobrescribe por campo vacío y reintento no duplica. Reproducir negativo auditado y resultado corregido en superficie propia; backend prueba DTO/permiso, app vista/estado; no usar maqueta como integración productiva. Depende de: T-002 y contratos/capacidades implicados.
 
 - [ ] T-711 →FR-711,NFR-001,NFR-003. Corregir y comprobar H11: Contexto de chat por mensaje. Acepta: AC-711: Nueva orden no reescribe contexto histórico; mensaje/evento tiene orderId/requestId autorizado y cabecera muestra pedido activo. Reproducir negativo auditado y resultado corregido en superficie propia; backend prueba DTO/permiso, app vista/estado; no usar maqueta como integración productiva. Depende de: T-002 y contratos/capacidades implicados.
+
+## Preparacion de rutas antes de Ready (0.4.1)
+
+- [ ] T-950 →FR-950,NFR-950. Concretar dueño S05 Messaging, ubicacion objetivo services/messaging/src/ y services/messaging/tests/, archivos reales actuales y alcance: mensajes, pertenencia e idempotencia; upgrade WS de Gateway no posee mensajes. Registrar decisiones, contratos, dependencias de entrada y suites por caso; enlazar el mapa sin fabricar scaffolding o comandos de proyectos inexistentes. Acepta: AC-950 queda refinado en plan y evidencia documental, con limites/pendientes y revisor identificable antes de Ready; no ejecuta producto ni resuelve proveedores por inferencia. Depende de: T-006, T-020.
+
+Orden aplicable: refinamiento y preparacion de rutas preceden Ready; construccion solo tras encargo/Ready, integracion espera las tareas propias adicionales, seguridad y cierre conservan sus dependencias. No esperar cierre completo de otra fase cuando solo se requiere su entrada concreta.
+
+## Refinamiento del perfil de arquitectura
+
+- [ ] T-960 →FR-960,NFR-960. Refinar el [perfil S05](../../docs/arquitectura/servicios/s05-messaging.md) para la historia seleccionada, sin crear servicios vacíos. Acepta: AC-960 con patrón/motivo, invariantes, contrato, rutas, atomicidad, permisos y fallos comprobables; proveedores y revisión pendientes se registran sin inventarlos. Depende de: T-950.

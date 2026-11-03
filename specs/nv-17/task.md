@@ -4,7 +4,7 @@
 
 - [ ] T-006 →FR-090,NFR-090. Refinar fuente/actor/precondiciones/contrato. Acepta: AC-090 documentados y después comprobados con evidencia apropiada, sin éxito ficticio. Depende de: fuentes/dependencias de spec.
 - [ ] T-020 →FR-100,NFR-100. Precisar escenario propio. Acepta: AC-100 documentados y después comprobados con evidencia apropiada, sin éxito ficticio. Depende de: T-006.
-- [ ] T-001 →FR-001,FR-002,FR-003,NFR-002. Cerrar Ready con decisiones y revisión humana. Acepta: AC-090 documentados y después comprobados con evidencia apropiada, sin éxito ficticio. Depende de: T-006, T-020.
+- [ ] T-001 →FR-001,FR-002,FR-003,NFR-002,FR-950,NFR-950. Cerrar Ready con decisiones y revisión humana. Acepta: AC-950 con rutas y orden explicitados; AC-090 documentados y después comprobados con evidencia apropiada, sin éxito ficticio. Depende de: T-950, T-006, T-020.
 - [ ] T-002 →FR-001,FR-002,FR-003,NFR-003. Concretar cambio y archivos al encargar. Acepta: AC-001, AC-002, AC-003 documentados y después comprobados con evidencia apropiada, sin éxito ficticio. Depende de: T-001 y encargo correspondiente.
 - [ ] T-010 →FR-001,NFR-001. Consultar catálogo activo y administrar categorías con auditoría e invalidación. Acepta: AC-001 documentados y después comprobados con evidencia apropiada, sin éxito ficticio. Depende de: T-002.
 - [ ] T-011 →FR-002,NFR-001. Administración separada del consumidor público; no UI admin Flutter implícita. Acepta: AC-002 documentados y después comprobados con evidencia apropiada, sin éxito ficticio. Depende de: T-002.
@@ -19,3 +19,9 @@
 
 - [ ] T-214 →FR-214,NFR-001,NFR-003. Definir y después construir/comprobar EP-014 (GET /catalog/categories) en S02; entradas/salida e invariantes enlazadas en fichas autoritativas, sin duplicar operación. Acepta: AC-214: EP-014: Excluir altas inactivas; caché público 24 h Actor permitido recibe el resultado previsto; validación, permiso/estado y fallo/reintento se comprueban sin exponer datos fuera del DTO. Previsto en línea base; contrato formal y aceptación pendientes. Depende de: T-002 y contrato formal/decisiones de esta historia; no exige construir todo el dominio.
 - [ ] T-215 →FR-215,NFR-001,NFR-003. Definir y después construir/comprobar EP-015 (PUT /admin/catalog/categories/{id}) en S02; entradas/salida e invariantes enlazadas en fichas autoritativas, sin duplicar operación. Acepta: AC-215: EP-015: Auditar; conservar referencias; invalidar caché Actor permitido recibe el resultado previsto; validación, permiso/estado y fallo/reintento se comprueban sin exponer datos fuera del DTO. Previsto en línea base; contrato formal y aceptación pendientes. Depende de: T-002 y contrato formal/decisiones de esta historia; no exige construir todo el dominio.
+
+## Preparacion de rutas antes de Ready (0.4.1)
+
+- [ ] T-950 →FR-950,NFR-950. Concretar dueño S02 Directory, ubicacion objetivo services/directory/src/ y services/directory/tests/, archivos reales actuales y alcance: catalogo/categorias y autorizacion administrativa; consumo desde nv-06. Registrar decisiones, contratos, dependencias de entrada y suites por caso; enlazar el mapa sin fabricar scaffolding o comandos de proyectos inexistentes. Acepta: AC-950 queda refinado en plan y evidencia documental, con limites/pendientes y revisor identificable antes de Ready; no ejecuta producto ni resuelve proveedores por inferencia. Depende de: T-006, T-020.
+
+Orden aplicable: refinamiento y preparacion de rutas preceden Ready; construccion solo tras encargo/Ready, integracion espera las tareas propias adicionales, seguridad y cierre conservan sus dependencias. No esperar cierre completo de otra fase cuando solo se requiere su entrada concreta.

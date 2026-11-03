@@ -1,0 +1,241 @@
+{
+  "status": "design-profiles-not-runtime-configuration",
+  "date": "2026-11-03",
+  "authority": "docs/contracts/inventario.json",
+  "profiles": [
+    {
+      "owner": "G01",
+      "document": "docs/arquitectura/servicios/g01-gateway.md",
+      "folder": "nexolocal.Api/",
+      "spec": "nv-01",
+      "conditional": false,
+      "operationIds": []
+    },
+    {
+      "owner": "S01",
+      "document": "docs/arquitectura/servicios/s01-identity.md",
+      "folder": "services/identity/",
+      "spec": "nv-04",
+      "conditional": false,
+      "operationIds": [
+        "EP-001",
+        "EP-002",
+        "EP-003",
+        "EP-004",
+        "EP-005",
+        "EP-006",
+        "EP-007",
+        "EP-008",
+        "EP-009",
+        "EP-010",
+        "EP-011",
+        "EP-012",
+        "EP-013",
+        "EP-073",
+        "EP-101"
+      ],
+      "architecture": "hexagonal",
+      "projects": [
+        "Domain",
+        "Application",
+        "Infrastructure",
+        "Api"
+      ]
+    },
+    {
+      "owner": "S02",
+      "document": "docs/arquitectura/servicios/s02-directory.md",
+      "folder": "services/directory/",
+      "spec": "nv-06",
+      "conditional": false,
+      "operationIds": [
+        "EP-014",
+        "EP-015",
+        "EP-016",
+        "EP-017",
+        "EP-018",
+        "EP-019",
+        "EP-020",
+        "EP-021",
+        "EP-022",
+        "EP-023",
+        "EP-024",
+        "EP-025",
+        "EP-026",
+        "EP-027",
+        "EP-028",
+        "EP-029",
+        "EP-091",
+        "EP-093",
+        "EP-096",
+        "EP-100"
+      ],
+      "architecture": "vertical-slices",
+      "projects": [
+        "Features",
+        "Adapters",
+        "Api"
+      ]
+    },
+    {
+      "owner": "S03",
+      "document": "docs/arquitectura/servicios/s03-community.md",
+      "folder": "services/community/",
+      "spec": "nv-08",
+      "conditional": false,
+      "operationIds": [
+        "EP-030",
+        "EP-031",
+        "EP-032",
+        "EP-033",
+        "EP-034",
+        "EP-035",
+        "EP-036",
+        "EP-037",
+        "EP-038",
+        "EP-039",
+        "EP-040",
+        "EP-041",
+        "EP-042",
+        "EP-043",
+        "EP-044",
+        "EP-045",
+        "EP-046",
+        "EP-094",
+        "EP-095"
+      ],
+      "architecture": "feature-modules",
+      "projects": [
+        "Modules",
+        "Adapters",
+        "Api"
+      ]
+    },
+    {
+      "owner": "S04",
+      "document": "docs/arquitectura/servicios/s04-orders.md",
+      "folder": "services/orders/",
+      "spec": "nv-10",
+      "conditional": false,
+      "operationIds": [
+        "EP-047",
+        "EP-048",
+        "EP-049",
+        "EP-050",
+        "EP-051",
+        "EP-052",
+        "EP-053",
+        "EP-054",
+        "EP-055",
+        "EP-056",
+        "EP-057",
+        "EP-058",
+        "EP-059",
+        "EP-060",
+        "EP-061",
+        "EP-062",
+        "EP-063",
+        "EP-064",
+        "EP-065",
+        "EP-088",
+        "EP-092",
+        "EP-097"
+      ],
+      "architecture": "ddd-hexagonal",
+      "projects": [
+        "Domain",
+        "Application",
+        "Infrastructure",
+        "Api"
+      ]
+    },
+    {
+      "owner": "S05",
+      "document": "docs/arquitectura/servicios/s05-messaging.md",
+      "folder": "services/messaging/",
+      "spec": "nv-11",
+      "conditional": false,
+      "operationIds": [
+        "EP-066",
+        "EP-067",
+        "EP-068",
+        "EP-069",
+        "EP-070",
+        "EP-071",
+        "EP-072",
+        "EP-074"
+      ],
+      "architecture": "ports-adapters-realtime",
+      "projects": [
+        "Core",
+        "Adapters",
+        "Api"
+      ]
+    },
+    {
+      "owner": "S06",
+      "document": "docs/arquitectura/servicios/s06-trust.md",
+      "folder": "services/trust/",
+      "spec": "nv-05",
+      "conditional": false,
+      "operationIds": [
+        "EP-075",
+        "EP-076",
+        "EP-077",
+        "EP-078",
+        "EP-079",
+        "EP-080",
+        "EP-081",
+        "EP-082",
+        "EP-087",
+        "EP-099"
+      ],
+      "architecture": "evaluation-pipeline",
+      "projects": [
+        "Evaluation",
+        "Adapters",
+        "Api"
+      ]
+    },
+    {
+      "owner": "S07",
+      "document": "docs/arquitectura/servicios/s07-notifications.md",
+      "folder": "services/notifications/",
+      "spec": "nv-21",
+      "conditional": false,
+      "operationIds": [
+        "EP-083",
+        "EP-084",
+        "EP-085",
+        "EP-086"
+      ],
+      "architecture": "event-driven-delivery",
+      "projects": [
+        "Delivery",
+        "Adapters",
+        "Api",
+        "Worker"
+      ]
+    },
+    {
+      "owner": "S08",
+      "document": "docs/arquitectura/servicios/s08-relations.md",
+      "folder": "services/relations/",
+      "spec": "nv-15",
+      "conditional": true,
+      "operationIds": [
+        "EP-098"
+      ],
+      "architecture": "read-projections",
+      "projects": [
+        "Projections",
+        "Adapters",
+        "Api"
+      ]
+    }
+  ],
+  "transversalOperationIds": [
+    "EP-089",
+    "EP-090"
+  ]
+}

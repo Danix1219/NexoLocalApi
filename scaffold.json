@@ -1,0 +1,266 @@
+{
+  "status": "scaffold-no-business-logic",
+  "solution": "nexolocal.Api.slnx",
+  "services": [
+    {
+      "owner": "S01",
+      "folder": "services/identity",
+      "name": "Identity",
+      "layers": [
+        "Domain",
+        "Application",
+        "Infrastructure",
+        "Api"
+      ],
+      "conditional": false,
+      "profile": "docs/arquitectura/servicios/s01-identity.md",
+      "architecture": "hexagonal",
+      "projectReferences": {
+        "Domain": [],
+        "Application": [
+          "Domain"
+        ],
+        "Infrastructure": [
+          "Application",
+          "Domain"
+        ],
+        "Api": [
+          "Application",
+          "Infrastructure"
+        ]
+      }
+    },
+    {
+      "owner": "S02",
+      "folder": "services/directory",
+      "name": "Directory",
+      "layers": [
+        "Features",
+        "Adapters",
+        "Api"
+      ],
+      "conditional": false,
+      "profile": "docs/arquitectura/servicios/s02-directory.md",
+      "architecture": "vertical-slices",
+      "projectReferences": {
+        "Features": [],
+        "Adapters": [
+          "Features"
+        ],
+        "Api": [
+          "Features",
+          "Adapters"
+        ]
+      }
+    },
+    {
+      "owner": "S03",
+      "folder": "services/community",
+      "name": "Community",
+      "layers": [
+        "Modules",
+        "Adapters",
+        "Api"
+      ],
+      "conditional": false,
+      "profile": "docs/arquitectura/servicios/s03-community.md",
+      "architecture": "feature-modules",
+      "projectReferences": {
+        "Modules": [],
+        "Adapters": [
+          "Modules"
+        ],
+        "Api": [
+          "Modules",
+          "Adapters"
+        ]
+      }
+    },
+    {
+      "owner": "S04",
+      "folder": "services/orders",
+      "name": "Orders",
+      "layers": [
+        "Domain",
+        "Application",
+        "Infrastructure",
+        "Api"
+      ],
+      "conditional": false,
+      "profile": "docs/arquitectura/servicios/s04-orders.md",
+      "architecture": "ddd-hexagonal",
+      "projectReferences": {
+        "Domain": [],
+        "Application": [
+          "Domain"
+        ],
+        "Infrastructure": [
+          "Application",
+          "Domain"
+        ],
+        "Api": [
+          "Application",
+          "Infrastructure"
+        ]
+      }
+    },
+    {
+      "owner": "S05",
+      "folder": "services/messaging",
+      "name": "Messaging",
+      "layers": [
+        "Core",
+        "Adapters",
+        "Api"
+      ],
+      "conditional": false,
+      "profile": "docs/arquitectura/servicios/s05-messaging.md",
+      "architecture": "ports-adapters-realtime",
+      "projectReferences": {
+        "Core": [],
+        "Adapters": [
+          "Core"
+        ],
+        "Api": [
+          "Core",
+          "Adapters"
+        ]
+      }
+    },
+    {
+      "owner": "S06",
+      "folder": "services/trust",
+      "name": "Trust",
+      "layers": [
+        "Evaluation",
+        "Adapters",
+        "Api"
+      ],
+      "conditional": false,
+      "profile": "docs/arquitectura/servicios/s06-trust.md",
+      "architecture": "evaluation-pipeline",
+      "projectReferences": {
+        "Evaluation": [],
+        "Adapters": [
+          "Evaluation"
+        ],
+        "Api": [
+          "Evaluation",
+          "Adapters"
+        ]
+      }
+    },
+    {
+      "owner": "S07",
+      "folder": "services/notifications",
+      "name": "Notifications",
+      "layers": [
+        "Delivery",
+        "Adapters",
+        "Api",
+        "Worker"
+      ],
+      "conditional": false,
+      "profile": "docs/arquitectura/servicios/s07-notifications.md",
+      "architecture": "event-driven-delivery",
+      "projectReferences": {
+        "Delivery": [],
+        "Adapters": [
+          "Delivery"
+        ],
+        "Api": [
+          "Delivery",
+          "Adapters"
+        ],
+        "Worker": [
+          "Delivery",
+          "Adapters"
+        ]
+      }
+    },
+    {
+      "owner": "S08",
+      "folder": "services/relations",
+      "name": "Relations",
+      "layers": [
+        "Projections",
+        "Adapters",
+        "Api"
+      ],
+      "conditional": true,
+      "profile": "docs/arquitectura/servicios/s08-relations.md",
+      "architecture": "read-projections",
+      "projectReferences": {
+        "Projections": [],
+        "Adapters": [
+          "Projections"
+        ],
+        "Api": [
+          "Projections",
+          "Adapters"
+        ]
+      }
+    }
+  ],
+  "hosts": [
+    {
+      "owner": "G01",
+      "project": "nexolocal.Api/nexolocal.Api.csproj",
+      "port": 5187,
+      "kind": "http"
+    },
+    {
+      "owner": "S01",
+      "project": "services/identity/src/Api/NexoLocal.Identity.Api.csproj",
+      "kind": "http",
+      "port": 5188
+    },
+    {
+      "owner": "S02",
+      "project": "services/directory/src/Api/NexoLocal.Directory.Api.csproj",
+      "kind": "http",
+      "port": 5189
+    },
+    {
+      "owner": "S03",
+      "project": "services/community/src/Api/NexoLocal.Community.Api.csproj",
+      "kind": "http",
+      "port": 5190
+    },
+    {
+      "owner": "S04",
+      "project": "services/orders/src/Api/NexoLocal.Orders.Api.csproj",
+      "kind": "http",
+      "port": 5191
+    },
+    {
+      "owner": "S05",
+      "project": "services/messaging/src/Api/NexoLocal.Messaging.Api.csproj",
+      "kind": "http",
+      "port": 5192
+    },
+    {
+      "owner": "S06",
+      "project": "services/trust/src/Api/NexoLocal.Trust.Api.csproj",
+      "kind": "http",
+      "port": 5193
+    },
+    {
+      "owner": "S07",
+      "project": "services/notifications/src/Api/NexoLocal.Notifications.Api.csproj",
+      "kind": "http",
+      "port": 5194
+    },
+    {
+      "owner": "S07",
+      "project": "services/notifications/src/Worker/NexoLocal.Notifications.Worker.csproj",
+      "kind": "worker"
+    },
+    {
+      "owner": "S08",
+      "project": "services/relations/src/Api/NexoLocal.Relations.Api.csproj",
+      "kind": "http",
+      "port": 5195
+    }
+  ]
+}

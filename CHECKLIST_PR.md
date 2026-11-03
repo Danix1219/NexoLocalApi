@@ -20,3 +20,9 @@
 
 - [ ] Tabla de cada spec cubre FR/NFR y AC; todos los T-ID citados existen y sus dependencias no son circulares.
 - [ ] Si se añade spec, actualizar índice, contraparte, dueño de capacidad y dependencia de cierre de entrega.
+
+## Estructura y secuencia de la historia
+
+- [ ] Propietario, archivos actuales/objetivo, contrato/decision de entrada y suites definidos antes de Ready.
+- [ ] Consolidacion de plantilla, referencias y transicion CI enlazan dueño de fundacion/calidad; no se duplican en la funcionalidad.
+- [ ] python -B scripts/check_sdd_integrity.py y lint documental revisados; si hay proyecto nuevo, CI real en el mismo cambio, sin declarar producto por lint.

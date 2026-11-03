@@ -1,0 +1,6 @@
+# G01 es el proyecto existente; sin endpoints/proxy hasta su incremento.
+# En el perfil http conservado, GET / devuelve 404 mientras el host esta vacio.
+@nexolocal_GatewayAddress = http://localhost:5079
+
+GET {{nexolocal_GatewayAddress}}/
+Accept: application/json

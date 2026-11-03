@@ -65,3 +65,25 @@ Cada operación/función/obligación desglosada tiene requisito, tarea y AC en l
 ### Regresión H02
 
 FR-702 → T-702 → AC-702: Cancel/rechazo retira dirección precisa, caché y ruta; solo zona pública permanece. Fuente: auditoría 1.2.0; prueba nueva de producto pendiente.
+
+## Rutas, propietario y orden verificable 0.4.1
+
+Dueño: S04 Orders. Rutas objetivo: `services/orders/src/ y services/orders/tests/` (no creadas por este plan). Alcance propio: pedido/asignacion/outbox locales y privacidad de contacto; integrar nv-25 sin trasladar reglas a Gateway. Leer [mapa de carpetas](../../docs/estructura-backend.md) y [secuencia SDD](../../docs/orden-desarrollo-backend.md).
+
+Actual: SDD/validadores en este checkout y plantilla Visual Studio separada, sin consolidacion ejecutada. Antes de Ready, T-950 concreta archivos existentes/objetivo y decisiones de la historia; T-001 depende de esa salida ademas del refinamiento. Preservar dependencias de negocio ya declaradas, contratos formales y autoridad API/app.
+
+Durante implementacion, usar Domain→reglas, Application→casos/puertos, Infrastructure→adaptadores propios y Api→HTTP/composicion solo cuando corresponda a este propietario. No crear un servicio por spec; gobierno, contratos, infraestructura y expediente tienen artefactos propios, no Domain ficticio. La construccion concreta reutiliza fundamentos y verifica rutas/suites segun producto real.
+
+Validacion: AC-950 se revisa con lista de archivos/dueño/entrada/salida/suites, mediante T-950 y gate Ready. Es plan de comprobacion, no evidencia de ejecucion. Las tareas de integracion, seguridad y cierre mantienen evidencia por caso positivo/negativo/fallo.
+
+## Refinamiento de patrones del propietario
+
+T-960 atiende FR-960/NFR-960 y AC-960 con el [perfil S04](../../docs/arquitectura/servicios/s04-orders.md). Orden: T-950 → T-960 → T-001. Registrar para la historia patrón/motivo, capas/puertos, frontera atómica, contrato, concurrencia y recuperación, suites y evidencia esperada. Las carpetas objetivo del perfil no son proyectos creados. [Políticas comunes](../../docs/arquitectura/politicas-comunes.md) aplican según la superficie; S08 permanece condicional.
+
+## Base física ampliada por encargo explícito
+
+El usuario autoriza el scaffold de todos los propietarios, además de G01/S01. [Estado y evidencia](../../docs/inicio-backend/base-todos-microservicios.md). Proyectos/carpetas según perfil y host independiente; no equivale a implementación de patrones de negocio, Ready o aceptación. S08 permanece condicional; sin proveedores nuevos ni publicación. Consolidación Git/CI real y revisión siguen pendientes.
+
+## Arquitectura interna revisada por responsabilidad
+
+Perfil S04: **ddd-hexagonal**; proyectos activos: Domain, Application, Infrastructure, Api. Asignación y pedido requieren transiciones, permisos y concurrencia bajo una frontera atómica local. Patrones: Agregados y máquina de estados, versión optimista, idempotencia y transactional outbox. La [selección por caso de uso](../../docs/arquitectura/seleccion-arquitecturas.md) sustituye la plantilla común de cuatro capas donde no aplica. Refinamiento y comprobación de la tarea de perfil ya existente; no añade operaciones ni declara Ready.

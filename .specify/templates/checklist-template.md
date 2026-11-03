@@ -19,3 +19,7 @@ Cada tarea referencia FR/NFR, AC, criterio y dependencia. Antes de Ready resolve
 ## Integridad obligatoria de la plantilla completada
 
 Incluir tabla requisito → tarea definida → criterio AC; cada FR/NFR y AC debe estar cubierto. Resolver todos los T-ID citados en plan/checklist y dependencias sin ciclos. No copiar T-006/T-007/T-020/T-021 solo por convención: definirlos o actualizar referencias. Un requisito de API no se implementa como permiso local Flutter. Asignar dueño único a capacidades transversales y enlazar integración; mantener N/A y pendientes justificados, sin marcas de ejecución automáticas.
+
+## Preparacion de estructura y orden de implementacion
+
+Antes de Ready, asignar requisito/criterio/tarea con IDs locales libres que concreten propietario, rutas existentes/objetivo, contrato/decision de entrada, referencias permitidas, pruebas y evidencia. Ready depende de esa tarea documental; nunca hacerla depender del codigo que intenta habilitar. Separar tareas de consolidacion de plantilla (fundacion), contratos y transicion a CI de producto (calidad), sin duplicarlas en cada funcion. La integracion espera sus tareas ejecutables propias. Actualizar matriz y checklist; rutas futuras no son evidencia. Consultar docs/orden-desarrollo-backend.md y docs/estructura-backend.md del repositorio.
