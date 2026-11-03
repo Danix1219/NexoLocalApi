@@ -28,3 +28,7 @@ Leer [fuentes y brechas](../docs_nexo/SDD_COBERTURA_Y_BRECHAS.md) y la spec de l
 
 ## 9. Integridad local de la estructura
 Leer [estructura SDD](docs/estructura-sdd.md) y [trazabilidad constitucional](docs/trazabilidad-constitucion.md). Verificar que cada FR/NFR tenga tarea y cada AC comprobación, que todos los T-ID citados existan y que las dependencias locales no formen ciclos. El validador actual no garantiza esas propiedades por sí solo; registrar revisión adicional sin presentarla como prueba de producto.
+
+## Flujo Git del equipo (acuerdo 2026-11-02)
+
+Aplicar [flujo Git](docs/flujo-git.md): ramas por tarea desde develop, PR a develop, candidato release/* y PR de release a main; reintegrar main a develop. main permanece principal. CI y PR obligatorios; revision independiente exigible al incorporar revisor real. No declarar Ready o aceptacion por publicar o fusionar documentacion.

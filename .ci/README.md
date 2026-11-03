@@ -6,7 +6,7 @@ El validador existente usa enlaces fuera del repositorio. sdd-context.zip conser
 
 verify-sdd.ps1 limita rutas del archivo, verifica hashes, ejecuta check_sdd y comprueba referencias/cobertura documental. No certifica semántica ni integración; la comprobación de ciclos de tareas de sesión previa no se declara parte de este wrapper. Si aparece .csproj/pubspec.yaml, falla hasta configurar CI real en ese cambio, evitando aprobar producto con solo lint.
 
-El ruleset exige PR, conversaciones resueltas, check SDD / docs y bloqueo de force-push/borrado. Se activa tras verificar el primer check remoto. Por decision expresa del usuario, Danix1219 trabaja solo: required_approving_review_count=0; no hay revision independiente ni autoaprobacion. Incorporar un segundo revisor permitira exigir una aprobacion. Esta configuracion no sustituye la aceptacion humana de specs ni declara Ready. No hay bypass administrativo implicito.
+El flujo vigente del equipo es feature/* → develop → release/* → main, con reintegracion main→develop y PR en ramas compartidas. Consultar [flujo Git](../docs/flujo-git.md). Los rulesets importables de .github describen main/develop/release; el resultado remoto se registra en el informe comun. SDD / docs y Git / flow son checks obligatorios. Aprobaciones=0 solo durante el arranque sin segundo colaborador; cambiar a 1 al incorporar al primer revisor. Sin revision independiente inventada ni bypass.
 
 Backend futuro: restore/build/test/contrato/integración y seguridad según proyectos reales. App futura: SDK/analyze/unit/widget/integration/dispositivo y seguridad. CD requiere cuentas/entornos/proveedores; no hay deploy ficticio.
 
