@@ -11,6 +11,7 @@ No es aceptacion de producto: no sustituye las suites de contrato ni los gates d
 """
 import json
 import re
+import secrets
 import sys
 import time
 import urllib.error
@@ -20,8 +21,9 @@ import urllib.request
 BASE = (sys.argv[2] if len(sys.argv) > 2 else "http://127.0.0.1:5188") + "/api/v1"
 LOG = sys.argv[1]
 EMAIL = f"prueba.ep.{int(time.time())}@nexolocal.test"
-PASSWORD = "Clave-Segura-9"
-NEW_PASSWORD = "Otra-Clave-Segura-9"
+# Generadas por ejecucion: la cuenta es desechable y el repositorio no guarda ninguna clave.
+PASSWORD = "Ep-" + secrets.token_urlsafe(12)
+NEW_PASSWORD = "Ep-" + secrets.token_urlsafe(12)
 
 failures = []
 checks = 0
