@@ -10,6 +10,10 @@ builder.Services.AddIdentityMongo(builder.Configuration);
 builder.Services.AddIdentityFeatures();
 builder.Services.AddProblemDetails();
 
+// Contrato navegable de S01: documento OpenAPI y UI.
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen(options => options.SwaggerDoc("v1", new() { Title = "NexoLocal Identity (S01)", Version = "v1" }));
+
 // Un cuerpo JSON invalido responde 400 en todos los entornos, no 500 solo en desarrollo.
 builder.Services.Configure<RouteHandlerOptions>(options => options.ThrowOnBadRequest = false);
 
@@ -31,6 +35,10 @@ var app = builder.Build();
 
 app.UseExceptionHandler();
 app.UseRateLimiter();
+
+// Publicado en todo entorno: el expediente de evaluacion exige el contrato navegable.
+app.UseSwagger();
+app.UseSwaggerUI(options => options.SwaggerEndpoint("/swagger/v1/swagger.json", "NexoLocal Identity v1"));
 
 // Endpoint de infraestructura, no de negocio: no figura en el inventario de operaciones.
 app.MapHealthChecks("/health/ready");

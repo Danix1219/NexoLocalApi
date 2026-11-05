@@ -6,6 +6,9 @@ $dotnet = (Get-Command dotnet -ErrorAction Stop).Source
 $logRoot = Join-Path $root ('artifacts/smoke/' + [guid]::NewGuid().ToString('N'))
 New-Item -ItemType Directory -Path $logRoot -Force | Out-Null
 $started = @()
+# El smoke solo mide que el host arranca: una cadena local ficticia satisface la validacion de arranque
+# sin conectar a Atlas ni versionar secreto alguno. Si el entorno ya trae una, se respeta.
+if (-not $env:Mongo__ConnectionString) { $env:Mongo__ConnectionString = 'mongodb://127.0.0.1:27017/?serverSelectionTimeoutMS=500&connectTimeoutMS=500' }
 try {
     # Check ports before starting: an existing process is never stopped or used as evidence.
     foreach ($entry in $manifest.hosts | Where-Object kind -eq 'http') {

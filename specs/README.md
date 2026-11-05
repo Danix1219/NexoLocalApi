@@ -56,3 +56,11 @@ Orden de construcción: ep-03 → ep-02 → ep-04 → ep-05 → ep-06 → ep-07;
 Fundamentos preceden identidad mínima. Catálogo público puede prepararse antes del perfil completo; administración requiere identidad. Publicación de trabajo precede integración con guardados/experiencias. Experiencia declarada no espera pedido; la vinculada sí espera done/eligibilidad. Solicitud precede interés/candidato. Pedido directo precede entrada por chat; contacto privado y preferencias se cierran al integrar su capacidad. Eventos/push/borrado crecen con cada productor/propietario habilitado.
 
 Las dependencias de cierre integrado no se usan para impedir un subset anterior ya definido: las specs y planes delimitan precondiciones de la historia. Primer subset identidad mantiene EP-001/002/003/004/005/007/008; otras operaciones tienen historia separada. S08/shortlist son opcionales. La entrega global exige todas las capacidades obligatorias, no solo la primera vertical. No prometer Ready por este índice.
+
+## CI/CD y despliegue
+
+| Spec | Objetivo | Flujo |
+|---|---|---|
+| [cd-01](CI-CD/cd-01/spec.md) | Despliegue continuo a Azure Container Apps (contenedor Linux, OIDC, sin secretos versionados) | [plan](CI-CD/cd-01/plan.md), [tareas](CI-CD/cd-01/task.md), [gates](CI-CD/cd-01/checklists/gates.md) |
+
+Los validadores documentales (`scripts/check_sdd.ps1`, `scripts/check_sdd_integrity.py`) solo recorren `nv-XX` y `ep-XX`: `cd-01` es infraestructura y no declara operaciones del inventario.
