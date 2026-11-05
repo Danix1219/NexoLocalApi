@@ -58,8 +58,8 @@ def inspect(folder):
 
 
 def main(root):
-    folders = sorted(path for path in (root / "specs").iterdir()
-                     if path.is_dir() and re.fullmatch(r"nv-\d{2}", path.name))
+    folders = sorted(path for path in (root / "specs").glob("*/*")
+                     if path.is_dir() and re.fullmatch(r"(?:nv|ep)-\d{2}", path.name))
     if not folders:
         print("SDD-INTEGRITY-FAIL: no backend specs")
         return 1

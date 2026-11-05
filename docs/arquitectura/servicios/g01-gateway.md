@@ -6,7 +6,7 @@ Diseño de implementacion propuesto, 2026-11-03. Proyecto original existente; ho
 
 Ruta: `nexolocal.Api/`. Sin base ni agregados de negocio. Configuracion de rutas y limites; no copiar cuentas, mensajes o pedidos. [Datos autoritativos](../../modelo-datos.md).
 
-Specs de referencia: [nv-01](../../../specs/nv-01/spec.md). La matriz de requisitos/tareas de cada spec conserva el alcance y dependencias.
+Specs de referencia: [nv-01](../../../specs/arquitectura/nv-01/spec.md). La matriz de requisitos/tareas de cada spec conserva el alcance y dependencias.
 
 ## Estructura del propietario
 

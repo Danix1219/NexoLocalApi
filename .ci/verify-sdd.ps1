@@ -1,4 +1,4 @@
-#Requires -Version 5.1
+﻿#Requires -Version 5.1
 param([Parameter(Mandatory = $true)][string]$WorkspaceRoot)
 $ErrorActionPreference = 'Stop'
 $repoRoot = Split-Path -Parent $PSScriptRoot
@@ -49,9 +49,9 @@ try {
     if ($LASTEXITCODE -ne 0) { throw 'SDD structure/link validation failed.' }
 } finally { Pop-Location }
 $isApi = Test-Path -LiteralPath (Join-Path $repoRoot '.specify/memory/constitution.md')
-$pattern = if ($isApi) { '^nv-\d{2}$' } else { '^\d{3}-[a-z0-9-]+$' }
+$pattern = if ($isApi) { '^(?:nv|ep)-\d{2}$' } else { '^\d{3}-[a-z0-9-]+$' }
 $count = 0
-foreach ($dir in Get-ChildItem -LiteralPath (Join-Path $repoRoot 'specs') -Directory | Where-Object { $_.Name -match $pattern }) {
+foreach ($dir in Get-ChildItem -LiteralPath (Join-Path $repoRoot 'specs') -Directory -Recurse | Where-Object { $_.Name -match $pattern }) {
     $count++
     $taskName = if ($isApi) { 'task.md' } else { 'tasks.md' }
     $checkName = if ($isApi) { 'checklists/gates.md' } else { 'checklist.md' }
