@@ -6,7 +6,7 @@ Diseño de implementacion propuesto, 2026-11-03. Opcional/condicionado; ningun p
 
 Ruta: `services/relations/`. Proyeccion derivada de relaciones publicas, versiones/tombstones y estado de reconstruccion. No posee la cuenta, el pedido, permisos ni direccion/telefono. [Datos autoritativos](../../modelo-datos.md).
 
-Specs de referencia: [nv-15](../../../specs/nv-15/spec.md). La matriz de requisitos/tareas de cada spec conserva el alcance y dependencias.
+Specs de referencia: [nv-15](../../../specs/arquitectura/nv-15/spec.md). La matriz de requisitos/tareas de cada spec conserva el alcance y dependencias.
 
 ## Estructura del propietario
 
@@ -48,7 +48,7 @@ Flujo: Hecho publico compatible → dedupe/version → proyeccion → consulta c
 
 | ID | Metodo/ruta del catalogo | Spec primaria |
 |---|---|---|
-| EP-098 | `POST /graphql/social/v1` | [nv-15](../../../specs/nv-15/spec.md) |
+| EP-098 | `POST /graphql/social/v1` | [nv-15](../../../specs/arquitectura/nv-15/spec.md) |
 
 ## Criterios antes de implementar/aceptar
 

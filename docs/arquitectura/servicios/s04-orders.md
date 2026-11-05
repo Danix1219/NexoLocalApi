@@ -6,7 +6,7 @@ Diseño de implementacion propuesto, 2026-11-03. Base física creada por encargo
 
 Ruta: `services/orders/`. requests, interests y orders; asignacion pertenece a S04. Precio opcional, actor, version y estado se definen por contrato; no se modela pago/cobro no requerido. [Datos autoritativos](../../modelo-datos.md).
 
-Specs de referencia: [nv-09](../../../specs/nv-09/spec.md), [nv-10](../../../specs/nv-10/spec.md), [nv-20](../../../specs/nv-20/spec.md), [nv-25](../../../specs/nv-25/spec.md). La matriz de requisitos/tareas de cada spec conserva el alcance y dependencias.
+Specs de referencia: [nv-09](../../../specs/arquitectura/nv-09/spec.md), [nv-10](../../../specs/arquitectura/nv-10/spec.md), [nv-20](../../../specs/arquitectura/nv-20/spec.md), [nv-25](../../../specs/arquitectura/nv-25/spec.md). La matriz de requisitos/tareas de cada spec conserva el alcance y dependencias.
 
 ## Estructura del propietario
 
@@ -50,28 +50,28 @@ Flujo: Comando autenticado → comprobar actor/estado/version → regla de domin
 
 | ID | Metodo/ruta del catalogo | Spec primaria |
 |---|---|---|
-| EP-047 | `POST /requests` | [nv-09](../../../specs/nv-09/spec.md) |
-| EP-048 | `GET /requests` | [nv-09](../../../specs/nv-09/spec.md) |
-| EP-049 | `GET /requests/{id}` | [nv-09](../../../specs/nv-09/spec.md) |
-| EP-050 | `PATCH /requests/{id}` | [nv-09](../../../specs/nv-09/spec.md) |
-| EP-051 | `POST /requests/{id}/close` | [nv-09](../../../specs/nv-09/spec.md) |
-| EP-052 | `DELETE /requests/{id}` | [nv-09](../../../specs/nv-09/spec.md) |
-| EP-053 | `PUT /requests/{id}/interest` | [nv-20](../../../specs/nv-20/spec.md) |
-| EP-054 | `DELETE /requests/{id}/interest` | [nv-20](../../../specs/nv-20/spec.md) |
-| EP-055 | `GET /requests/{id}/interests` | [nv-20](../../../specs/nv-20/spec.md) |
-| EP-056 | `PUT /requests/{id}/shortlist/{providerId}` | [nv-20](../../../specs/nv-20/spec.md) |
-| EP-057 | `DELETE /requests/{id}/shortlist/{providerId}` | [nv-20](../../../specs/nv-20/spec.md) |
-| EP-058 | `POST /orders` | [nv-10](../../../specs/nv-10/spec.md) |
-| EP-059 | `GET /me/orders` | [nv-10](../../../specs/nv-10/spec.md) |
-| EP-060 | `GET /orders/{id}` | [nv-10](../../../specs/nv-10/spec.md) |
-| EP-061 | `POST /orders/{id}/accept` | [nv-10](../../../specs/nv-10/spec.md) |
-| EP-062 | `POST /orders/{id}/reject` | [nv-10](../../../specs/nv-10/spec.md) |
-| EP-063 | `POST /orders/{id}/cancel` | [nv-10](../../../specs/nv-10/spec.md) |
-| EP-064 | `POST /orders/{id}/complete` | [nv-10](../../../specs/nv-10/spec.md) |
-| EP-065 | `PATCH /orders/{id}/address` | [nv-10](../../../specs/nv-10/spec.md) |
-| EP-088 | `GET /internal/orders/{id}/review-eligibility` | [nv-10](../../../specs/nv-10/spec.md) |
-| EP-092 | `GET /orders/{id}/contact` | [nv-25](../../../specs/nv-25/spec.md) |
-| EP-097 | `PATCH /orders/{id}/contact-preference` | [nv-25](../../../specs/nv-25/spec.md) |
+| EP-047 | `POST /requests` | [nv-09](../../../specs/arquitectura/nv-09/spec.md) |
+| EP-048 | `GET /requests` | [nv-09](../../../specs/arquitectura/nv-09/spec.md) |
+| EP-049 | `GET /requests/{id}` | [nv-09](../../../specs/arquitectura/nv-09/spec.md) |
+| EP-050 | `PATCH /requests/{id}` | [nv-09](../../../specs/arquitectura/nv-09/spec.md) |
+| EP-051 | `POST /requests/{id}/close` | [nv-09](../../../specs/arquitectura/nv-09/spec.md) |
+| EP-052 | `DELETE /requests/{id}` | [nv-09](../../../specs/arquitectura/nv-09/spec.md) |
+| EP-053 | `PUT /requests/{id}/interest` | [nv-20](../../../specs/arquitectura/nv-20/spec.md) |
+| EP-054 | `DELETE /requests/{id}/interest` | [nv-20](../../../specs/arquitectura/nv-20/spec.md) |
+| EP-055 | `GET /requests/{id}/interests` | [nv-20](../../../specs/arquitectura/nv-20/spec.md) |
+| EP-056 | `PUT /requests/{id}/shortlist/{providerId}` | [nv-20](../../../specs/arquitectura/nv-20/spec.md) |
+| EP-057 | `DELETE /requests/{id}/shortlist/{providerId}` | [nv-20](../../../specs/arquitectura/nv-20/spec.md) |
+| EP-058 | `POST /orders` | [nv-10](../../../specs/arquitectura/nv-10/spec.md) |
+| EP-059 | `GET /me/orders` | [nv-10](../../../specs/arquitectura/nv-10/spec.md) |
+| EP-060 | `GET /orders/{id}` | [nv-10](../../../specs/arquitectura/nv-10/spec.md) |
+| EP-061 | `POST /orders/{id}/accept` | [nv-10](../../../specs/arquitectura/nv-10/spec.md) |
+| EP-062 | `POST /orders/{id}/reject` | [nv-10](../../../specs/arquitectura/nv-10/spec.md) |
+| EP-063 | `POST /orders/{id}/cancel` | [nv-10](../../../specs/arquitectura/nv-10/spec.md) |
+| EP-064 | `POST /orders/{id}/complete` | [nv-10](../../../specs/arquitectura/nv-10/spec.md) |
+| EP-065 | `PATCH /orders/{id}/address` | [nv-10](../../../specs/arquitectura/nv-10/spec.md) |
+| EP-088 | `GET /internal/orders/{id}/review-eligibility` | [nv-10](../../../specs/arquitectura/nv-10/spec.md) |
+| EP-092 | `GET /orders/{id}/contact` | [nv-25](../../../specs/arquitectura/nv-25/spec.md) |
+| EP-097 | `PATCH /orders/{id}/contact-preference` | [nv-25](../../../specs/arquitectura/nv-25/spec.md) |
 
 ## Criterios antes de implementar/aceptar
 

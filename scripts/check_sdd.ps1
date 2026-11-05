@@ -5,11 +5,14 @@ $ErrorActionPreference = 'Stop'
 $root = Split-Path -Parent $PSScriptRoot
 $isApi = Test-Path -LiteralPath (Join-Path $root '.specify/memory/constitution.md')
 $specRoot = Join-Path $root 'specs'
-$pattern = if ($isApi) { '^nv-\d{2}$' } else { '^\d{3}-[a-z0-9-]+$' }
+$pattern = if ($isApi) { '^(?:nv|ep)-\d{2}$' } else { '^\d{3}-[a-z0-9-]+$' }
 $taskName = if ($isApi) { 'task.md' } else { 'tasks.md' }
 $checkName = if ($isApi) { 'checklists/gates.md' } else { 'checklist.md' }
 $failures = New-Object System.Collections.Generic.List[string]
-$specs = @(Get-ChildItem -LiteralPath $specRoot -Directory | Where-Object { $_.Name -match $pattern })
+# Las specs viven en subcarpetas por tipo: specs/arquitectura y specs/endpoints.
+$specs = @(Get-ChildItem -LiteralPath $specRoot -Directory -Recurse | Where-Object { $_.Name -match $pattern })
+$specPaths = @{}
+foreach ($d in $specs) { $specPaths[$d.Name] = $d.FullName }
 if ($specs.Count -eq 0) { $failures.Add('No hay specs vigentes.') }
 foreach ($dir in $specs) {
     foreach ($name in @('spec.md','plan.md',$taskName,$checkName)) {
@@ -48,7 +51,7 @@ if ($isApi) {
     if (@($ids | Select-Object -Unique).Count -ne $ids.Count) { $failures.Add('EP duplicados en catalogo.') }
     $endpoints = Get-Content -LiteralPath (Join-Path $root 'docs/endpoints.md') -Raw -Encoding UTF8
     foreach ($operation in $catalog.operations) {
-        if (-not (Test-Path -LiteralPath (Join-Path $specRoot "$($operation.spec)/spec.md"))) { $failures.Add("$($operation.id): spec viva inexistente") }
+        if (-not ($specPaths.ContainsKey($operation.spec) -and (Test-Path -LiteralPath (Join-Path $specPaths[$operation.spec] 'spec.md')))) { $failures.Add("$($operation.id): spec viva inexistente") }
         if ($endpoints -notmatch [regex]::Escape($operation.id)) { $failures.Add("$($operation.id): falta indice endpoints") }
     }
     if ($catalog.count -ne @($catalog.operations).Count) { $failures.Add('Cantidad declarada no coincide con inventario.') }

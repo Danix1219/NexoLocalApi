@@ -44,3 +44,34 @@ El usuario confirma: "Crear carpetas y proyectos base, sin logica de negocio". S
 ## Correccion explicita del usuario: G01 y solucion original (2026-11-03)
 
 El usuario rechaza la solucion paralela y confirma que el proyecto existente nexolocal.Api es Gateway G01; cada microservicio tendra su host. Se conserva nexolocal.Api.slnx, G01 no referencia proyectos de Identity y S01 usa services/identity/src/{Domain,Application,Infrastructure,Api}. [Evidencia vigente](../inicio-backend/correccion-base-microservicios.md). Esta decision aclara estructura/rol, no ratifica proveedores o negocio.
+
+## Encargo de conexion a datos y canal de verificacion (2026-11-05)
+
+El usuario encarga: implementar la conexion con MongoDB Atlas con variables en secretos, separar specs de arquitectura y specs de endpoint, y definir los primeros siete endpoints del usuario que solicita servicio con verificacion por correo en lugar de telefono.
+
+Efectos registrados:
+
+- S01 Identity incorpora `MongoDB.Driver` y conexion configurable por secreto, con validacion al arranque y `GET /health/ready`. Detalle y claves en [configuracion y secretos](../configuracion-secretos.md). Este encargo autoriza la conexion del propietario S01; **no ratifica D01**: cluster, region, tier, transacciones, Redis y YARP siguen pendientes, igual que los otros ocho hosts.
+- El identificador de cuenta pasa de telefono a correo. Se actualizan en el [inventario](../contracts/inventario.json) los campos de EP-001, EP-003, EP-004 y EP-006 (proposito, actor, entradas y regla). Las rutas `/auth/otp` y `/auth/otp/verify` se conservan; renombrarlas a `/auth/email/*` es una decision de contrato aun no tomada. D04 (proveedor de envio) sigue abierta y cambia de SMS a correo.
+- `specs/` queda separada en `specs/arquitectura/` (26 incrementos de capacidad y gobierno) y `specs/endpoints/` (una spec por operacion). Los validadores `scripts/check_sdd.ps1`, `scripts/check_sdd_integrity.py` y `.ci/verify-sdd.ps1` recorren ambas subcarpetas y aceptan el patron `ep-NN`.
+
+Limite: no hay build ni arranque verificados en este checkout (el SDK 10.0.302 que exige `global.json` no esta instalado). Ninguna tarea queda marcada como ejecutada y Ready sigue abierto.
+
+## Ejecucion de los primeros siete endpoints (2026-11-05)
+
+El usuario entrega la cadena de conexion de su cluster Atlas y encarga implementar ya los siete endpoints. Se ejecuta en `feature/Johann-arquitectura` desde `develop`.
+
+- La cadena queda en el almacen de secretos del usuario para `nexolocal-identity` y `nexolocal-community`. No se versiona y no aparece en ningun archivo del repositorio.
+- S01 implementa EP-001 a EP-008 con correo como identificador; S03 implementa EP-030. Comprobado contra Atlas: 35 de 35 verificaciones de [la sonda](../../scripts/probe_endpoints.py) mas la paginacion del feed. Datos de prueba eliminados.
+- Esta ejecucion **no ratifica D01**: cluster, tier, region, transacciones, Redis y YARP siguen pendientes. D04 pasa de proveedor SMS a proveedor de correo, todavia sin elegir; mientras tanto el codigo solo se registra en Development.
+- Decision de implementacion pendiente de contrato: el token de acceso es opaco y se valida leyendo la sesion en base, no un JWT firmado. Cambiarlo a JWT afecta al contrato de frontera con la app.
+- Limite verificado: el equipo no tiene el SDK 10.0.302 de `global.json`; la compilacion se verifico en un proyecto desechable net9.0 y los hosts se ejecutaron desde el, no desde la solucion.
+
+## SDK y driver de datos (2026-11-05)
+
+El usuario intenta compilar en Visual Studio 17.14 y obtiene NETSDK1209 mas el aviso de `global.json`. Elige, entre las opciones planteadas, instalar el SDK 10 y trabajar por CLI sin cambiar el objetivo `net10.0`.
+
+- Instalado SDK **10.0.403**; `global.json` pasa a esa version porque `rollForward: latestPatch` no cruza bandas de caracteristicas. No ratifica la version de equipo de D01: refleja lo instalado en este equipo.
+- `MongoDB.Driver` 3.1.0 → **3.13.0** por vulnerabilidad alta transitiva en `Snappier 1.0.0` y moderada en `SharpCompress 0.30.1`. Tras el cambio el build queda en 0 avisos.
+- Rutas con prefijo `/api/v1` conforme a [el indice de endpoints](../endpoints.md); `/health` queda fuera, como indica ese mismo documento.
+- Limite abierto: Visual Studio 17.14 no compila `net10.0`. Actualizar la IDE a 18.0+ o bajar el objetivo es una decision de D01 aun no tomada; mientras tanto la compilacion y ejecucion son por CLI.

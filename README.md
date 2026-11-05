@@ -1,6 +1,6 @@
 # API_NexoLocal · SDD
 
-Patrón de referencia: API_SDD. Flujo: `specs/nv-XX/spec.md → plan.md → task.md → checklists/gates.md`. Estructura adoptada para documentación; todas las specs son borradores, no releases existentes.
+Patrón de referencia: API_SDD. Flujo: `specs/arquitectura/nv-XX/spec.md → plan.md → task.md → checklists/gates.md`. Estructura adoptada para documentación; todas las specs son borradores, no releases existentes.
 
 ## Orden de lectura
 

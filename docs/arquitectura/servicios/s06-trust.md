@@ -6,7 +6,7 @@ Diseño de implementacion propuesto, 2026-11-03. Base física revisada: 3 proyec
 
 Ruta: `services/trust/`. media, reports y decisions. Decision de aprobacion vinculada a huella/autor/proposito/version de politica; permisos de medios y reportes con acceso minimo. [Datos autoritativos](../../modelo-datos.md).
 
-Specs de referencia: [nv-05](../../../specs/nv-05/spec.md), [nv-13](../../../specs/nv-13/spec.md), [nv-24](../../../specs/nv-24/spec.md). La matriz de requisitos/tareas de cada spec conserva el alcance y dependencias.
+Specs de referencia: [nv-05](../../../specs/arquitectura/nv-05/spec.md), [nv-13](../../../specs/arquitectura/nv-13/spec.md), [nv-24](../../../specs/arquitectura/nv-24/spec.md). La matriz de requisitos/tareas de cada spec conserva el alcance y dependencias.
 
 ## Estructura del propietario
 
@@ -48,16 +48,16 @@ Flujo: Solicitud autorizada → evaluar sin persistir contenido rechazado → de
 
 | ID | Metodo/ruta del catalogo | Spec primaria |
 |---|---|---|
-| EP-075 | `POST /media` | [nv-05](../../../specs/nv-05/spec.md) |
-| EP-076 | `GET /media/{id}/access` | [nv-05](../../../specs/nv-05/spec.md) |
-| EP-077 | `DELETE /media/{id}` | [nv-05](../../../specs/nv-05/spec.md) |
-| EP-078 | `POST /reports` | [nv-05](../../../specs/nv-05/spec.md) |
-| EP-079 | `GET /me/reports` | [nv-05](../../../specs/nv-05/spec.md) |
-| EP-080 | `GET /admin/reports` | [nv-24](../../../specs/nv-24/spec.md) |
-| EP-081 | `POST /admin/reports/{id}/decision` | [nv-24](../../../specs/nv-24/spec.md) |
-| EP-082 | `POST /assist/draft` | [nv-13](../../../specs/nv-13/spec.md) |
-| EP-087 | `POST /internal/moderation/check` | [nv-05](../../../specs/nv-05/spec.md) |
-| EP-099 | `GET /catalog/report-reasons` | [nv-05](../../../specs/nv-05/spec.md) |
+| EP-075 | `POST /media` | [nv-05](../../../specs/arquitectura/nv-05/spec.md) |
+| EP-076 | `GET /media/{id}/access` | [nv-05](../../../specs/arquitectura/nv-05/spec.md) |
+| EP-077 | `DELETE /media/{id}` | [nv-05](../../../specs/arquitectura/nv-05/spec.md) |
+| EP-078 | `POST /reports` | [nv-05](../../../specs/arquitectura/nv-05/spec.md) |
+| EP-079 | `GET /me/reports` | [nv-05](../../../specs/arquitectura/nv-05/spec.md) |
+| EP-080 | `GET /admin/reports` | [nv-24](../../../specs/arquitectura/nv-24/spec.md) |
+| EP-081 | `POST /admin/reports/{id}/decision` | [nv-24](../../../specs/arquitectura/nv-24/spec.md) |
+| EP-082 | `POST /assist/draft` | [nv-13](../../../specs/arquitectura/nv-13/spec.md) |
+| EP-087 | `POST /internal/moderation/check` | [nv-05](../../../specs/arquitectura/nv-05/spec.md) |
+| EP-099 | `GET /catalog/report-reasons` | [nv-05](../../../specs/arquitectura/nv-05/spec.md) |
 
 ## Criterios antes de implementar/aceptar
 

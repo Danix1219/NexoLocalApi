@@ -30,7 +30,7 @@ Sin secretos en archivos, errores o logs. Configuración por entorno. Redis no e
 
 ## 7. Gobernanza SDD
 
-Flujo `specs/nv-XX/spec.md → plan.md → task.md → checklists/gates.md`. Un cambio pequeño por revisión, tareas con FR/NFR y aceptación verificable. Docs vivos en docs/, especificaciones los enlazan. Rama de trabajo futura según id de spec. Un revisor humano real; no copiar firmas del profesor. Borrador documental → refinada → lista para desarrollar → implementada con evidencia → aprobada; Borrador con evidencia solo tras ejecutar producto y documentar resultados.
+Flujo `specs/arquitectura/nv-XX/spec.md → plan.md → task.md → checklists/gates.md`. Un cambio pequeño por revisión, tareas con FR/NFR y aceptación verificable. Docs vivos en docs/, especificaciones los enlazan. Rama de trabajo futura según id de spec. Un revisor humano real; no copiar firmas del profesor. Borrador documental → refinada → lista para desarrollar → implementada con evidencia → aprobada; Borrador con evidencia solo tras ejecutar producto y documentar resultados.
 
 Cada FR/NFR debe aparecer en una tarea definida y cada AC tener comprobación asignada. No citar tareas ausentes ni mantener dependencias circulares. La cobertura de diseño queda en tabla por spec; plan y checklist deben usar los mismos IDs. Las capacidades transversales tienen dueño único y los recorridos enlazan su integración.
 

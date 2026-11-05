@@ -2,7 +2,7 @@
 
 Actualizacion: 2026-11-03. Correccion solicitada por el usuario: conservar su solucion/proyecto existente y la arquitectura por microservicios. Decision explicita: **nexolocal.Api es G01 Gateway; los microservicios tienen hosts propios**. La solucion paralela NexoLocal.Backend.slnx generada anteriormente se retiro; no forma parte del trabajo actual.
 
-Autoridades: [constitucion](../.specify/memory/constitution.md), [datos por propietario](modelo-datos.md), [orden SDD](orden-desarrollo-backend.md), [fundacion](../specs/nv-01/spec.md) y [calidad](../specs/nv-03/spec.md). La estructura anterior de referencia usa gateway y services/<servicio>/src/{Domain,Application,Infrastructure,Api}; se adapta preservando la ruta del host ya creado por el usuario, sin duplicarlo.
+Autoridades: [constitucion](../.specify/memory/constitution.md), [datos por propietario](modelo-datos.md), [orden SDD](orden-desarrollo-backend.md), [fundacion](../specs/arquitectura/nv-01/spec.md) y [calidad](../specs/arquitectura/nv-03/spec.md). La estructura anterior de referencia usa gateway y services/<servicio>/src/{Domain,Application,Infrastructure,Api}; se adapta preservando la ruta del host ya creado por el usuario, sin duplicarlo.
 
 ## Estructura fisica actual
 
