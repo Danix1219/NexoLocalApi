@@ -179,3 +179,31 @@ Contra la alternativa descartada: un plan por servicio para 8 servicios rondaba 
 **Limite honesto del calculo**: los ~26 USD cubren el plan de computo. El hospedaje de Redis **no** esta incluido y FR-006 depende de el: Azure Cache for Redis Basic C0 añade del orden de 16 USD/mes, lo que llevaria el total cerca de 42 USD. Sigue dentro del credito, pero la cifra de 26 USD de la enmienda E-001 es solo el computo. Elegir el Redis concreto y su costo queda pendiente de decision.
 
 **Sin desplegar**: el workflow solo corre en `push` a `main` y el despliegue real necesita encargo aparte, mas las variables `AZURE_PLAN_NAME`, `AZURE_WEBAPP_NAME`, `AZURE_RESOURCE_GROUP` y las credenciales OIDC.
+
+## Retirada de las operaciones de negocio (2026-11-06)
+
+El usuario indica que los endpoints publicados **no son los que corresponden**: el conjunto de operaciones estaba mal elegido, no es lo que la aplicacion necesita primero. Decide retirarlos por completo, incluido el dominio y sus pruebas.
+
+### Que se retiro
+
+| Elemento | Detalle |
+|---|---|
+| Identity | `AuthService`, `Ports`, `Account`, `Session`, `EmailChallenge`, los cuatro archivos de endpoints, adaptadores de Mongo, el emisor de correo y `Secrets` |
+| Discovery | `FeedModel`, `Post`, `IFeedReader`, `MongoFeedReader`, `PostCollection` y los 14 archivos de endpoints |
+| Engagement | Los 11 archivos de endpoints sin implementacion |
+| Pruebas | 29 de `Nexo.Identity.Unit` y 7 de `Nexo.Discovery.Unit` |
+| Contrato del equipo movil | Archivado con aviso en [archivo/](archivo/contrato-primeros-7-endpoints-retirado.md); describia operaciones que ya no existen |
+
+### Que se conserva
+
+La **estructura de nv-00 intacta**: los 28 proyectos, las cinco capas por dominio, los grupos `/v1/identity`, `/v1/discovery`, `/v1/engagement` y `/v1/screens` listos para colgar operaciones sin tocar el host, los bloques comunes, Redis, las tres bases y las sondas. `dotnet build` sigue en **0 errores y 0 advertencias** y quedan **34 pruebas en verde**: Common 16, Architecture 7 e Integration 11.
+
+### Conflicto con nv-00, declarado
+
+Esta retirada **contradice FR-008** (*"conservar el dominio Identity existente sin reescribir su logica"*) y deja **AC-008 sin objeto**: ya no hay pruebas de Identity que conservar. No se disimula: FR-008 protegia un codigo que se da por no valido, y una decision posterior del responsable del producto lo sustituye. Si nv-00 se cierra formalmente, debe hacerlo con AC-008 marcado como **anulado por decision**, no como cumplido.
+
+El codigo retirado sigue recuperable en el historial de Git; esta retirada se hizo con `git rm`.
+
+### Pendiente
+
+Las specs `specs/endpoints/ep-01` a `ep-07` **siguen en el repositorio y describen las operaciones retiradas**. Quedan obsoletas hasta que se definan las correctas: no implementarlas tal cual. El [inventario de operaciones](../contracts/inventario.json) tampoco se ha revisado contra esta decision.

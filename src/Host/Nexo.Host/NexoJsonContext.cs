@@ -1,21 +1,15 @@
 using System.Text.Json.Serialization;
-using Nexo.Identity.Endpoints.Http;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Nexo.Host;
 
-/// <summary>Serializadores generados para los cuerpos HTTP publicos; evita reflexion en el camino caliente.</summary>
+/// <summary>
+/// Serializadores generados para los cuerpos HTTP publicos; evita reflexion en el camino caliente.
+/// Sin DTO de dominio: las operaciones anteriores se retiraron por estar mal elegidas.
+/// Cada cuerpo nuevo se añade aqui con su `JsonSerializable` al definir su endpoint.
+/// </summary>
 [JsonSourceGenerationOptions(PropertyNamingPolicy = JsonKnownNamingPolicy.CamelCase)]
-[JsonSerializable(typeof(RequestCodeBody))]
-[JsonSerializable(typeof(VerifyCodeBody))]
-[JsonSerializable(typeof(RegisterBody))]
-[JsonSerializable(typeof(LoginBody))]
-[JsonSerializable(typeof(RefreshBody))]
-[JsonSerializable(typeof(PasswordResetBody))]
-[JsonSerializable(typeof(ChallengeResponse))]
-[JsonSerializable(typeof(ProofResponse))]
-[JsonSerializable(typeof(SessionResponse))]
-[JsonSerializable(typeof(RegisteredResponse))]
-[JsonSerializable(typeof(MeResponse))]
+[JsonSerializable(typeof(ProblemDetails))]
 internal sealed partial class NexoJsonContext : JsonSerializerContext
 {
 }

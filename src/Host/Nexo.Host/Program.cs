@@ -14,7 +14,7 @@ using Nexo.Discovery.Infrastructure;
 using Nexo.Engagement.Endpoints;
 using Nexo.Engagement.Infrastructure;
 using Nexo.Identity.Endpoints;
-using Nexo.Identity.Infrastructure.Persistence;
+using Nexo.Identity.Infrastructure;
 using Nexo.Outbox;
 using Nexo.Screens.Endpoints;
 using Scalar.AspNetCore;
@@ -92,8 +92,7 @@ static async Task RunApiAsync(string[] args)
             }));
     });
 
-    builder.Services.AddIdentityMongo();
-    builder.Services.AddIdentityFeatures();
+    builder.Services.AddIdentityInfrastructure();
     builder.Services.AddDiscoveryInfrastructure();
     builder.Services.AddEngagementInfrastructure();
     builder.Services.AddOutbox(NexoDatabaseKeys.Identity);

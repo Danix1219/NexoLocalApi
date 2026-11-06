@@ -294,3 +294,13 @@ Tres defectos mas encontrados al verificar y corregidos: el feed de Discovery es
 Deuda que queda: el OpenAPI documenta las rutas pero **no las respuestas**: solo `200 OK` sin cuerpo, sin 400, 401, 409 ni 429 y sin esquema. Para que el equipo movil genere su cliente desde ahi hacen falta los `Produces<T>` en los nueve endpoints; es trabajo fuera de nv-00. Siguen pendientes el limite de conexiones real de M0, la eleccion del Redis hospedado y su costo, y `Nexo.Engagement.Unit` vacio.
 
 **E-001 sigue siendo propuesta.** Los diez AC tienen evidencia ejecutada, pero ninguna casilla de tarea se marca y nadie firma hasta que Johann revise la enmienda.
+
+## Retirada de las operaciones de negocio (2026-11-06)
+
+Estado: el backend queda **sin endpoints de negocio**. El usuario determino que las operaciones publicadas no eran las correctas, asi que se retiraron el dominio Identity, el feed de Discovery, los endpoints sin implementacion de Engagement y sus 36 pruebas. La **arquitectura de nv-00 sigue intacta**: 28 proyectos, cinco capas por dominio, los cuatro grupos de ruta listos, bloques comunes, Redis, tres bases y sondas. `dotnet build` en 0/0 y 34 pruebas en verde (Common 16, Architecture 7, Integration 11).
+
+Decisiones: la retirada **contradice FR-008 y deja AC-008 sin objeto**, y asi queda escrito en gates.md y en el [registro](docs/decisions/registro.md). No se marca como cumplido lo que se anulo. El contrato del equipo movil se archivo con un aviso de no implementar contra el, porque describia operaciones que ya no existen.
+
+Deuda: definir **que operaciones van primero** antes de volver a escribir codigo; ese fue el error que se esta deshaciendo. Las specs `ep-01` a `ep-07` siguen en el repositorio describiendo lo retirado y quedan obsoletas hasta rehacerse. El inventario de operaciones tampoco se ha revisado contra esta decision.
+
+A evitar: reimplementar los mismos endpoints a partir de las specs `ep-*` sin antes acordar el conjunto correcto; dar por buena una operacion porque exista su ficha en el inventario.

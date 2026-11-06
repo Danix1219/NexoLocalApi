@@ -28,7 +28,7 @@ Spec: [spec.md](../spec.md). Plan: [plan.md](../plan.md). Tareas: [task.md](../t
 | 4 | Integración | `docker compose up -d` + `--filter "Category=Integration"` | AC-005, AC-007 |
 | 5 | Dos instancias | Dos contenedores del host; revocar en A, verificar rechazo en B | AC-006 |
 | 6 | Degradación | Detener Redis; `/health/ready` debe dar **503**, no 200 | AC-007 |
-| 7 | Identity intacto | Pruebas de Identity en verde tras el traslado, sin tocar asertos | AC-008 |
+| 7 | ~~Identity intacto~~ | Anulado: el dominio se retiro por decision del 2026-11-06 | AC-008 |
 | 8 | Secretos | Escaneo sin hallazgos | NFR-001 |
 | 9 | Retirada | Solución sin los 7 proyectos; registro con motivos | AC-009 |
 | 10 | Costo | Workflow con plan B1 y dos instancias; cálculo documentado | AC-010 |
@@ -53,7 +53,7 @@ No basta el camino feliz:
 | AC-005 | `Una_escritura_de_un_dominio_no_aparece_en_la_base_de_otro` contra MongoDB real | **En verde.** Las tres bases existen (`mongo-init.js` las crea de forma idempotente) y lo escrito por un dominio no aparece en la base de otro | 2026-11-06 | pendiente de firma humana |
 | AC-006 | `Un_jti_revocado_en_A_es_rechazado_por_B` contra Redis real | **En verde**, junto con `La_revocacion_no_alcanza_a_otras_sesiones`, el contador de rate limit compartido entre instancias y la idempotencia de un reintento que cae en la otra instancia | 2026-11-06 | pendiente de firma humana |
 | AC-007 | Sondas con el entorno arriba y con Redis caido | **Los dos casos en verde**: con `docker compose up -d` readiness responde 200; con Redis caido responde **503 y no 200 por omision**; liveness sigue en 200 en ambos | 2026-11-06 | pendiente de firma humana |
-| AC-008 | `dotnet test tests/Nexo.Identity.Unit` | **29 pruebas, 0 fallos** sobre `Account`, `Session`, `EmailChallenge` y `EmailProof`. Nota: el `services/identity/tests` original solo contenia README, no habia asertos que conservar | 2026-11-06 | pendiente de firma humana |
+| AC-008 | — | **ANULADO POR DECISION el 2026-11-06.** El responsable del producto retiro el dominio Identity por estar sus operaciones mal elegidas, asi que ya no hay logica que conservar ni pruebas que mantener en verde. FR-008 queda sin objeto; ver el [registro](../../../../docs/decisions/registro.md). No contar este criterio como cumplido | 2026-11-06 | pendiente de firma humana |
 | AC-009 | Solucion sin los 7 proyectos; registro con motivos | **Ejecutado con `git rm`**: `services/` y `nexolocal.Api/` eliminados, `nexolocal.Api.slnx` retirada, `architecture-selection.json` archivado. Quedan 28 `.csproj` (20 en `src/`, 8 en `tests/`) y el build sigue en 0/0. Inventario y motivos en el [registro](../../../../docs/decisions/registro.md) | 2026-11-06 | pendiente de firma humana |
 | AC-010 | Workflow con plan B1 y dos instancias | **Workflow reescrito**: `deploy-azure.yml` declara un plan B1, `--number-of-workers 2` con verificacion que falla si hay menos, una app por rol en el mismo plan y el calculo (~26 USD/mes). **Sin desplegar** | 2026-11-06 | pendiente de firma humana |
 
