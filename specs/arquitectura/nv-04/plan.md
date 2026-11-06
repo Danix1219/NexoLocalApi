@@ -69,7 +69,7 @@ FR-703 → T-703 → AC-703: Ana publica/guarda y sale; Carlos no recibe como pr
 
 ## Rutas, propietario y orden verificable 0.4.1
 
-Dueño: S01 Identity. Rutas objetivo: `services/identity/src/ y services/identity/tests/` (no creadas por este plan). Alcance propio: subset inicial EP-001/002/003/004/005/007/008; reutilizar scaffold de nv-01. Leer [mapa de carpetas](../../../docs/estructura-backend.md) y [secuencia SDD](../../../docs/orden-desarrollo-backend.md).
+Dueño: S01 Identity. Rutas objetivo: `services/identity/src/ y services/identity/tests/` (no creadas por este plan). Alcance propio: subset inicial EP-001/002/003/004/005/007/008; reutilizar scaffold de nv-00. Leer [mapa de carpetas](../../../docs/estructura-backend.md) y [secuencia SDD](../../../docs/orden-desarrollo-backend.md).
 
 Actual: SDD/validadores en este checkout y plantilla Visual Studio separada, sin consolidacion ejecutada. Antes de Ready, T-950 concreta archivos existentes/objetivo y decisiones de la historia; T-001 depende de esa salida ademas del refinamiento. Preservar dependencias de negocio ya declaradas, contratos formales y autoridad API/app.
 

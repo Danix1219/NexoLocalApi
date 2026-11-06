@@ -41,5 +41,5 @@
 
 - [ ] AC-950 / T-950: rutas actuales/objetivo, dueño, decisiones, dependencia de entrada, suites y evidencia definidos en plan; T-001 no pasa Ready sin esta preparacion. No marcar porque exista el mapa general.
 - [ ] Construccion usa solo el propietario habilitado y no accede a proyectos/bases ajenos; todo comando de producto apunta a una ruta existente y su resultado real.
-- [ ] Jira/Confluence pospuestos siguen pendientes sin enlaces inventados; CI documental y revision de diseño no equivalen a aceptacion funcional.
+- [ ] CI documental y revision de diseño no equivalen a aceptacion funcional.
 - [ ] AC-951 / T-951: Con proyecto existente, CI ejecuta comandos de rutas reales y falla al romper build/test o arquitectura; lint no puede ser el unico gate verde. Registrar resultados/limites sin afirmar ejecuciones aun pendientes. Resultado/entorno/revisor y limitaciones registrados; estado pendiente hasta comprobacion real.

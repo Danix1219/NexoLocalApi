@@ -1,0 +1,8 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <ProjectReference Include="../../Identity/Nexo.Identity.Contracts/Nexo.Identity.Contracts.csproj" />
+    <ProjectReference Include="../../Discovery/Nexo.Discovery.Contracts/Nexo.Discovery.Contracts.csproj" />
+    <ProjectReference Include="../../Engagement/Nexo.Engagement.Contracts/Nexo.Engagement.Contracts.csproj" />
+    <ProjectReference Include="../../../BuildingBlocks/Nexo.Common/Nexo.Common.csproj" />
+  </ItemGroup>
+</Project>

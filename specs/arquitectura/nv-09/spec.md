@@ -18,8 +18,8 @@ Requisitos Móvil v2: 04, 07, 14, 16. Componentes: M09, M13, M16. Hallazgos: H12
 
 Dependencias: nv-06, nv-05.
 
-- FR-001: Cliente publica/edita/cierra/retira necesidad; interesados se consultan mediante nv-20.
-- FR-002: Integrar expresar/retirar interés y candidatos con nv-20, preservando permisos/estado de la solicitud.
+- FR-001: Cliente publica/edita/cierra/retira necesidad; interesados se consultan mediante este spec.
+- FR-002: Integrar expresar/retirar interés y candidatos con este spec, preservando permisos/estado de la solicitud.
 
 - NFR-001: autorización, aislamiento, privacidad y manejo de errores según constitución.
 - NFR-002: trazabilidad y evidencia real; no declarar integraciones reales con dobles.
@@ -69,11 +69,11 @@ Fuera: funcionalidades ajenas y despliegue no encargado.
 
 | Operación integrada | Nuevo dueño de incremento |
 |---|---|
-| EP-053 | [nv-20](../nv-20/spec.md) |
-| EP-054 | [nv-20](../nv-20/spec.md) |
-| EP-055 | [nv-20](../nv-20/spec.md) |
-| EP-056 | [nv-20](../nv-20/spec.md) |
-| EP-057 | [nv-20](../nv-20/spec.md) |
+| EP-053 | [este spec](../este spec/spec.md) |
+| EP-054 | [este spec](../este spec/spec.md) |
+| EP-055 | [este spec](../este spec/spec.md) |
+| EP-056 | [este spec](../este spec/spec.md) |
+| EP-057 | [este spec](../este spec/spec.md) |
 
 Los FR/AC heredados de esta fase comprueban integración con esas capacidades; sus tareas EP y casos de uso se ejecutan únicamente en la spec primaria del inventario. El propietario S01–S08 no cambia.
 
@@ -162,8 +162,8 @@ Cobertura de diseño, no ejecución aprobada. Contratos formales, decisiones y e
 
 Dueño de este incremento: S04 Orders. [Mapa backend](../../../docs/estructura-backend.md) y [orden SDD](../../../docs/orden-desarrollo-backend.md) concretan la propuesta; no ratifican proveedores ni crean proyectos. Las rutas siguientes son objetivo hasta ejecutarse.
 
-- FR-950: Antes de Ready, concretar archivos/rutas, dueño, referencias y pruebas del alcance: solicitudes y coordinacion de intereses con nv-20. Ubicacion objetivo: services/orders/src/ y services/orders/tests/.
-- NFR-950: Separar preparacion documental de ejecucion; respetar capas y datos por propietario, conservar Git/SDD y exigir CI de producto al introducir codigo. Jira/Confluence pospuestos no se inventan; ningun endpoint, estado Ready o aceptacion se deriva de una carpeta.
+- FR-950: Antes de Ready, concretar archivos/rutas, dueño, referencias y pruebas del alcance: solicitudes y coordinacion de intereses con este spec. Ubicacion objetivo: services/orders/src/ y services/orders/tests/.
+- NFR-950: Separar preparacion documental de ejecucion; respetar capas y datos por propietario, conservar Git/SDD y exigir CI de producto al introducir codigo. Ningun endpoint, estado Ready o aceptacion se deriva de una carpeta.
 
 - [ ] AC-950 → FR-950/NFR-950: Plan contiene rutas actuales/objetivo, decisiones previas, dependencia de entrada, historia seleccionada, suites/evidencia y dueño; matriz de tareas cubre el cambio y Ready espera esa preparacion. Si una ruta no aplica, justificar con superficie/autoridad, sin crear un proyecto artificial. Verificacion de producto queda pendiente hasta ejecutarse.
 

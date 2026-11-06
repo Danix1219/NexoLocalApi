@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="MongoDB.Driver" />
+    <PackageReference Include="StackExchange.Redis" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="../Nexo.Engagement.Application/Nexo.Engagement.Application.csproj" />
+    <ProjectReference Include="../Nexo.Engagement.Domain/Nexo.Engagement.Domain.csproj" />
+    <ProjectReference Include="../../../BuildingBlocks/Nexo.Common/Nexo.Common.csproj" />
+  </ItemGroup>
+</Project>

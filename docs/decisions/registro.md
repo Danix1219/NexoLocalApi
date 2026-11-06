@@ -75,3 +75,26 @@ El usuario intenta compilar en Visual Studio 17.14 y obtiene NETSDK1209 mas el a
 - `MongoDB.Driver` 3.1.0 → **3.13.0** por vulnerabilidad alta transitiva en `Snappier 1.0.0` y moderada en `SharpCompress 0.30.1`. Tras el cambio el build queda en 0 avisos.
 - Rutas con prefijo `/api/v1` conforme a [el indice de endpoints](../endpoints.md); `/health` queda fuera, como indica ese mismo documento.
 - Limite abierto: Visual Studio 17.14 no compila `net10.0`. Actualizar la IDE a 18.0+ o bajar el objetivo es una decision de D01 aun no tomada; mientras tanto la compilacion y ejecucion son por CLI.
+
+## Inventario de retiro nv-00 (2026-11-05)
+
+T-001 se ejecuta antes de borrar nada. Conteo de archivos versionables (sin `bin/` ni `obj/`). El motivo comun es la enmienda E-001: un solo despliegue modular sustituye los 8 microservicios; el codigo vacio no se conserva como si fuera producto.
+
+| Elemento | Archivos | Lineas | Motivo |
+|---|---:|---:|---|
+| `services/directory` | 24 | 102 | Scaffold sin implementacion; su capacidades pasan a `Discovery` |
+| `services/community` | 29 | 427 | Scaffold sin implementacion; `Post`/`FeedModel` y `CommunityMongo` se revisan para migrar a `Discovery` (deuda) |
+| `services/orders` | 34 | 149 | Scaffold sin implementacion; pasa a `Engagement` |
+| `services/messaging` | 27 | 108 | Scaffold sin implementacion; pasa a `Engagement` |
+| `services/trust` | 26 | 106 | Scaffold sin implementacion; pasa a `Engagement` + adaptador de moderacion |
+| `services/notifications` | 29 | 140 | Scaffold sin implementacion; pasa a `Engagement` + worker |
+| `services/relations` | 22 | 98 | Scaffold sin implementacion; S08 retirado por D-2 (`$graphLookup`) |
+| `services/identity` | 48 | 1316 | **No se borra: se mueve** a `src/Domains/Identity` (FR-008) |
+| `nexolocal.Api` (G01) | 6 | 27 | Host vacio; G01 se absorbe en `Screens` + `Nexo.Host` |
+| `nexolocal.Api.slnx` | 1 | 71 | Solucion de microservicios; se sustituye por `src/Nexo.sln` |
+| `docs/architecture-selection.json` | 1 | - | Fijaba 8 arquitecturas internas distintas; queda archivado en `artifacts/` |
+| `.github/workflows/deploy-azure.yml` | 1 | 83 | Despliegue a Container Apps por servicio; se reescribe a App Service B1 con dos instancias |
+
+Decisiones ratificadas por esta ejecucion: D-1 API modular por dominios; D-2 sin grafo (MongoDB `$graphLookup`); D-3 tres motores NoSQL en un despliegue.
+
+Bloqueo registrado: los cambios sin commitear de Johann (`services/identity/src/Api/Program.cs`, `NexoLocal.Identity.Infrastructure.csproj`, `Cache/RedisRateLimiting.cs`) se conservan al mover el proyecto. El encargo del usuario autoriza ejecutar sin commit; no se firma T-011 como cerrada hasta que exista commit y revision.

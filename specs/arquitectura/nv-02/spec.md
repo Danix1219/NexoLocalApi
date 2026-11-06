@@ -14,7 +14,7 @@ Fase de fundamento previa a funcionalidad. Conserva el orden de aprendizaje del 
 
 Requisitos Móvil v2: SDD, calidad, contratos y entrega; no reemplaza el alcance de funcionalidades.
 
-Dependencias: nv-01.
+Dependencias: nv-00.
 
 - FR-001: Definir revisión y compatibilidad de contratos HTTP/WS/eventos por historia y revisión consumida por Flutter, separando públicas, internas y administrativas.
 
@@ -122,7 +122,7 @@ Cobertura de diseño, no ejecución aprobada. Contratos formales, decisiones y e
 Dueño de este incremento: Contratos por propietario. [Mapa backend](../../../docs/estructura-backend.md) y [orden SDD](../../../docs/orden-desarrollo-backend.md) concretan la propuesta; no ratifican proveedores ni crean proyectos. Las rutas siguientes son objetivo hasta ejecutarse.
 
 - FR-950: Antes de Ready, concretar archivos/rutas, dueño, referencias y pruebas del alcance: esquemas formales, errores y eventos; no crear un DTO universal ni duplicar autoridad en Flutter. Ubicacion objetivo: docs/contracts/ y adaptador Api/Contracts del propietario.
-- NFR-950: Separar preparacion documental de ejecucion; respetar capas y datos por propietario, conservar Git/SDD y exigir CI de producto al introducir codigo. Jira/Confluence pospuestos no se inventan; ningun endpoint, estado Ready o aceptacion se deriva de una carpeta.
+- NFR-950: Separar preparacion documental de ejecucion; respetar capas y datos por propietario, conservar Git/SDD y exigir CI de producto al introducir codigo. Ningun endpoint, estado Ready o aceptacion se deriva de una carpeta.
 
 - [ ] AC-950 → FR-950/NFR-950: Plan contiene rutas actuales/objetivo, decisiones previas, dependencia de entrada, historia seleccionada, suites/evidencia y dueño; matriz de tareas cubre el cambio y Ready espera esa preparacion. Si una ruta no aplica, justificar con superficie/autoridad, sin crear un proyecto artificial. Verificacion de producto queda pendiente hasta ejecutarse.
 

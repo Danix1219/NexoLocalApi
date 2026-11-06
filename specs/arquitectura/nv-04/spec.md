@@ -20,7 +20,7 @@ Dependencias: nv-03; subset inicial EP-001/002/003/004/005/007/008. Borrado dist
 
 - FR-001: Visitante crea cuenta verificando control real de teléfono y consentimientos.
 - FR-002: Usuario inicia, renueva y cierra sesión en cualquiera de dos instancias.
-- FR-003: Integrar recuperación/edición/sesiones de nv-16 y solicitud de borrado de nv-12 con reautenticación; identidad mínima no las entrega por su subset.
+- FR-003: Integrar recuperación/edición/sesiones de este spec y solicitud de borrado de nv-12 con reautenticación; identidad mínima no las entrega por su subset.
 
 - NFR-001: autorización, aislamiento, privacidad y manejo de errores según constitución.
 - NFR-002: trazabilidad y evidencia real; no declarar integraciones reales con dobles.
@@ -81,10 +81,10 @@ Fuera: funcionalidades ajenas y despliegue no encargado.
 
 | Operación integrada | Nuevo dueño de incremento |
 |---|---|
-| EP-006 | [nv-16](../nv-16/spec.md) |
-| EP-009 | [nv-16](../nv-16/spec.md) |
-| EP-010 | [nv-16](../nv-16/spec.md) |
-| EP-011 | [nv-16](../nv-16/spec.md) |
+| EP-006 | [este spec](../este spec/spec.md) |
+| EP-009 | [este spec](../este spec/spec.md) |
+| EP-010 | [este spec](../este spec/spec.md) |
+| EP-011 | [este spec](../este spec/spec.md) |
 
 Los FR/AC heredados de esta fase comprueban integración con esas capacidades; sus tareas EP y casos de uso se ejecutan únicamente en la spec primaria del inventario. El propietario S01–S08 no cambia.
 
@@ -186,8 +186,8 @@ Cobertura de diseño, no ejecución aprobada. Contratos formales, decisiones y e
 
 Dueño de este incremento: S01 Identity. [Mapa backend](../../../docs/estructura-backend.md) y [orden SDD](../../../docs/orden-desarrollo-backend.md) concretan la propuesta; no ratifican proveedores ni crean proyectos. Las rutas siguientes son objetivo hasta ejecutarse.
 
-- FR-950: Antes de Ready, concretar archivos/rutas, dueño, referencias y pruebas del alcance: subset inicial EP-001/002/003/004/005/007/008; reutilizar scaffold de nv-01. Ubicacion objetivo: services/identity/src/ y services/identity/tests/.
-- NFR-950: Separar preparacion documental de ejecucion; respetar capas y datos por propietario, conservar Git/SDD y exigir CI de producto al introducir codigo. Jira/Confluence pospuestos no se inventan; ningun endpoint, estado Ready o aceptacion se deriva de una carpeta.
+- FR-950: Antes de Ready, concretar archivos/rutas, dueño, referencias y pruebas del alcance: subset inicial EP-001/002/003/004/005/007/008; reutilizar scaffold de nv-00. Ubicacion objetivo: services/identity/src/ y services/identity/tests/.
+- NFR-950: Separar preparacion documental de ejecucion; respetar capas y datos por propietario, conservar Git/SDD y exigir CI de producto al introducir codigo. Ningun endpoint, estado Ready o aceptacion se deriva de una carpeta.
 
 - [ ] AC-950 → FR-950/NFR-950: Plan contiene rutas actuales/objetivo, decisiones previas, dependencia de entrada, historia seleccionada, suites/evidencia y dueño; matriz de tareas cubre el cambio y Ready espera esa preparacion. Si una ruta no aplica, justificar con superficie/autoridad, sin crear un proyecto artificial. Verificacion de producto queda pendiente hasta ejecutarse.
 

@@ -18,7 +18,7 @@ Requisitos Móvil v2: 07, 10, 15, 16. Componentes: M22, M24. Hallazgos: H01, H02
 
 Dependencias: nv-04 para inicio de borrado; cierre global integra nv-05..11; S08 solo si habilitado.
 
-- FR-001: Integrar notificaciones/dispositivos de nv-21 con logout y borrado; la bandeja/push tiene implementación primaria en nv-21.
+- FR-001: Integrar notificaciones/dispositivos de este spec con logout y borrado; la bandeja/push tiene implementación primaria en este spec.
 - FR-002: Cuenta solicita borrado y consulta progreso hasta confirmación de todos.
 
 - NFR-001: autorización, aislamiento, privacidad y manejo de errores según constitución.
@@ -59,10 +59,10 @@ Fuera: funcionalidades ajenas y despliegue no encargado.
 
 | Operación integrada | Nuevo dueño de incremento |
 |---|---|
-| EP-083 | [nv-21](../nv-21/spec.md) |
-| EP-084 | [nv-21](../nv-21/spec.md) |
-| EP-085 | [nv-21](../nv-21/spec.md) |
-| EP-086 | [nv-21](../nv-21/spec.md) |
+| EP-083 | [este spec](../este spec/spec.md) |
+| EP-084 | [este spec](../este spec/spec.md) |
+| EP-085 | [este spec](../este spec/spec.md) |
+| EP-086 | [este spec](../este spec/spec.md) |
 
 Los FR/AC heredados de esta fase comprueban integración con esas capacidades; sus tareas EP y casos de uso se ejecutan únicamente en la spec primaria del inventario. El propietario S01–S08 no cambia.
 
@@ -141,7 +141,7 @@ Cobertura de diseño, no ejecución aprobada. Contratos formales, decisiones y e
 Dueño de este incremento: S01/S07 y cada propietario activo. [Mapa backend](../../../docs/estructura-backend.md) y [orden SDD](../../../docs/orden-desarrollo-backend.md) concretan la propuesta; no ratifican proveedores ni crean proyectos. Las rutas siguientes son objetivo hasta ejecutarse.
 
 - FR-950: Antes de Ready, concretar archivos/rutas, dueño, referencias y pruebas del alcance: borrado inicia en identidad; cierre distribuido integra dueños sin acceder a sus bases. Ubicacion objetivo: adaptadores/outbox/inbox de cada servicio y tests/EndToEnd/.
-- NFR-950: Separar preparacion documental de ejecucion; respetar capas y datos por propietario, conservar Git/SDD y exigir CI de producto al introducir codigo. Jira/Confluence pospuestos no se inventan; ningun endpoint, estado Ready o aceptacion se deriva de una carpeta.
+- NFR-950: Separar preparacion documental de ejecucion; respetar capas y datos por propietario, conservar Git/SDD y exigir CI de producto al introducir codigo. Ningun endpoint, estado Ready o aceptacion se deriva de una carpeta.
 
 - [ ] AC-950 → FR-950/NFR-950: Plan contiene rutas actuales/objetivo, decisiones previas, dependencia de entrada, historia seleccionada, suites/evidencia y dueño; matriz de tareas cubre el cambio y Ready espera esa preparacion. Si una ruta no aplica, justificar con superficie/autoridad, sin crear un proyecto artificial. Verificacion de producto queda pendiente hasta ejecutarse.
 

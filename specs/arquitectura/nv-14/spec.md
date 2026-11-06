@@ -16,10 +16,10 @@ No incluye implementación de dominios ajenos ni afirma integraciones ya existen
 
 Requisitos Móvil v2: 01, 02, 03, 05, 06, 07, 08, 09, 11, 12, 13, 14, 15, 16, 17, 18, 19. Componentes: W01, M26, M27. Hallazgos: Sin hallazgo específico asociado.
 
-Dependencias: Preparación desde nv-00..04; cierre requiere nv-04..13 y decisiones D03..D08; nv-15 opcional.
+Dependencias: Preparación desde nv-00..04; cierre requiere nv-04..13 y decisiones D03..D08. El grafo (nv-15) fue retirado por decisión D-2; sus relaciones se resuelven con $graphLookup.
 
 - FR-001: Equipo despliega primera vertical y replica servicios con configuración reproducible.
-- FR-002: Integrar expediente/landing de nv-23 y operación de datos de nv-22 con despliegue, sin atribuir Play/GA4 al código de la API.
+- FR-002: Integrar expediente/landing de este spec y operación de datos de este spec con despliegue, sin atribuir Play/GA4 al código de la API.
 
 - NFR-001: autorización, aislamiento, privacidad y manejo de errores según constitución.
 - NFR-002: trazabilidad y evidencia real; no declarar integraciones reales con dobles.
@@ -141,7 +141,7 @@ Cobertura de diseño, no ejecución aprobada. Contratos formales, decisiones y e
 Dueño de este incremento: Entrega y operacion de propietarios activos. [Mapa backend](../../../docs/estructura-backend.md) y [orden SDD](../../../docs/orden-desarrollo-backend.md) concretan la propuesta; no ratifican proveedores ni crean proyectos. Las rutas siguientes son objetivo hasta ejecutarse.
 
 - FR-950: Antes de Ready, concretar archivos/rutas, dueño, referencias y pruebas del alcance: preparar desde fundamentos; destinos reales y dos replicas se verifican al desplegar. Ubicacion objetivo: deploy/, .github/workflows/, docs/operations/ y suites de cada servicio.
-- NFR-950: Separar preparacion documental de ejecucion; respetar capas y datos por propietario, conservar Git/SDD y exigir CI de producto al introducir codigo. Jira/Confluence pospuestos no se inventan; ningun endpoint, estado Ready o aceptacion se deriva de una carpeta.
+- NFR-950: Separar preparacion documental de ejecucion; respetar capas y datos por propietario, conservar Git/SDD y exigir CI de producto al introducir codigo. Ningun endpoint, estado Ready o aceptacion se deriva de una carpeta.
 
 - [ ] AC-950 → FR-950/NFR-950: Plan contiene rutas actuales/objetivo, decisiones previas, dependencia de entrada, historia seleccionada, suites/evidencia y dueño; matriz de tareas cubre el cambio y Ready espera esa preparacion. Si una ruta no aplica, justificar con superficie/autoridad, sin crear un proyecto artificial. Verificacion de producto queda pendiente hasta ejecutarse.
 

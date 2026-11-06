@@ -60,7 +60,7 @@ Cada operación/función/obligación desglosada tiene requisito, tarea y AC en l
 
 ## Rutas, propietario y orden verificable 0.4.1
 
-Dueño: S03 Community. Rutas objetivo: `services/community/src/ y services/community/tests/` (no creadas por este plan). Alcance propio: publicaciones y coordinacion con nv-18/nv-19; opinion vinculada espera pedidos. Leer [mapa de carpetas](../../../docs/estructura-backend.md) y [secuencia SDD](../../../docs/orden-desarrollo-backend.md).
+Dueño: S03 Community. Rutas objetivo: `services/community/src/ y services/community/tests/` (no creadas por este plan). Alcance propio: publicaciones y coordinacion con este spec/este spec; opinion vinculada espera pedidos. Leer [mapa de carpetas](../../../docs/estructura-backend.md) y [secuencia SDD](../../../docs/orden-desarrollo-backend.md).
 
 Actual: SDD/validadores en este checkout y plantilla Visual Studio separada, sin consolidacion ejecutada. Antes de Ready, T-950 concreta archivos existentes/objetivo y decisiones de la historia; T-001 depende de esa salida ademas del refinamiento. Preservar dependencias de negocio ya declaradas, contratos formales y autoridad API/app.
 

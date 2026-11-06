@@ -68,7 +68,7 @@ FR-702 → T-702 → AC-702: Cancel/rechazo retira dirección precisa, caché y 
 
 ## Rutas, propietario y orden verificable 0.4.1
 
-Dueño: S04 Orders. Rutas objetivo: `services/orders/src/ y services/orders/tests/` (no creadas por este plan). Alcance propio: pedido/asignacion/outbox locales y privacidad de contacto; integrar nv-25 sin trasladar reglas a Gateway. Leer [mapa de carpetas](../../../docs/estructura-backend.md) y [secuencia SDD](../../../docs/orden-desarrollo-backend.md).
+Dueño: S04 Orders. Rutas objetivo: `services/orders/src/ y services/orders/tests/` (no creadas por este plan). Alcance propio: pedido/asignacion/outbox locales y privacidad de contacto; integrar este spec sin trasladar reglas a Gateway. Leer [mapa de carpetas](../../../docs/estructura-backend.md) y [secuencia SDD](../../../docs/orden-desarrollo-backend.md).
 
 Actual: SDD/validadores en este checkout y plantilla Visual Studio separada, sin consolidacion ejecutada. Antes de Ready, T-950 concreta archivos existentes/objetivo y decisiones de la historia; T-001 depende de esa salida ademas del refinamiento. Preservar dependencias de negocio ya declaradas, contratos formales y autoridad API/app.
 

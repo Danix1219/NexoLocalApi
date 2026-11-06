@@ -1,6 +1,6 @@
 # Constitución — API_NexoLocal
 
-Versión: 0.3.1 documental. Estado: Borrador; pendiente de ratificación técnica. Fuente de verdad: `.specify/memory/constitution.md`.
+Versión: 0.4.0 documental. Estado: Borrador; stack y arquitectura ratificados por enmienda E-001 (§11), pendiente de revisión humana. Fuente de verdad: `.specify/memory/constitution.md`.
 
 ## 1. Propósito y alcance
 
@@ -12,13 +12,59 @@ Fuentes vigentes: requisitos académicos, maqueta aprobada y hallazgos H01-H12. 
 
 ## 3. Stack
 
-Propuesta previa: .NET 10/YARP, MongoDB por propietario, Redis distribuido, Blob/CDN, colas con outbox/inbox. Azure y Neo4j siguen condicionados a ratificación/costo/ensayo.
+**Ratificado 2026-11-05** (enmienda E-001, ver §11). Stack fijo, sin alternativas abiertas:
 
-Fijar versiones exactas y evaluar dependencias al preparar la primera implementación; no hay paquetes instalados por estos documentos.
+| Capa | Tecnología |
+|---|---|
+| Framework | .NET 10 LTS · ASP.NET Core Minimal APIs |
+| Identidad | OpenIddict + OpenIddict.MongoDb (JWT Bearer) |
+| CQRS | Mediator.SourceGenerator (MIT) |
+| Validación | FluentValidation |
+| Base de datos | MongoDB Atlas Free (M0) — **una base por módulo**, 512 MB en total |
+| Caché y estado volátil | Redis — caché L2, rate limiting exacto, tickets de WebSocket, pub/sub |
+| Colas | Azure Storage Queues + patrón outbox/inbox |
+| Archivos | Azure Blob Storage + CDN de Azure |
+| Moderación | Azure AI Content Safety |
+| Tiempo real | SignalR sobre Redis como backplane |
+| Push | Firebase Cloud Messaging |
+| Observabilidad | OpenTelemetry → Application Insights |
+| Nube | **Azure App Service, plan B1, 2 instancias** |
+| IaC | Terraform |
+
+**Descartado y por qué** (no reabrir sin enmienda):
+
+| Tecnología | Motivo |
+|---|---|
+| **MinIO** | El requisito 15 exige el CDN *de la nube seleccionada*. MinIO es autoalojado y no es CDN → Azure Blob + CDN |
+| **Neo4j y grafo (S08)** | El documento de requisitos lo define como *"opción propuesta"*, como **proyección reconstruible** (no fuente de verdad) con *"una API de lectura opcional"*, y exige *"comparar costo (…) antes de elegir"*. Hecha esa comparación: **AuraDB Free se auto-pausa por inactividad y se elimina si queda pausada ~30 días**, con la evaluación el 2 de diciembre. El mismo documento ofrece la alternativa: *"MongoDB ofrece `$graphLookup` para ciertos recorridos"* y *"las menciones actuales continúan funcionando mediante REST y MongoDB"*. Las relaciones se resuelven con `recommendations`, `saved` y `$graphLookup`. **No se pierde ninguna función de la maqueta** |
+| **GraphQL** | Era la superficie de lectura del grafo S08. Sin grafo, REST cubre el catálogo completo |
+| **YARP** | Era la puerta de los microservicios. Con un solo despliegue no hay nada que enrutar |
+| **Seq** | El requisito 15 pide observabilidad *en la nube* → Application Insights |
+| **AWS y Google Cloud** | Nube única ratificada: Azure (cuenta Azure for Students disponible) |
+| **Jira y Confluence** | Ningún requisito los pide; bloqueaban tareas con dependencias inexistentes |
+
+Fijar versiones exactas al preparar la primera implementación; no hay paquetes instalados por estos documentos.
 
 ## 4. Arquitectura
 
-Microservicios por dominio; hexagonal es propuesta interna, no exigencia del ejemplo docente. Caso de uso y permisos en aplicación; adaptadores de datos/integraciones. Transacciones locales S04 para pedido/asignación, eventos versionados y outbox/inbox. Cada servicio escribe solo su base.
+**API REST modular por dominios** (enmienda E-001, ver §11). En la literatura técnica este patrón se llama *monolito modular*; se usa aquí el nombre descriptivo porque refleja mejor lo que se construye y lo que el requisito 15 autoriza ("libertad de uso API o Microservicios").
+
+Un único despliegue con APIs de dominio de frontera estricta:
+
+| Módulo | Responsabilidad | Base |
+|---|---|---|
+| `Identity` | Cuenta, sesión, dispositivos, borrado | `nexo_identity` |
+| `Discovery` | Perfiles, catálogo, búsqueda geoespacial, trabajos, solicitudes, guardados | `nexo_discovery` |
+| `Engagement` | Interés, pedidos, chat, opiniones, contacto, reportes, notificaciones | `nexo_engagement` |
+| `Screens` | Composición por pantalla con `Task.WhenAll`. Sin base propia | — |
+
+**Una sola arquitectura interna para todos los módulos**: `Contracts ← Domain ← Application ← Infrastructure ← Endpoints`. Caso de uso y permisos en aplicación; adaptadores de datos e integraciones en infraestructura. Verificado por NetArchTest en CI.
+
+**Un binario, dos roles**: arranca como `api` o `worker` según `NEXO_ROLE`.
+
+Frontera entre módulos: un módulo solo referencia `*.Contracts` de otro. Lecturas por interfaz de contrato con timeout y circuit breaker; cambios de estado por eventos versionados (outbox → cola → worker), con consumidores idempotentes. **Cada módulo escribe solo su base.** Transacción local en Engagement para pedido y asignación.
+
+Los 8 microservicios previos (G01/S01-S08) quedan como **mapa de dominios**, no como unidades de despliegue.
 
 ## 5. Contratos y datos
 
@@ -49,6 +95,30 @@ Memoria.md registra Estado, Decisiones con porqué, Deuda y A evitar por fase. B
 ## 11. Revisión y excepciones
 
 Registrar diferencia con el profesor y razón de producto, manteniendo formato y secuencia. Ratificar stack/proveedores y responsable antes de Ready del primer incremento. Controles propuestos y escenarios de aceptación no son pruebas ejecutadas.
+
+### E-001 — API modular por dominios sobre microservicios (2026-11-05)
+
+**Cambia**: §3 Stack y §4 Arquitectura. **Estado**: propuesta, pendiente de revisión de Johann.
+
+**Motivo — restricción de infraestructura real.** La suscripción disponible es **Azure App Service plan B1** (1 vCPU, 1.75 GB RAM, ~13 USD/mes por instancia) y el requisito 15 exige **al menos 2 instancias**:
+
+| Opción | Cuentas | Resultado |
+|---|---|---|
+| 8 microservicios en un plan B1 | 8 apps × 2 instancias = 16 procesos .NET en 1.75 GB; ~100 MB por runtime en reposo → ~1.6 GB solo al arrancar | No cabe en memoria |
+| Un plan B1 por microservicio | 8 planes × ~26 USD = **~208 USD/mes** | Agota los 100 USD de crédito en ~2 semanas; la evaluación es el 2 de diciembre |
+| **API modular por dominios** | 1 app × 2 instancias en 1 plan B1 = **~26 USD/mes** | Cabe, y el crédito cubre ~3.8 meses |
+
+**Sobre la separación de datos.** El aislamiento físico de bases que justifica los microservicios no existe en el plan gratuito: Atlas permite **un solo cluster M0 por proyecto**, de modo que 8 servicios acabarían conectados al mismo cluster de 512 MB. La separación real que sí se obtiene —y que esta arquitectura conserva— es **una base por dominio dentro del cluster** (M0 admite 100 bases y 500 colecciones).
+
+**Sobre varios motores de datos.** El número de motores y el número de despliegues son decisiones independientes: un solo proceso puede usar MongoDB, Redis y Blob a la vez, como hace esta arquitectura. "No todos los dominios usan el mismo motor" no obliga a separar despliegues.
+
+**Motivos adicionales**: el requisito 15 concede *"libertad de uso API o Microservicios"*, así que los microservicios no son exigidos. App Service balancea entre instancias del mismo plan de forma nativa, con lo que el requisito 13 se cumple sin pagar Front Door. Y 8 despliegues implicaban 8 pipelines de CI-CD para los requisitos 5, 7 y 8, además de las 8 arquitecturas internas distintas que fijaba `docs/architecture-selection.json`.
+
+**Qué se conserva**: el módulo `Identity` mantiene íntegro el trabajo existente (14 archivos, ~1361 líneas) y su arquitectura hexagonal, que pasa a ser la arquitectura única de todos los módulos. Los dominios G01/S01-S08 siguen siendo el mapa funcional.
+
+**Qué se retira**: los 7 proyectos de servicio sin implementación (4–10 líneas cada uno), ~20 de los 27 `.csproj`, y las tecnologías listadas como descartadas en §3.
+
+**Base previa**: §3 y §4 estaban redactados como *"propuesta previa"* y *"propuesta interna, no exigencia"*, con Azure y Neo4j *"condicionados a ratificación/costo/ensayo"*. Esta enmienda resuelve esa condición con datos de costo; no revierte una decisión ratificada.
 
 ## 12. Herramientas y coordinación acordadas
 

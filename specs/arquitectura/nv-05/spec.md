@@ -19,7 +19,7 @@ Requisitos Móvil v2: 07, 15, 16. Componentes: M23, M26. Hallazgos: Sin hallazgo
 Dependencias: nv-04; contratos internos mínimos sin esperar todo el directorio.
 
 - FR-001: Usuario envía texto o imagen y conoce aprobación/rechazo antes de publicar.
-- FR-002: Reportante envía/consulta reportes; integrar revisión administrativa de nv-24 sin duplicar cola/decisión de moderación.
+- FR-002: Reportante envía/consulta reportes; integrar revisión administrativa de este spec sin duplicar cola/decisión de moderación.
 
 - NFR-001: autorización, aislamiento, privacidad y manejo de errores según constitución.
 - NFR-002: trazabilidad y evidencia real; no declarar integraciones reales con dobles.
@@ -74,8 +74,8 @@ Fuera: funcionalidades ajenas y despliegue no encargado.
 
 | Operación integrada | Nuevo dueño de incremento |
 |---|---|
-| EP-080 | [nv-24](../nv-24/spec.md) |
-| EP-081 | [nv-24](../nv-24/spec.md) |
+| EP-080 | [este spec](../este spec/spec.md) |
+| EP-081 | [este spec](../este spec/spec.md) |
 
 Los FR/AC heredados de esta fase comprueban integración con esas capacidades; sus tareas EP y casos de uso se ejecutan únicamente en la spec primaria del inventario. El propietario S01–S08 no cambia.
 
@@ -169,7 +169,7 @@ Cobertura de diseño, no ejecución aprobada. Contratos formales, decisiones y e
 Dueño de este incremento: S06 Trust. [Mapa backend](../../../docs/estructura-backend.md) y [orden SDD](../../../docs/orden-desarrollo-backend.md) concretan la propuesta; no ratifican proveedores ni crean proyectos. Las rutas siguientes son objetivo hasta ejecutarse.
 
 - FR-950: Antes de Ready, concretar archivos/rutas, dueño, referencias y pruebas del alcance: moderacion y medios antes de persistir, con adaptadores y datos de S06. Ubicacion objetivo: services/trust/src/ y services/trust/tests/.
-- NFR-950: Separar preparacion documental de ejecucion; respetar capas y datos por propietario, conservar Git/SDD y exigir CI de producto al introducir codigo. Jira/Confluence pospuestos no se inventan; ningun endpoint, estado Ready o aceptacion se deriva de una carpeta.
+- NFR-950: Separar preparacion documental de ejecucion; respetar capas y datos por propietario, conservar Git/SDD y exigir CI de producto al introducir codigo. Ningun endpoint, estado Ready o aceptacion se deriva de una carpeta.
 
 - [ ] AC-950 → FR-950/NFR-950: Plan contiene rutas actuales/objetivo, decisiones previas, dependencia de entrada, historia seleccionada, suites/evidencia y dueño; matriz de tareas cubre el cambio y Ready espera esa preparacion. Si una ruta no aplica, justificar con superficie/autoridad, sin crear un proyecto artificial. Verificacion de producto queda pendiente hasta ejecutarse.
 
