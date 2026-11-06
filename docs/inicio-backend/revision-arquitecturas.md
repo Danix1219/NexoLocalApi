@@ -1,5 +1,8 @@
 # Evidencia de revisión de arquitectura interna
 
+> **Documento historico.** Describe la estructura de ocho microservicios que la **enmienda E-001** retiro el 2026-11-06. Ya no refleja lo que hay en disco: no existen `nexolocal.Api.slnx`, `services/` ni los hosts por servicio. Se conserva como evidencia del trabajo ejecutado y de por que se cambio. **Estado vigente:** [estructura-backend.md](../estructura-backend.md) y [mapa de specs](../../specs/arquitectura/README.md).
+
+
 Fecha: 2026-11-03. Encargo del usuario: revisar casos de uso y aplicar arquitectura adecuada por servicio, combinada con los patrones existentes. [Decisión vigente](../arquitectura/seleccion-arquitecturas.md).
 
 ## Cambio ejecutado

@@ -1,6 +1,8 @@
 # NV-03 — Gates de calidad y DevSecOps
 
-Versión: 0.4.1 | Fecha: 2026-11-02 | Rama prevista: `nv-03`
+Versión: 0.5.0 | Fecha: 2026-11-06 | Rama prevista: `nv-03`
+
+> **Alineación E-001.** Incremento **transversal**: aplica a los tres módulos (`Identity`, `Discovery`, `Engagement`) de la API modular por dominios, no a servicios desplegables independientes. Los identificadores `S01`–`S08` se conservan como **mapa de dominios**. Ver [mapa de specs](../README.md) y [constitución §4](../../../.specify/memory/constitution.md).
 
 ## 1. Objetivo
 

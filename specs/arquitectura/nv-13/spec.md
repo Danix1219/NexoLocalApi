@@ -1,6 +1,8 @@
 # NV-13 — ML y asistencia generativa evaluables
 
-Versión: 0.4.1 | Fecha: 2026-11-02 | Rama prevista: `nv-13`
+Versión: 0.5.0 | Fecha: 2026-11-06 | Rama prevista: `nv-13`
+
+> **Alineación E-001.** Incremento **transversal**: la moderación y la asistencia generativa son **adaptadores de Infrastructure** consumidos por los módulos que publican contenido, no un servicio aparte. El ML en dispositivo corresponde a la app. No es un servicio desplegable independiente: comparte host, se despliega en una app de App Service con **2 instancias**, y el estado compartido vive en **Redis**. Los identificadores `S01`–`S08` se conservan como **mapa de dominios**. Ver [mapa de specs](../README.md) y [constitución §4](../../../.specify/memory/constitution.md).
 
 ## 1. Objetivo
 

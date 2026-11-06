@@ -1,6 +1,6 @@
 # Configuracion y secretos de base de datos
 
-Pertenece a [nv-01](../specs/arquitectura/nv-01/spec.md) (configuracion por servicio sin secretos) y a [nv-22](../specs/arquitectura/nv-22/spec.md) (operacion de datos). No ratifica proveedor: MongoDB/Atlas y Redis siguen abiertos en D01 del [registro de decisiones](decisions/registro.md).
+Pertenece a [nv-01](../specs/arquitectura/nv-00/spec.md) (configuracion por servicio sin secretos) y a [nv-22](../specs/arquitectura/nv-14/spec.md) (operacion de datos). No ratifica proveedor: MongoDB/Atlas y Redis siguen abiertos en D01 del [registro de decisiones](decisions/registro.md).
 
 ## Regla
 
@@ -47,4 +47,4 @@ El host valida la configuracion al arrancar: si falta la cadena o no empieza por
 
 Para recorrer los endpoints de identidad contra un host en marcha: `python -B scripts/probe_endpoints.py <log del host>`. Lee el codigo de verificacion del registro porque en desarrollo no hay proveedor de correo.
 
-Codigo: [MongoOptions.cs](../services/identity/src/Infrastructure/Persistence/MongoOptions.cs) y [MongoRegistration.cs](../services/identity/src/Infrastructure/Persistence/MongoRegistration.cs). Para S03: [CommunityMongo.cs](../services/community/src/Adapters/Persistence/CommunityMongo.cs). Hoy solo S01 y S03 tienen conexion.
+Codigo: [MongoOptions.cs](../src/BuildingBlocks/Nexo.Common/Mongo/MongoOptions.cs) y [MongoRegistration.cs](../src/BuildingBlocks/Nexo.Common/Mongo/MongoRegistration.cs). Para S03: [CommunityMongo.cs](../src/BuildingBlocks/Nexo.Common/Mongo/MongoRegistration.cs). Hoy solo S01 y S03 tienen conexion.

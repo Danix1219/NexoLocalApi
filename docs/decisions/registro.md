@@ -98,3 +98,84 @@ T-001 se ejecuta antes de borrar nada. Conteo de archivos versionables (sin `bin
 Decisiones ratificadas por esta ejecucion: D-1 API modular por dominios; D-2 sin grafo (MongoDB `$graphLookup`); D-3 tres motores NoSQL en un despliegue.
 
 Bloqueo registrado: los cambios sin commitear de Johann (`services/identity/src/Api/Program.cs`, `NexoLocal.Identity.Infrastructure.csproj`, `Cache/RedisRateLimiting.cs`) se conservan al mover el proyecto. El encargo del usuario autoriza ejecutar sin commit; no se firma T-011 como cerrada hasta que exista commit y revision.
+
+## nv-00 T-001 — Inventario previo a la retirada (2026-11-06)
+
+Medido antes de borrar nada, con `find` excluyendo `bin/` y `obj/`. Es la entrada de FR-009 y AC-009.
+
+### Proyectos de servicio sin implementacion
+
+| Ruta | Archivos `.cs` | Lineas | `.csproj` | Motivo de retirada |
+|---|---|---|---|---|
+| `services/directory` | 1 | 4 | 3 | Andamiaje vacio; su dominio pasa a `Nexo.Discovery.*` |
+| `services/messaging` | 1 | 4 | 3 | Andamiaje vacio; su dominio pasa a `Nexo.Engagement.*` |
+| `services/orders` | 1 | 5 | 4 | Andamiaje vacio; su dominio pasa a `Nexo.Engagement.*` |
+| `services/relations` | 1 | 4 | 3 | Retirado por D-2: sin grafo, `$graphLookup` sobre MongoDB |
+| `services/trust` | 1 | 4 | 3 | Andamiaje vacio; su dominio pasa a `Nexo.Engagement.*` |
+| `services/notifications` | 2 | 10 | 4 | Andamiaje vacio; su dominio pasa a `Nexo.Engagement.*` + worker |
+| `services/community` | 3 | 363 | 3 | **Tiene codigo real**: migrado a Discovery antes de borrar |
+| **Total retirado** | **10** | **394** | **23** | |
+
+### Codigo que se conserva, no se borra
+
+| Origen | Destino | Lineas |
+|---|---|---|
+| `services/identity` (14 archivos, 1361 lineas) | `src/Domains/Identity/Nexo.Identity.*` | 1237 en el destino |
+| `services/identity/src/Infrastructure/Persistence/MongoOptions.cs` | `src/BuildingBlocks/Nexo.Common/Mongo/MongoOptions.cs` | compartido por los tres dominios |
+| `services/identity/src/Infrastructure/Cache/RedisRateLimiting.cs` | `src/BuildingBlocks/Nexo.Common/Redis/SharedRateLimiter.cs` | trabajo de Johann aprovechado en FR-006 |
+| `services/identity/src/Api/Program.cs` | `src/Host/Nexo.Host/Program.cs` | un host con dos roles |
+| `services/community` feed (`FeedModel`, `MongoFeedReader`, `PostCollection`) | `Nexo.Discovery.Application/Feed` e `Infrastructure/Feed` | las 363 lineas utiles migradas |
+
+La diferencia de 1361 a 1237 lineas no es codigo perdido: `MongoOptions`, `RedisRateLimiting` y `Program.cs` salieron del dominio hacia los bloques comunes y el host.
+
+### Hosts y solucion
+
+| Elemento | Motivo |
+|---|---|
+| `nexolocal.Api/` (gateway G01) | Sustituido por `src/Host/Nexo.Host`: con un solo despliegue no hay nada que enrutar entre procesos |
+| `nexolocal.Api.slnx` | Sustituida por `src/Nexo.sln`, con 28 proyectos de la nueva estructura |
+
+### Documentos y validadores
+
+| Elemento | Destino | Motivo |
+|---|---|---|
+| `docs/architecture-selection.json` | Se archiva en `docs/decisions/archivo/` | Definia 8 arquitecturas internas distintas; FR-001 fija **una** |
+| `scripts/check_architecture.py` | Se retira | Validaba la politica de referencias de los 28 proyectos viejos; lo sustituye NetArchTest en `tests/Nexo.Architecture.Tests` (T-006, AC-004) |
+| `scripts/Test-ScaffoldHosts.ps1` | Se retira | Comprobaba los 9 hosts del andamiaje anterior; ya no existen |
+| `.ci/product-ci.json` y `backend-base.yml` | Se reapuntan | Referencian `nexolocal.Api.slnx` |
+
+**Nada borrado en este punto.** La retirada se ejecuta en T-012 y se confirma mas abajo.
+
+## nv-00 T-012 — Retirada ejecutada (2026-11-06)
+
+Ejecutada con `git rm`, asi que el historial de cada archivo se conserva y es recuperable.
+
+| Retirado | Resultado |
+|---|---|
+| `services/` completo (8 carpetas, 23 `.csproj`) | Eliminado. Identity y el feed de community viven en `src/Domains/` |
+| `nexolocal.Api/` (gateway G01) | Eliminado. Lo sustituye `src/Host/Nexo.Host` |
+| `nexolocal.Api.slnx` | Eliminada. La solucion es `src/Nexo.sln` con 28 proyectos |
+| `scripts/check_architecture.py` | Retirado. Lo sustituye NetArchTest en `tests/Nexo.Architecture.Tests` |
+| `scripts/Test-ScaffoldHosts.ps1` | Retirado. Comprobaba los 9 hosts del andamiaje anterior |
+| `docs/architecture-selection.json` | Archivado en [docs/decisions/archivo/](archivo/architecture-selection.json) |
+
+Reapuntados para que el build no quede roto: `.ci/product-ci.json` (`solution` → `src/Nexo.sln`) y `.github/workflows/backend-base.yml` (restore, build y pruebas sobre `src/Nexo.sln`; las fronteras las valida NetArchTest).
+
+Verificacion: `dotnet build src/Nexo.sln` → **0 errores, 0 advertencias** despues de la retirada. Quedan exactamente 28 `.csproj`, los de la nueva estructura.
+
+## nv-00 T-015 — Costo del despliegue B1 con dos instancias (2026-11-06)
+
+`deploy-azure.yml` deja de desplegar un contenedor por servicio en Container Apps y pasa a **un** App Service plan con **una** app y **dos** instancias, con el rol worker como WebJob continuo en el mismo plan.
+
+| Concepto | Cantidad | Costo mensual estimado |
+|---|---|---|
+| App Service plan B1 Linux (1 vCPU, 1.75 GB) | 2 instancias | ~26 USD |
+| Worker, WebJob continuo en el mismo plan | 1 | 0 USD |
+| MongoDB Atlas M0 | 1 cluster, 3 bases | 0 USD |
+| **Total del plan** | | **~26 USD/mes** |
+
+Contra la alternativa descartada: un plan por servicio para 8 servicios rondaba los 208 USD/mes, por encima de los 100 USD de credito (D-1).
+
+**Limite honesto del calculo**: los ~26 USD cubren el plan de computo. El hospedaje de Redis **no** esta incluido y FR-006 depende de el: Azure Cache for Redis Basic C0 añade del orden de 16 USD/mes, lo que llevaria el total cerca de 42 USD. Sigue dentro del credito, pero la cifra de 26 USD de la enmienda E-001 es solo el computo. Elegir el Redis concreto y su costo queda pendiente de decision.
+
+**Sin desplegar**: el workflow solo corre en `push` a `main` y el despliegue real necesita encargo aparte, mas las variables `AZURE_PLAN_NAME`, `AZURE_WEBAPP_NAME`, `AZURE_RESOURCE_GROUP` y las credenciales OIDC.

@@ -1,12 +1,15 @@
 # S04 — Solicitudes y pedidos
 
+> **Mapa de dominios, no unidad desplegable.** Tras la **enmienda E-001**, este servicio se implementa en el modulo **Engagement** de la API modular por dominios, con datos en `nexo_engagement`. Comparte host y se despliega en una app de App Service con **2 instancias**. El contenido funcional de abajo sigue vigente; lo que cambia es donde vive. Ver [estructura-backend.md](../../estructura-backend.md).
+
+
 Diseño de implementacion propuesto, 2026-11-03. Base física creada por encargo posterior; sin negocio ni almacenamiento configurado. Esta ficha no instala patrones/proveedores ni convierte la base en producto aprobado. [Politicas comunes](../politicas-comunes.md) y [mapa general](../README.md).
 
 ## Limite y dueño
 
 Ruta: `services/orders/`. requests, interests y orders; asignacion pertenece a S04. Precio opcional, actor, version y estado se definen por contrato; no se modela pago/cobro no requerido. [Datos autoritativos](../../modelo-datos.md).
 
-Specs de referencia: [nv-09](../../../specs/arquitectura/nv-09/spec.md), [nv-10](../../../specs/arquitectura/nv-10/spec.md), [nv-20](../../../specs/arquitectura/nv-20/spec.md), [nv-25](../../../specs/arquitectura/nv-25/spec.md). La matriz de requisitos/tareas de cada spec conserva el alcance y dependencias.
+Specs de referencia: [nv-09](../../../specs/arquitectura/nv-09/spec.md), [nv-10](../../../specs/arquitectura/nv-10/spec.md), [nv-20](../../../specs/arquitectura/nv-09/spec.md), [nv-25](../../../specs/arquitectura/nv-10/spec.md). La matriz de requisitos/tareas de cada spec conserva el alcance y dependencias.
 
 ## Estructura del propietario
 
@@ -56,11 +59,11 @@ Flujo: Comando autenticado → comprobar actor/estado/version → regla de domin
 | EP-050 | `PATCH /requests/{id}` | [nv-09](../../../specs/arquitectura/nv-09/spec.md) |
 | EP-051 | `POST /requests/{id}/close` | [nv-09](../../../specs/arquitectura/nv-09/spec.md) |
 | EP-052 | `DELETE /requests/{id}` | [nv-09](../../../specs/arquitectura/nv-09/spec.md) |
-| EP-053 | `PUT /requests/{id}/interest` | [nv-20](../../../specs/arquitectura/nv-20/spec.md) |
-| EP-054 | `DELETE /requests/{id}/interest` | [nv-20](../../../specs/arquitectura/nv-20/spec.md) |
-| EP-055 | `GET /requests/{id}/interests` | [nv-20](../../../specs/arquitectura/nv-20/spec.md) |
-| EP-056 | `PUT /requests/{id}/shortlist/{providerId}` | [nv-20](../../../specs/arquitectura/nv-20/spec.md) |
-| EP-057 | `DELETE /requests/{id}/shortlist/{providerId}` | [nv-20](../../../specs/arquitectura/nv-20/spec.md) |
+| EP-053 | `PUT /requests/{id}/interest` | [nv-20](../../../specs/arquitectura/nv-09/spec.md) |
+| EP-054 | `DELETE /requests/{id}/interest` | [nv-20](../../../specs/arquitectura/nv-09/spec.md) |
+| EP-055 | `GET /requests/{id}/interests` | [nv-20](../../../specs/arquitectura/nv-09/spec.md) |
+| EP-056 | `PUT /requests/{id}/shortlist/{providerId}` | [nv-20](../../../specs/arquitectura/nv-09/spec.md) |
+| EP-057 | `DELETE /requests/{id}/shortlist/{providerId}` | [nv-20](../../../specs/arquitectura/nv-09/spec.md) |
 | EP-058 | `POST /orders` | [nv-10](../../../specs/arquitectura/nv-10/spec.md) |
 | EP-059 | `GET /me/orders` | [nv-10](../../../specs/arquitectura/nv-10/spec.md) |
 | EP-060 | `GET /orders/{id}` | [nv-10](../../../specs/arquitectura/nv-10/spec.md) |
@@ -70,8 +73,8 @@ Flujo: Comando autenticado → comprobar actor/estado/version → regla de domin
 | EP-064 | `POST /orders/{id}/complete` | [nv-10](../../../specs/arquitectura/nv-10/spec.md) |
 | EP-065 | `PATCH /orders/{id}/address` | [nv-10](../../../specs/arquitectura/nv-10/spec.md) |
 | EP-088 | `GET /internal/orders/{id}/review-eligibility` | [nv-10](../../../specs/arquitectura/nv-10/spec.md) |
-| EP-092 | `GET /orders/{id}/contact` | [nv-25](../../../specs/arquitectura/nv-25/spec.md) |
-| EP-097 | `PATCH /orders/{id}/contact-preference` | [nv-25](../../../specs/arquitectura/nv-25/spec.md) |
+| EP-092 | `GET /orders/{id}/contact` | [nv-25](../../../specs/arquitectura/nv-10/spec.md) |
+| EP-097 | `PATCH /orders/{id}/contact-preference` | [nv-25](../../../specs/arquitectura/nv-10/spec.md) |
 
 ## Criterios antes de implementar/aceptar
 

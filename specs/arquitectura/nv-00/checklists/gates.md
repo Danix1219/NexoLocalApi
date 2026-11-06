@@ -46,16 +46,20 @@ No basta el camino feliz:
 
 | AC | Comando y entorno | Resultado | Fecha | Revisor |
 |---|---|---|---|---|
-| AC-001 | | | | |
-| AC-002 | | | | |
-| AC-003 | | | | |
-| AC-004 | | | | |
-| AC-005 | | | | |
-| AC-006 | | | | |
-| AC-007 | | | | |
-| AC-008 | | | | |
-| AC-009 | | | | |
-| AC-010 | | | | |
+| AC-001 | `dotnet build src/Nexo.sln` · Windows, SDK 10.0.403 de `global.json` | **Compilacion correcta. 0 advertencias, 0 errores** (21 s), repetida despues de la retirada de T-012 | 2026-11-06 | pendiente de firma humana |
+| AC-002 | `dotnet run --project src/Host/Nexo.Host` con `NEXO_ROLE=api` y con `=worker` | **Ejecutado.** Rol `api`: escucha en 127.0.0.1:5188 y `/health/live` responde **200**. Rol `worker`: proceso vivo y **ningun puerto en escucha** para su PID, comprobado con `Get-NetTCPConnection` | 2026-11-06 | pendiente de firma humana |
+| AC-003 | `dotnet test src/Nexo.sln` | **59 pruebas unitarias, 0 fallos**: Common 16, Identity 29, Architecture 7, Discovery 7. Aparte, las 11 de `Nexo.Integration` **fallan** por falta de Docker, no por el codigo | 2026-11-06 | pendiente de firma humana |
+| AC-004 | `dotnet test tests/Nexo.Architecture.Tests` | **7 pruebas en verde**, incluido el caso negativo con `Nexo.Fixtures.BadDiscovery` | 2026-11-06 | pendiente de firma humana |
+| AC-005 | Escritura cruzada entre bases | **Prueba escrita, sin ejecutar**: `tests/Nexo.Integration` compila; Docker Desktop no estaba levantado | — | — |
+| AC-006 | Revocacion de `jti` entre dos instancias | **Prueba escrita, sin ejecutar**: `tests/Nexo.Integration` compila; Docker Desktop no estaba levantado | — | — |
+| AC-007 | `/health/ready` con Mongo y Redis caidos | **Caso negativo ejecutado**: responde **503 Unhealthy**, no 200 por omision, y `/health/live` sigue en 200. El caso positivo (200 con el entorno arriba) sigue pendiente de Docker | 2026-11-06 | pendiente de firma humana |
+| AC-008 | `dotnet test tests/Nexo.Identity.Unit` | **29 pruebas, 0 fallos** sobre `Account`, `Session`, `EmailChallenge` y `EmailProof`. Nota: el `services/identity/tests` original solo contenia README, no habia asertos que conservar | 2026-11-06 | pendiente de firma humana |
+| AC-009 | Solucion sin los 7 proyectos; registro con motivos | **Ejecutado con `git rm`**: `services/` y `nexolocal.Api/` eliminados, `nexolocal.Api.slnx` retirada, `architecture-selection.json` archivado. Quedan 28 `.csproj` (20 en `src/`, 8 en `tests/`) y el build sigue en 0/0. Inventario y motivos en el [registro](../../../../docs/decisions/registro.md) | 2026-11-06 | pendiente de firma humana |
+| AC-010 | Workflow con plan B1 y dos instancias | **Workflow reescrito**: `deploy-azure.yml` declara un plan B1, `--number-of-workers 2` con verificacion que falla si hay menos, una app por rol en el mismo plan y el calculo (~26 USD/mes). **Sin desplegar** | 2026-11-06 | pendiente de firma humana |
+
+### Defecto encontrado y corregido durante la verificacion
+
+Con Mongo inalcanzable, `IdentityIndexBootstrap` y `DiscoveryIndexBootstrap` esperaban el timeout del driver **dentro de `StartAsync`**, de modo que el host tardaba ~30 s en escuchar y `/health/ready` no podia responder 503 mientras tanto. Ahora la verificacion de indices corre en segundo plano y el host escucha de inmediato: comprobado a los 12 s del arranque, con `live` en 200 y `ready` en 503. Sigue siendo idempotente y un fallo sigue quedando en el registro sin tumbar el proceso.
 
 ## Salida
 
@@ -69,4 +73,11 @@ No basta el camino feliz:
 - [ ] `services/community` (363 líneas): decidir qué migra a Discovery.
 - [ ] Límite de conexiones de M0 confirmado y `maxPoolSize` ajustado en consecuencia.
 - [x] Consolidación de specs 26 → 14, ejecutada el 2026-11-05. Ver [mapa](../../README.md).
-- [ ] `deploy-azure.yml` migrado de Container Apps a App Service.
+- [x] `deploy-azure.yml` migrado de Container Apps a App Service B1 con dos instancias, el 2026-11-06.
+- [x] `Nexo.Identity.Unit` cubierto (29 pruebas) y `Nexo.Integration` escrito el 2026-11-06.
+- [ ] Ejecutar `tests/Nexo.Integration` con Docker levantado: AC-005, AC-006 y AC-007 siguen sin evidencia.
+- [ ] `Nexo.Engagement.Unit` sigue vacio: el dominio Engagement son 53 lineas de andamiaje.
+- [ ] `terraform validate` y `terraform apply` de `infra/terraform`: la Fase 0 no esta cerrada hasta que Azure responda 200.
+- [x] Front Door descartado por costo el 2026-11-06: CDN en Cloudflare R2 (enmienda **E-002**), ~63 → ~28 USD/mes.
+- [ ] **Requisito 15 en riesgo**: exige el CDN de la nube seleccionada y R2 es de Cloudflare. Necesita visto bueno del profesor antes de declararlo cumplido.
+- [ ] Rol `worker` desplegado en las 2 instancias del plan: el despachador corre por duplicado. La idempotencia por `MessageId` evita doble efecto, pero conviene un cerrojo en Redis.

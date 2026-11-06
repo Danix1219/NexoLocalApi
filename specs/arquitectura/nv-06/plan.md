@@ -80,7 +80,7 @@ FR-710 → T-710 → AC-710: Radio cero en local no vuelve invisible negocio ni 
 
 ## Rutas, propietario y orden verificable 0.4.1
 
-Dueño: S02 Directory. Rutas objetivo: `services/directory/src/ y services/directory/tests/` (no creadas por este plan). Alcance propio: perfiles/cobertura/edicion y consumo del catalogo de este spec sin reimplementarlo. Leer [mapa de carpetas](../../../docs/estructura-backend.md) y [secuencia SDD](../../../docs/orden-desarrollo-backend.md).
+Dueño: S02 Directory. Rutas objetivo: `src/Domains/directory/ y services/directory/tests/` (no creadas por este plan). Alcance propio: perfiles/cobertura/edicion y consumo del catalogo de este spec sin reimplementarlo. Leer [mapa de carpetas](../../../docs/estructura-backend.md) y [secuencia SDD](../../../docs/orden-desarrollo-backend.md).
 
 Actual: SDD/validadores en este checkout y plantilla Visual Studio separada, sin consolidacion ejecutada. Antes de Ready, T-950 concreta archivos existentes/objetivo y decisiones de la historia; T-001 depende de esa salida ademas del refinamiento. Preservar dependencias de negocio ya declaradas, contratos formales y autoridad API/app.
 

@@ -1,5 +1,8 @@
 # Spec — CD-01 · Despliegue continuo a Azure (Linux dockerizado)
 
+> **Desalineado por E-001 y E-002.** Este spec se redacto para ocho servicios en **Container Apps** con alta manual de recursos. Vigente hoy: **App Service B1 con 2 instancias** (`.github/workflows/deploy-azure.yml`), **Terraform** en `infra/terraform/` (ya no es no-alcance) y **Cloudflare R2** en lugar de Front Door. El no-alcance de *dominio propio* sigue en pie y por eso R2 se sirve por su URL `r2.dev`. Ver [mapa de specs](../../arquitectura/README.md).
+
+
 Versión: 0.1.0 | Fecha: 2026-11-05 | Estado: Borrador documental | Rama prevista: cd-01
 
 ## 1. Objetivo

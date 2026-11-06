@@ -255,3 +255,26 @@ Decisiones: se instalo el SDK **10.0.403** y `global.json` pasa de `10.0.302` a 
 Deuda: Visual Studio 17.14 no compila `net10.0` (NETSDK1209, exige 18.0+). Hoy se compila y ejecuta por CLI; si el equipo necesita compilar dentro de la IDE hay que decidir entre actualizar Visual Studio o bajar el objetivo, y eso toca D01. La version exacta del SDK sigue sin ratificar: `global.json` refleja lo instalado en este equipo, no un acuerdo de equipo.
 
 A evitar: suponer que el resto del equipo puede abrir la solucion en VS 17; dar por ratificado el runtime porque `global.json` ya apunte a una version instalada.
+
+## nv-00 ejecutada: una API modular sustituye a los microservicios (2026-11-06)
+
+Rama: `feature/Johann-arquitectura`, reconstruida sobre `develop`. La rama anterior no se perdio: se habia mergeado en los PR #7 y #9 y se borro despues, que es el flujo acordado.
+
+Estado: la arquitectura de nv-00 queda construible y los restos de microservicios estan retirados.
+
+- **Solucion**: `src/Nexo.sln` con 28 proyectos (20 en `src/`, 8 en `tests/`). Tres dominios de cinco capas (`Identity`, `Discovery`, `Engagement`), `Screens`, los bloques `Nexo.Common` y `Nexo.Outbox`, y un unico `Nexo.Host`. `dotnet build` → **0 errores, 0 advertencias**.
+- **Dos roles, un binario**: `NEXO_ROLE=api` escucha y responde `/health/live` 200; `NEXO_ROLE=worker` corre sin abrir ningun puerto. Verificado por PID.
+- **Degradacion**: con Mongo y Redis caidos, `/health/ready` responde **503**, no 200 por omision.
+- **Retirado** con `git rm`, historial conservado: `services/` completo (8 carpetas, 23 `.csproj`), `nexolocal.Api/`, `nexolocal.Api.slnx`, `scripts/check_architecture.py` y `scripts/Test-ScaffoldHosts.ps1`. `architecture-selection.json` archivado. El codigo util no se perdio: Identity vive en `src/Domains/Identity`, el feed de community en `Discovery`, `MongoOptions` y el limitador de Johann en `Nexo.Common`.
+- **Entorno local**: `docker-compose.yml` con MongoDB en replica, Redis y Azurite, mas `scripts/mongo-init.js` que crea las tres bases de forma idempotente.
+- **Despliegue**: `deploy-azure.yml` pasa de un contenedor por servicio a un plan B1 con dos instancias y el worker como WebJob continuo en el mismo plan.
+- **Pruebas**: 59 unitarias en verde (Common 16, Identity 29, Architecture 7, Discovery 7), incluido el caso negativo de fronteras con `Nexo.Fixtures.BadDiscovery`.
+- **Secretos**: escaneo de los 299 archivos rastreados, 0 hallazgos.
+
+Decisiones ratificadas por esta spec: **D-1** una API modular en lugar de 8 microservicios (~26 USD/mes contra ~208), **D-2** sin grafo, MongoDB con `$graphLookup`, **D-3** tres motores NoSQL y un solo despliegue. Detalle, inventario y calculo de costo en el [registro](docs/decisions/registro.md).
+
+Defecto encontrado y corregido al verificar: los bootstraps de indices de Identity y Discovery esperaban el timeout de Mongo dentro de `StartAsync`, lo que retrasaba ~30 s que el host escuchara. Ahora corren en segundo plano; el host responde a los 12 s.
+
+Deuda abierta: **AC-005, AC-006 y AC-007 positivo siguen sin evidencia** porque Docker Desktop no estaba levantado, y las 11 pruebas de `Nexo.Integration` fallan por eso, no por el codigo. El limite de conexiones del cluster M0 sigue sin confirmar en el panel, asi que `maxPoolSize = 40` es provisional. El costo de ~26 USD cubre solo el computo: el Redis hospedado añadiria del orden de 16 USD y aun no esta elegido. `Nexo.Engagement.Unit` sigue vacio. La enmienda **E-001 sigue siendo propuesta**: nada de esto esta aprobado hasta que Johann la revise y firme.
+
+A evitar: marcar los AC pendientes como cumplidos sin levantar Docker; tratar los ~26 USD como costo total del sistema; dar por aprobada E-001 porque el codigo ya exista.

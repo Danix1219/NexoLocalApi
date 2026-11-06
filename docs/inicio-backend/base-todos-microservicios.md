@@ -1,5 +1,8 @@
 # Base física de todos los microservicios — registro previo de 33 proyectos
 
+> **Documento historico.** Describe la estructura de ocho microservicios que la **enmienda E-001** retiro el 2026-11-06. Ya no refleja lo que hay en disco: no existen `nexolocal.Api.slnx`, `services/` ni los hosts por servicio. Se conserva como evidencia del trabajo ejecutado y de por que se cambio. **Estado vigente:** [estructura-backend.md](../estructura-backend.md) y [mapa de specs](../../specs/arquitectura/README.md).
+
+
 **Sustituido por la [revisión por caso de uso](../arquitectura/seleccion-arquitecturas.md): estado vigente 28 proyectos.** Este documento conserva evidencia ejecutada del scaffold anterior, sin atribuirla a la revisión posterior.
 
 ## Encargo y alcance vigente

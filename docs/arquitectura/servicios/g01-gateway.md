@@ -1,12 +1,15 @@
 # G01 — Gateway de entrada
 
+> **Retirado por la enmienda E-001.** No hay gateway de borde: hay un solo host (`Nexo.Host`) que monta los `MapGroup` de los cuatro modulos. Lo que el gateway hacia (enrutamiento y composicion) lo hacen el host y el modulo **Screens**. Se conserva como evidencia. Ver [estructura-backend.md](../../estructura-backend.md).
+
+
 Diseño de implementacion propuesto, 2026-11-03. Proyecto original existente; host vacio sin proxy instalado. Esta ficha no instala patrones/proveedores ni convierte la base en producto aprobado. [Politicas comunes](../politicas-comunes.md) y [mapa general](../README.md).
 
 ## Limite y dueño
 
 Ruta: `nexolocal.Api/`. Sin base ni agregados de negocio. Configuracion de rutas y limites; no copiar cuentas, mensajes o pedidos. [Datos autoritativos](../../modelo-datos.md).
 
-Specs de referencia: [nv-01](../../../specs/arquitectura/nv-01/spec.md). La matriz de requisitos/tareas de cada spec conserva el alcance y dependencias.
+Specs de referencia: [nv-01](../../../specs/arquitectura/nv-00/spec.md). La matriz de requisitos/tareas de cada spec conserva el alcance y dependencias.
 
 ## Estructura del propietario
 

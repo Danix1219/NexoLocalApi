@@ -82,7 +82,7 @@ A partir de ahí, cada funcionalidad entra por un camino ya pavimentado. **Nadie
 |---|---|---|---|
 | 1 | **nv-00** | Solución, módulos, capas, fronteras, 3 bases, Redis, host de dos roles | 14, 15 |
 | 2 | **nv-02** | Contratos, convenciones de API y **matriz de versiones antes de desarrollar** | 11, 15 |
-| 3 | **nv-14-A** | Azure: plan B1, **2 instancias**, SSL/HTTPS, Atlas, Redis, Blob + **CDN**, Application Insights, Terraform | 13, 15 |
+| 3 | **nv-14-A** | Azure: plan B1, **2 instancias**, SSL/HTTPS, Atlas, Redis, **Cloudflare R2** (objetos + CDN), Application Insights, Terraform | 13, 15 |
 | 4 | **nv-03** | CI-CD completo: build, pruebas, SAST, secretos, despliegue y **reversión** | 5, 7, 8 |
 
 **Criterio de salida de la Fase 0** — se comprueba de una vez y no se vuelve a tocar:

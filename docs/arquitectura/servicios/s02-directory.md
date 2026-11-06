@@ -1,12 +1,15 @@
 # S02 — Directorio y descubrimiento
 
+> **Mapa de dominios, no unidad desplegable.** Tras la **enmienda E-001**, este servicio se implementa en el modulo **Discovery** de la API modular por dominios, con datos en `nexo_discovery`. Comparte host y se despliega en una app de App Service con **2 instancias**. El contenido funcional de abajo sigue vigente; lo que cambia es donde vive. Ver [estructura-backend.md](../../estructura-backend.md).
+
+
 Diseño de implementacion propuesto, 2026-11-03. Base física revisada: 3 proyectos, sin negocio ni almacenamiento configurado. Esta ficha no instala patrones/proveedores ni convierte la base en producto aprobado. [Politicas comunes](../politicas-comunes.md) y [mapa general](../README.md).
 
 ## Limite y dueño
 
 Ruta: `services/directory/`. categories, providers y read_cache. Perfil de prestador por cuenta; distinguir ubicacion publica aproximada, direccion comercial y origen privado. [Datos autoritativos](../../modelo-datos.md).
 
-Specs de referencia: [nv-06](../../../specs/arquitectura/nv-06/spec.md), [nv-07](../../../specs/arquitectura/nv-07/spec.md), [nv-17](../../../specs/arquitectura/nv-17/spec.md), [nv-19](../../../specs/arquitectura/nv-19/spec.md), [nv-25](../../../specs/arquitectura/nv-25/spec.md). La matriz de requisitos/tareas de cada spec conserva el alcance y dependencias.
+Specs de referencia: [nv-06](../../../specs/arquitectura/nv-06/spec.md), [nv-07](../../../specs/arquitectura/nv-07/spec.md), [nv-17](../../../specs/arquitectura/nv-06/spec.md), [nv-19](../../../specs/arquitectura/nv-08/spec.md), [nv-25](../../../specs/arquitectura/nv-10/spec.md). La matriz de requisitos/tareas de cada spec conserva el alcance y dependencias.
 
 ## Estructura del propietario
 
@@ -48,8 +51,8 @@ Flujo: Cambio de perfil autorizado → validacion/moderacion S06 cuando aplique 
 
 | ID | Metodo/ruta del catalogo | Spec primaria |
 |---|---|---|
-| EP-014 | `GET /catalog/categories` | [nv-17](../../../specs/arquitectura/nv-17/spec.md) |
-| EP-015 | `PUT /admin/catalog/categories/{id}` | [nv-17](../../../specs/arquitectura/nv-17/spec.md) |
+| EP-014 | `GET /catalog/categories` | [nv-17](../../../specs/arquitectura/nv-06/spec.md) |
+| EP-015 | `PUT /admin/catalog/categories/{id}` | [nv-17](../../../specs/arquitectura/nv-06/spec.md) |
 | EP-016 | `POST /providers` | [nv-06](../../../specs/arquitectura/nv-06/spec.md) |
 | EP-017 | `GET /providers/{id}` | [nv-06](../../../specs/arquitectura/nv-06/spec.md) |
 | EP-018 | `GET /me/provider` | [nv-06](../../../specs/arquitectura/nv-06/spec.md) |
@@ -64,10 +67,10 @@ Flujo: Cambio de perfil autorizado → validacion/moderacion S06 cuando aplique 
 | EP-027 | `GET /providers/compare` | [nv-07](../../../specs/arquitectura/nv-07/spec.md) |
 | EP-028 | `GET /geo/search` | [nv-07](../../../specs/arquitectura/nv-07/spec.md) |
 | EP-029 | `GET /geo/reverse` | [nv-07](../../../specs/arquitectura/nv-07/spec.md) |
-| EP-091 | `GET /providers/{id}/contact` | [nv-25](../../../specs/arquitectura/nv-25/spec.md) |
-| EP-093 | `GET /mentions/suggestions` | [nv-19](../../../specs/arquitectura/nv-19/spec.md) |
-| EP-096 | `PATCH /me/provider/contact-preferences` | [nv-25](../../../specs/arquitectura/nv-25/spec.md) |
-| EP-100 | `GET /internal/providers/{id}/contact-policy` | [nv-25](../../../specs/arquitectura/nv-25/spec.md) |
+| EP-091 | `GET /providers/{id}/contact` | [nv-25](../../../specs/arquitectura/nv-10/spec.md) |
+| EP-093 | `GET /mentions/suggestions` | [nv-19](../../../specs/arquitectura/nv-08/spec.md) |
+| EP-096 | `PATCH /me/provider/contact-preferences` | [nv-25](../../../specs/arquitectura/nv-10/spec.md) |
+| EP-100 | `GET /internal/providers/{id}/contact-policy` | [nv-25](../../../specs/arquitectura/nv-10/spec.md) |
 
 ## Criterios antes de implementar/aceptar
 

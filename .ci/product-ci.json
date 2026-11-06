@@ -1,6 +1,6 @@
 {
   "phase": "scaffold-no-business-logic",
-  "solution": "nexolocal.Api.slnx",
+  "solution": "src/Nexo.sln",
   "workflow": ".github/workflows/backend-base.yml",
   "sddJobDependsOn": "product",
   "expectedProjects": 28

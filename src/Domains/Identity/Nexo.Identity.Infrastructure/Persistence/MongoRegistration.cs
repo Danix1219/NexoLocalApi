@@ -39,19 +39,29 @@ public static class MongoRegistration
 /// <summary>Crea indices y TTL al arrancar. Idempotente: un fallo no tumba el host, queda registrado.</summary>
 public sealed class IdentityIndexBootstrap(IdentityCollections collections, ILogger<IdentityIndexBootstrap> logger) : IHostedService
 {
-    public async Task StartAsync(CancellationToken cancellationToken)
+    private Task? running;
+
+    public Task StartAsync(CancellationToken cancellationToken)
+    {
+        // En segundo plano a proposito: con Mongo caido, esperar aqui retrasaria 30 s que el
+        // host escuche, y /health/ready debe poder responder 503 de inmediato (AC-007).
+        running = EnsureIndexesAsync(cancellationToken);
+        return Task.CompletedTask;
+    }
+
+    public Task StopAsync(CancellationToken cancellationToken) => running ?? Task.CompletedTask;
+
+    private async Task EnsureIndexesAsync(CancellationToken cancellationToken)
     {
         try
         {
             await collections.EnsureIndexesAsync(cancellationToken);
-            logger.LogInformation("Indices de S01 verificados.");
+            logger.LogInformation("Indices de identidad verificados.");
         }
         catch (Exception error)
         {
             // Sin credenciales en el registro: solo el tipo de fallo.
-            logger.LogError(error, "No se pudieron verificar los indices de S01; revisar la conexion antes de operar.");
+            logger.LogError(error, "No se pudieron verificar los indices de identidad; revisar la conexion antes de operar.");
         }
     }
-
-    public Task StopAsync(CancellationToken cancellationToken) => Task.CompletedTask;
 }

@@ -1,5 +1,8 @@
 # NV-14 — Infraestructura, landing, DevSecOps y publicación
 
+> **Alineación E-001.** Incremento de **plataforma**, sin base propia. Se ejecuta en **dos momentos**: **14-A** (Fase 0) cierra Azure App Service **B1 con 2 instancias**, SSL, Atlas, Redis, Blob + CDN, Application Insights, Terraform y CI-CD **antes de la funcionalidad**; **14-B** (Fase 2) cierra landing, expediente y entrega. El grafo (nv-15) fue retirado por la decisión D-2. Ver [mapa de specs](../README.md) y [constitución §4](../../../.specify/memory/constitution.md).
+
+
 Versión: 0.4.1 | Fecha: 2026-11-02 | Rama prevista: `nv-14`
 
 ## 1. Objetivo

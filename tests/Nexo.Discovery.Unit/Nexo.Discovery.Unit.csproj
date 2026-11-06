@@ -12,6 +12,7 @@
     <PackageReference Include="coverlet.collector" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="../../src/Domains/Discovery/Nexo.Discovery.Application/Nexo.Discovery.Application.csproj" />
     <ProjectReference Include="../../src/Domains/Discovery/Nexo.Discovery.Domain/Nexo.Discovery.Domain.csproj" />
   </ItemGroup>
 </Project>

@@ -1,6 +1,8 @@
 # NV-04 — Identidad, sesión y aislamiento de cuenta
 
-Versión: 0.4.1 | Fecha: 2026-11-02 | Rama prevista: `nv-04`
+Versión: 0.5.0 | Fecha: 2026-11-06 | Rama prevista: `nv-04`
+
+> **Alineación E-001.** Este incremento se implementa en el módulo **Identity** de la API modular por dominios, con datos en **`nexo_identity`**. No es un servicio desplegable independiente: comparte host, se despliega en una app de App Service con **2 instancias**, y el estado compartido vive en **Redis**. Los identificadores `S01`–`S08` se conservan como **mapa de dominios**. Ver [mapa de specs](../README.md) y [constitución §4](../../../.specify/memory/constitution.md).
 
 ## 1. Objetivo
 
@@ -186,7 +188,7 @@ Cobertura de diseño, no ejecución aprobada. Contratos formales, decisiones y e
 
 Dueño de este incremento: S01 Identity. [Mapa backend](../../../docs/estructura-backend.md) y [orden SDD](../../../docs/orden-desarrollo-backend.md) concretan la propuesta; no ratifican proveedores ni crean proyectos. Las rutas siguientes son objetivo hasta ejecutarse.
 
-- FR-950: Antes de Ready, concretar archivos/rutas, dueño, referencias y pruebas del alcance: subset inicial EP-001/002/003/004/005/007/008; reutilizar scaffold de nv-00. Ubicacion objetivo: services/identity/src/ y services/identity/tests/.
+- FR-950: Antes de Ready, concretar archivos/rutas, dueño, referencias y pruebas del alcance: subset inicial EP-001/002/003/004/005/007/008; reutilizar scaffold de nv-00. Ubicacion objetivo: src/Domains/identity/ y services/identity/tests/.
 - NFR-950: Separar preparacion documental de ejecucion; respetar capas y datos por propietario, conservar Git/SDD y exigir CI de producto al introducir codigo. Ningun endpoint, estado Ready o aceptacion se deriva de una carpeta.
 
 - [ ] AC-950 → FR-950/NFR-950: Plan contiene rutas actuales/objetivo, decisiones previas, dependencia de entrada, historia seleccionada, suites/evidencia y dueño; matriz de tareas cubre el cambio y Ready espera esa preparacion. Si una ruta no aplica, justificar con superficie/autoridad, sin crear un proyecto artificial. Verificacion de producto queda pendiente hasta ejecutarse.

@@ -1,5 +1,8 @@
 # NV-05 — Moderación y medios antes de persistir
 
+> **Alineación E-001.** Este incremento se implementa en el módulo **Engagement** de la API modular por dominios, con datos en **`nexo_engagement`**. No es un servicio desplegable independiente: comparte host, se despliega en una app de App Service con **2 instancias**, y el estado compartido vive en **Redis**. Absorbe **nv-24**. Ver [mapa de specs](../README.md) y [constitución §4](../../../.specify/memory/constitution.md).
+
+
 Versión: 0.4.1 | Fecha: 2026-11-02 | Rama prevista: `nv-05`
 
 ## 1. Objetivo

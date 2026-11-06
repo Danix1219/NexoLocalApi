@@ -15,8 +15,8 @@ El alcance de preparacion varia por spec: gobierno/contratos/expediente entregan
 | Dueño | Tarea nueva | Entregable y criterio |
 |---|---|---|
 | [nv-00](../specs/arquitectura/nv-00/task.md) | T-951 / FR-951 / AC-951 | Activar Jira/Confluence con datos reales y check verificado; preparado no significa activo. Pendiente por decision del usuario. |
-| [nv-01](../specs/arquitectura/nv-01/task.md) | T-951 / FR-951 / AC-951 | Consolidar plantilla de Visual Studio en el checkout backend y actualizar solucion/Docker/lanzamiento juntos, sin segundo repo. |
-| [nv-01](../specs/arquitectura/nv-01/task.md) | T-952 / FR-952 / AC-952 | Verificar referencias por capas/servicio y rechazo de referencias o datos ajenos sobre proyectos reales. |
+| [nv-01](../specs/arquitectura/nv-00/task.md) | T-951 / FR-951 / AC-951 | Consolidar plantilla de Visual Studio en el checkout backend y actualizar solucion/Docker/lanzamiento juntos, sin segundo repo. |
+| [nv-01](../specs/arquitectura/nv-00/task.md) | T-952 / FR-952 / AC-952 | Verificar referencias por capas/servicio y rechazo de referencias o datos ajenos sobre proyectos reales. |
 | [nv-03](../specs/arquitectura/nv-03/task.md) | T-951 / FR-951 / AC-951 | Incorporar CI de producto en el mismo PR del csproj; sustituir bloqueo documental por gates reales, no retirarlo sin reemplazo. |
 
 Estas tareas ejecutables/de activacion esperan T-002 y su preparacion de rutas. En nv-01, T-952 espera T-951. La integracion T-003 de cada dueño espera esas tareas; no se altera el resto del flujo seguridad/cierre. Todas las casillas siguen pendientes y no se afirma ninguna aceptacion.

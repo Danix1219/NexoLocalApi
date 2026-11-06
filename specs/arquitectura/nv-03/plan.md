@@ -60,13 +60,13 @@ T-951 / FR-951 / AC-951: Sustituir el bloqueo documental por CI real de producto
 
 ## Evidencia parcial de scaffold autorizado (2026-11-03)
 
-Estado corregido por indicacion del usuario: la solucion original nexolocal.Api.slnx contiene el proyecto original como G01 Gateway y cuatro proyectos S01 en services/identity/src. Dos hosts separados, cinco proyectos en total, sin logica de negocio. [Archivos y validacion real vigente](../../../docs/inicio-backend/correccion-base-microservicios.md). La propuesta paralela anterior fue retirada; no es la estructura activa.
+Estado corregido por indicacion del usuario: la solucion original nexolocal.Api.slnx contiene el proyecto original como G01 Gateway y cuatro proyectos S01 en src/Domains/identity. Dos hosts separados, cinco proyectos en total, sin logica de negocio. [Archivos y validacion real vigente](../../../docs/inicio-backend/correccion-base-microservicios.md). La propuesta paralela anterior fue retirada; no es la estructura activa.
 
 La tarea propietaria de consolidacion y las de CI/referencias NO se marcan completas: codigo aun fuera del checkout Git, ensayo de imagenes Docker pendiente; los Dockerfiles de ambos hosts estan preparados, Ready/ratificacion y revision pertinentes pendientes; workflow de producto preparado sin ejecucion remota. El guard documental actual se mantiene; al consolidar csproj al checkout, la transicion a CI real debe ir en ese cambio. Esta evidencia parcial no ratifica proveedores ni contratos.
 
 ## Correccion solicitada: solucion original y microservicios
 
-El usuario confirma G01 en el proyecto nexolocal.Api ya existente, y hosts propios para microservicios. La solucion unica sigue nexolocal.Api.slnx; el nombre paralelo anterior se retira. S01 usa services/identity/src/{Domain,Application,Infrastructure,Api}; no referencias de proyecto desde G01 a negocio S01. [Evidencia vigente](../../../docs/inicio-backend/correccion-base-microservicios.md) sustituye la organizacion del scaffold anterior. Las tareas de consolidacion/revision y ejecucion remota no se marcan completas por compilar localmente.
+El usuario confirma G01 en el proyecto nexolocal.Api ya existente, y hosts propios para microservicios. La solucion unica sigue nexolocal.Api.slnx; el nombre paralelo anterior se retira. S01 usa src/Domains/identity/{Domain,Application,Infrastructure,Api}; no referencias de proyecto desde G01 a negocio S01. [Evidencia vigente](../../../docs/inicio-backend/correccion-base-microservicios.md) sustituye la organizacion del scaffold anterior. Las tareas de consolidacion/revision y ejecucion remota no se marcan completas por compilar localmente.
 
 ## Perfiles de arquitectura aplicables
 

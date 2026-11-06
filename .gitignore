@@ -19,3 +19,14 @@
 artifacts/
 __pycache__/
 *.pyc
+
+# Terraform (nv-14-A). El tfstate guarda las cadenas de Atlas y Redis EN CLARO:
+# versionarlo publica los secretos. Lo mismo para los .tfvars con valores reales.
+infra/terraform/.terraform/
+*.tfstate
+*.tfstate.*
+*.tfvars
+!*.tfvars.example
+crash.log
+crash.*.log
+.terraform.lock.hcl

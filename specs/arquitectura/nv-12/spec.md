@@ -1,6 +1,8 @@
 # NV-12 — Notificaciones y eliminación distribuida completa
 
-Versión: 0.4.1 | Fecha: 2026-11-02 | Rama prevista: `nv-12`
+Versión: 0.5.0 | Fecha: 2026-11-06 | Rama prevista: `nv-12`
+
+> **Alineación E-001.** Este incremento se implementa en **Engagement** (notificaciones) e **Identity** (borrado de cuenta), con datos en **`nexo_engagement`** y **`nexo_identity`**. El borrado se propaga por **eventos de outbox** a los tres módulos; al compartir host no requiere coordinación distribuida entre servicios. No es un servicio desplegable independiente: comparte host, se despliega en una app de App Service con **2 instancias**, y el estado compartido vive en **Redis**. Los identificadores `S01`–`S08` se conservan como **mapa de dominios**. Ver [mapa de specs](../README.md) y [constitución §4](../../../.specify/memory/constitution.md).
 
 ## 1. Objetivo
 

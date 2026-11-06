@@ -1,5 +1,8 @@
 # NV-00 — Arquitectura base: API modular por dominios
 
+> **Alineación E-001.** Este incremento **define** la arquitectura: API REST modular por dominios, un host con dos roles, tres bases en un cluster M0 y **2 instancias** de App Service con el estado compartido en **Redis**. Los identificadores `S01`–`S08` se conservan como **mapa de dominios**. Ver [mapa de specs](../README.md) y [constitución §4](../../../.specify/memory/constitution.md).
+
+
 Versión: 0.5.0 | Fecha: 2026-11-05 | Estado: Borrador documental | Rama prevista: `nv-00`
 
 ## 1. Objetivo

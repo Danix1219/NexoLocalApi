@@ -24,7 +24,18 @@ public static class DiscoveryInfrastructureRegistration
 /// <summary>Crea indices al arrancar. Idempotente: un fallo no tumba el host, queda registrado.</summary>
 public sealed class DiscoveryIndexBootstrap(PostCollection collection, ILogger<DiscoveryIndexBootstrap> logger) : IHostedService
 {
-    public async Task StartAsync(CancellationToken cancellationToken)
+    private Task? running;
+
+    public Task StartAsync(CancellationToken cancellationToken)
+    {
+        // En segundo plano a proposito: con Mongo caido, esperar aqui retrasaria que el host escuche.
+        running = EnsureIndexesAsync(cancellationToken);
+        return Task.CompletedTask;
+    }
+
+    public Task StopAsync(CancellationToken cancellationToken) => running ?? Task.CompletedTask;
+
+    private async Task EnsureIndexesAsync(CancellationToken cancellationToken)
     {
         try
         {
@@ -36,6 +47,4 @@ public sealed class DiscoveryIndexBootstrap(PostCollection collection, ILogger<D
             logger.LogError(error, "No se pudieron verificar los indices de Discovery; revisar la conexion antes de operar.");
         }
     }
-
-    public Task StopAsync(CancellationToken cancellationToken) => Task.CompletedTask;
 }
