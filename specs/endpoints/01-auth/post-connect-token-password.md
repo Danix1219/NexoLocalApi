@@ -37,6 +37,14 @@ scope=openid offline_access nexo_api
 | `password` | string | **8–64** | sí | Nunca se registra en logs |
 | `scope` | string | **120** | sí | Debe incluir `offline_access` para recibir refresh token |
 
+**No se envía `client_id`.** El servidor acepta clientes anónimos (`AcceptAnonymousClients`). Mandar
+cualquier `client_id` responde **401 `invalid_client`**, porque no hay ninguno registrado.
+
+No se registra un cliente `nexo-mobile` a propósito: una app móvil es un cliente público, no puede
+guardar un secreto, y su `client_id` viaja a la vista de cualquiera que mire el tráfico. Registrarlo
+no añadiría seguridad y sí un modo de fallo nuevo: toda base nueva tendría que sembrarlo antes de
+que nadie pudiera iniciar sesión.
+
 ## 3. Respuesta
 
 `200 OK`
@@ -73,7 +81,7 @@ Formato OAuth (`error`, `error_description`) además del `code` de Nexo:
 | 401 | `auth.invalid_credentials` | Correo inexistente **o** contraseña incorrecta — **mensaje único** |
 | 423 | `auth.account_locked` | 5 fallos consecutivos. `Retry-After` con los segundos restantes |
 | 403 | `auth.email_not_verified` | |
-| 403 | `account_pending_deletion` | Cuenta en los 30 días de baja. El `detail` explica cómo cancelarla |
+| 403 | `account.pending_deletion` | Cuenta en los 30 días de baja. El `detail` explica cómo cancelarla |
 | 400 | `validation_failed` | Falta `grant_type` o `scope` inválido |
 | 429 | `rate.limit_exceeded` | Política `auth`: 20/min por IP |
 

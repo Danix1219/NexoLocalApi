@@ -34,6 +34,18 @@ Content-Type: application/json
 | `email` | string | **254** | sí | Se normaliza igual que al enviar |
 | `code` | string | **6** exactos | sí | Solo dígitos `[0-9]{6}`. Se compara con el HMAC guardado, en **tiempo constante** |
 
+**No se envía `purpose`.** El servidor lo lee del código guardado en Redis y lo copia al ticket. Que
+el cliente pudiera declararlo sería un agujero: bastaría pedir un código de `signup` y confirmarlo
+diciendo `resetPassword` para quedarse con la cuenta de otro.
+
+Por eso el ticket queda atado a un solo uso:
+
+| Ticket de | Sirve en | Rechaza con |
+|---|---|---|
+| `signup` | `POST /v1/identity/accounts` | `POST /v1/identity/password/reset` → `email.ticket_invalid` |
+| `resetPassword` | `POST /v1/identity/password/reset` | `POST /v1/identity/accounts` → `email.ticket_invalid` |
+| `changeEmail` | cambio de correo | los dos anteriores → `email.ticket_invalid` |
+
 ## 3. Respuesta
 
 `200 OK`

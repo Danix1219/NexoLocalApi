@@ -69,9 +69,6 @@ Idempotency-Key: 7f3c1a9e-2b44-4d05-8e61-0a9b3c7d5e21
   "name": "Ana López",
   "currentMode": "client",
   "hasProvider": false,
-  "accessToken": "eyJhbGciOi…",
-  "refreshToken": "rt_8c1f…",
-  "expiresInSeconds": 600,
   "nextStep": "home"
 }
 ```
@@ -82,9 +79,19 @@ Idempotency-Key: 7f3c1a9e-2b44-4d05-8e61-0a9b3c7d5e21
 | `email` | string | El propio, ya verificado |
 | `currentMode` | string | Siempre `client` al crear |
 | `hasProvider` | bool | Siempre `false` al crear |
-| `accessToken` | string | JWT, **10 min** |
-| `refreshToken` | string | **30 días**, con rotación |
 | `nextStep` | string | `home` si `intent = client`; `createProvider` si `intent = provider` |
+
+### Este endpoint no abre sesión
+
+**No devuelve `accessToken` ni `refreshToken`.** Tras el `201`, la app inicia sesión con
+[`POST /connect/token`](post-connect-token-password.md) usando el correo y la contraseña que el
+usuario acaba de elegir, que ya tiene en memoria. Son dos llamadas seguidas, sin pedirle nada más.
+
+Decidido el 2026-11-06 a petición del equipo móvil, que reportó la diferencia contra el contrato.
+El motivo es que solo OpenIddict emite tokens, y solo en su endpoint `/connect/token`. Devolverlos
+aquí obligaría a un segundo camino de emisión: dos sitios donde acertar con la vida del token, los
+claims, la rotación y la revocación, y dos donde equivocarse. Una ida y vuelta de ~200 ms en el
+registro, que ocurre una vez por usuario, no justifica ese riesgo permanente.
 
 **No se devuelve nunca**: `passwordHash`, `phone` (no existe aún), ni la ubicación exacta.
 

@@ -149,9 +149,10 @@ static async Task RunApiAsync(string[] args)
         Predicate = registration => registration.Tags.Contains("ready")
     });
 
-    // Fuera de produccion: contrato para el equipo movil. En produccion no se expone,
-    // porque publicar la superficie completa de la API no aporta nada al cliente ya compilado.
-    if (!app.Environment.IsProduction())
+    // Contrato para el equipo movil. Se publica tambien en produccion, donde es la unica
+    // referencia que tienen contra el entorno real: describe rutas y formas, nunca datos.
+    // Para apagarlo basta Docs__Enabled=false en las variables del sitio.
+    if (builder.Configuration.GetValue("Docs:Enabled", true))
     {
         app.MapOpenApi();
         app.MapScalarApiReference();

@@ -30,6 +30,9 @@ refresh_token=rt_8c1f…
 | `grant_type` | string | — | sí | `refresh_token` |
 | `refresh_token` | string | **512** | sí | Opaco. Lo valida OpenIddict contra su almacén |
 
+**No se envía `client_id`**, igual que en el grant `password`: mandarlo responde 401 `invalid_client`.
+El motivo está en [post-connect-token-password.md](post-connect-token-password.md).
+
 ## 3. Respuesta
 
 `200 OK` — misma forma que el login, con `refresh_token` **nuevo**.
