@@ -11,6 +11,7 @@ using Nexo.Identity.Infrastructure.Messaging;
 using Nexo.Identity.Infrastructure.Persistence;
 using Nexo.Identity.Infrastructure.Redis;
 using Nexo.Identity.Infrastructure.Security;
+using Nexo.Outbox;
 
 namespace Nexo.Identity.Infrastructure;
 
@@ -54,6 +55,32 @@ public static class IdentityInfrastructureRegistration
         services.AddHostedService<IdentityIndexBootstrap>();
         return services;
     }
+
+    /// <summary>
+    /// Consumidor del outbox de Identity. Solo lo registra el worker: es el unico proceso que
+    /// arranca el despachador, y el de API no debe abrir conexiones SMTP.
+    /// Va antes de AddOutbox, que registra su handler de registro con TryAdd.
+    /// </summary>
+    public static IServiceCollection AddIdentityOutboxHandler(
+        this IServiceCollection services, IConfiguration configuration)
+    {
+        services.AddOptions<MailOptions>()
+            .Bind(configuration.GetSection(MailOptions.SectionName))
+            .Validate(options => options.Validate() is null, "Configuracion de Mail invalida.")
+            .ValidateOnStart();
+
+        services.AddSingleton<IValidateOptions<MailOptions>>(new MailValidator());
+        services.AddSingleton<IEmailSender, SmtpEmailSender>();
+        services.AddSingleton<IOutboxHandler, IdentityOutboxHandler>();
+        return services;
+    }
+}
+
+/// <summary>Convierte el motivo en el fallo de arranque, sin imprimir la contrasena del SMTP.</summary>
+public sealed class MailValidator : IValidateOptions<MailOptions>
+{
+    public ValidateOptionsResult Validate(string? name, MailOptions options) =>
+        options.Validate() is { } problem ? ValidateOptionsResult.Fail(problem) : ValidateOptionsResult.Success;
 }
 
 /// <summary>Convierte el motivo de la validacion en el fallo de arranque, sin imprimir la llave.</summary>

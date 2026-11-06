@@ -21,7 +21,7 @@ public sealed class SondasDeSaludTests(InfraFixture infra)
             builder.UseEnvironment("Development");
             builder.ConfigureHostConfiguration(c => c.AddInMemoryCollection(new Dictionary<string, string?>
             {
-                ["NEXO_ROLE"] = "api",
+                
                 ["Mongo:ConnectionString"] = mongo,
                 ["Redis:ConnectionString"] = redis
             }));

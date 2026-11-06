@@ -35,15 +35,15 @@ El doble guion bajo es el separador de seccion de .NET: `Mongo__ConnectionString
 
 | Variable | Para que | Secreta |
 |---|---|---|
-| `NEXO_ROLE` | `api` o `worker`; el mismo binario sirve para los dos | no |
 | `Mongo__ConnectionString` | Cluster de Atlas | **si** |
 | `Mongo__IdentityDatabase`, `Mongo__DiscoveryDatabase`, `Mongo__EngagementDatabase` | Una base por dominio | no |
-| `Mongo__MaxPoolSize` | Pool por instancia; dos instancias mas el worker no deben agotar el cluster | no |
+| `Mongo__MaxPoolSize` | Pool por instancia; las instancias del plan no deben agotar el cluster | no |
 | `Redis__ConnectionString` | Cache L2, lista negra de `jti`, cuotas exactas, idempotencia y backplane | **si** |
 | `Identity__CodeHmacKey` | Llave HMAC del codigo de verificacion del correo | **si** |
 | `Identity__SigningCertificateBase64` y su `Password` | Firma de los tokens | **si** |
 | `Identity__EncryptionCertificateBase64` y su `Password` | Cifrado de los tokens de refresco | **si** |
-| `Mail__*` | SMTP; pendiente, MailKit aun no envia | **si** |
+| `Mail__Host`, `Mail__Port`, `Mail__User`, `Mail__Password` | SMTP de salida; MailKit. Sin `Host` el host no arranca | **si** (`Password`) |
+| `Mail__From`, `Mail__FromName` | Remitente de los codigos de verificacion | no |
 
 ## Certificados de los tokens
 

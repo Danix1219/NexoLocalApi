@@ -5,16 +5,7 @@
       "launchBrowser": false,
       "applicationUrl": "http://127.0.0.1:5188",
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development",
-        "NEXO_ROLE": "api"
-      }
-    },
-    "Worker": {
-      "commandName": "Project",
-      "launchBrowser": false,
-      "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development",
-        "NEXO_ROLE": "worker"
+        "ASPNETCORE_ENVIRONMENT": "Development"
       }
     }
   }

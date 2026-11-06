@@ -18,11 +18,6 @@ output "nombre_webapp_api" {
   value       = azurerm_linux_web_app.api.name
 }
 
-output "nombre_webapp_worker" {
-  description = "Se pasa al workflow como vars.AZURE_WEBAPP_WORKER."
-  value       = azurerm_linux_web_app.worker.name
-}
-
 output "nombre_plan" {
   description = "Se pasa al workflow como vars.AZURE_APP_PLAN."
   value       = azurerm_service_plan.principal.name

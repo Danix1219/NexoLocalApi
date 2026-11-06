@@ -21,39 +21,11 @@ using Nexo.Outbox;
 using Nexo.Screens.Endpoints;
 using Scalar.AspNetCore;
 
-// Primero el .env global: todas las variables, tambien NEXO_ROLE, salen de ahi.
+// Primero el .env global: todas las variables salen de ahi.
 // Lo que ya este en el entorno gana, que es como llegan en Azure.
 Nexo.Host.DotEnv.Load(AppContext.BaseDirectory);
 
-var role = (Environment.GetEnvironmentVariable("NEXO_ROLE") ?? "api").Trim().ToLowerInvariant();
-
-if (role == "worker")
-{
-    await RunWorkerAsync(args);
-}
-else if (role == "api")
-{
-    await RunApiAsync(args);
-}
-else
-{
-    throw new InvalidOperationException("NEXO_ROLE debe ser 'api' o 'worker'.");
-}
-
-static async Task RunWorkerAsync(string[] args)
-{
-    var builder = Host.CreateApplicationBuilder(args);
-
-    builder.Services.AddCommon();
-    builder.Services.AddSharedRedis(builder.Configuration);
-    builder.Services.AddMongoDatabases(builder.Configuration);
-
-    // Un unico despachador por outbox; el host de API no lo arranca.
-    builder.Services.AddOutbox(NexoDatabaseKeys.Identity);
-    builder.Services.AddHostedService<OutboxDispatcher>();
-
-    await builder.Build().RunAsync();
-}
+await RunApiAsync(args);
 
 static async Task RunApiAsync(string[] args)
 {
@@ -113,7 +85,12 @@ static async Task RunApiAsync(string[] args)
     builder.Services.AddIdentityInfrastructure(builder.Configuration, builder.Environment.IsDevelopment());
     builder.Services.AddDiscoveryInfrastructure();
     builder.Services.AddEngagementInfrastructure();
+    builder.Services.AddIdentityOutboxHandler(builder.Configuration);
     builder.Services.AddOutbox(NexoDatabaseKeys.Identity);
+
+    // Un solo proceso: el despachador vive dentro de la API. El reclamo en Mongo es atomico,
+    // asi que varias replicas no procesan el mismo mensaje.
+    builder.Services.AddHostedService<OutboxDispatcher>();
 
     var app = builder.Build();
 

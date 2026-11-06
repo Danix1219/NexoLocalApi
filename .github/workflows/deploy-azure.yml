@@ -4,8 +4,8 @@ name: Deploy Azure
 # Sustituye el despliegue anterior de Container Apps por servicio (un plan por servicio costaba
 # ~208 USD/mes contra 100 USD de credito; esta forma cuesta ~26 USD/mes, enmienda E-001 y D-1).
 #
-# El rol worker es un WebJob continuo DENTRO DEL MISMO PLAN: mismo binario, NEXO_ROLE=worker,
-# sin puerto HTTP y sin costo adicional.
+# Un solo proceso: el despachador de outbox corre dentro de la propia API. Con dos instancias
+# no hay envios duplicados: el outbox reclama cada mensaje con una actualizacion condicional.
 #
 # Sin secretos en el repositorio: la entrada a Azure es OIDC y la cadena de Mongo vive como
 # app setting del App Service, cargada una sola vez por runbook (specs/CI-CD/cd-01/spec.md).
@@ -49,16 +49,6 @@ jobs:
       - name: Publish host
         run: dotnet publish src/Host/Nexo.Host --configuration Release --output publish
 
-      # El WebJob continuo viaja dentro del mismo paquete: App Service lo arranca solo.
-      - name: Package worker as continuous WebJob
-        run: |
-          set -euo pipefail
-          job=publish/App_Data/jobs/continuous/outbox
-          mkdir -p "$job"
-          cp src/Host/Nexo.Host/WebJob/run.sh "$job/run.sh"
-          chmod +x "$job/run.sh"
-          test -f "$job/run.sh"
-
       - name: Azure login (OIDC)
         uses: azure/login@a65d910e8af852a8061c627c456678983e180302 # v2.2.0
         with:
@@ -80,11 +70,6 @@ jobs:
             --name "${{ vars.AZURE_WEBAPP_NAME }}" \
             --resource-group "${{ vars.AZURE_RESOURCE_GROUP }}" \
             --always-on true
-          # El rol por omision del sitio es api; el WebJob exporta worker por su cuenta.
-          az webapp config appsettings set \
-            --name "${{ vars.AZURE_WEBAPP_NAME }}" \
-            --resource-group "${{ vars.AZURE_RESOURCE_GROUP }}" \
-            --settings NEXO_ROLE=api
 
       - name: Deploy to App Service
         uses: azure/webapps-deploy@de617f46172a906d0617bb0e50d81e9e3aec24c8 # v3.0.1
@@ -107,13 +92,3 @@ jobs:
           done
           echo "No se alcanzaron 6 respuestas 200 en /health/ready; revisar el log del App Service." >&2
           exit 1
-
-      - name: Confirm worker WebJob is running
-        run: |
-          set -euo pipefail
-          state=$(az webapp webjob continuous list \
-            --name "${{ vars.AZURE_WEBAPP_NAME }}" \
-            --resource-group "${{ vars.AZURE_RESOURCE_GROUP }}" \
-            --query "[?name=='${{ vars.AZURE_WEBAPP_NAME }}/outbox'].status | [0]" -o tsv || true)
-          echo "WebJob outbox: ${state:-desconocido}"
-          test "${state:-}" = "Running"

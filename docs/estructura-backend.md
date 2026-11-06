@@ -66,16 +66,17 @@ Un dominio solo puede referenciar `*.Contracts` de otro. Lo comprueba
 `tests/Nexo.Architecture.Tests`, **con caso negativo**: `Nexo.Fixtures.BadDiscovery` referencia
 `Nexo.Discovery.Domain` a proposito y la prueba debe fallar ante esa referencia.
 
-## Un binario, dos roles
+## Un solo proceso
 
-`Nexo.Host` se comporta segun `NEXO_ROLE`:
+`Nexo.Host` atiende el pipeline HTTP (endpoints de los cuatro modulos, rate limiting,
+`/health/live` y `/health/ready`) y corre el `OutboxDispatcher` en el mismo proceso.
 
-| `NEXO_ROLE` | Que hace |
-|---|---|
-| `api` | Pipeline HTTP, endpoints de los cuatro modulos, rate limiting, `/health/live` y `/health/ready` |
-| `worker` | `OutboxDispatcher`; **no expone HTTP** |
+Antes habia dos roles por `NEXO_ROLE`. Se unificaron porque no hay forma comoda de arrancar dos
+instancias del mismo proyecto en local y la separacion no se estaba usando.
 
-En App Service B1 el rol `worker` es una segunda app en el **mismo plan**: no agrega costo.
+Con dos instancias en el plan no hay trabajo duplicado: el outbox reclama cada mensaje con una
+actualizacion condicional atomica y solo una instancia se lo lleva. El costo es que un envio SMTP
+lento ocupa el mismo proceso que atiende peticiones.
 
 ## Datos
 

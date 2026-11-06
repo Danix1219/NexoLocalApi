@@ -58,9 +58,7 @@ data "azurerm_container_registry" "principal" {
 }
 
 locals {
-  # Las dos apps comparten imagen y configuracion; solo cambia NEXO_ROLE.
   configuracion_comun = {
-    "NEXO_ROLE"                             = "api"
     "Mongo__ConnectionString"               = var.mongo_connection_string
     "Mongo__MaxPoolSize"                    = "40"
     "Redis__ConnectionString"               = var.redis_connection_string
@@ -105,8 +103,7 @@ resource "azurerm_linux_web_app" "api" {
   }
 
   app_settings = merge(local.configuracion_comun, {
-    "NEXO_ROLE"      = "api"
-    "WEBSITES_PORT"  = "8080"
+    "WEBSITES_PORT" = "8080"
   })
 
   tags = local.etiquetas
@@ -117,52 +114,10 @@ resource "azurerm_linux_web_app" "api" {
   }
 }
 
-resource "azurerm_linux_web_app" "worker" {
-  name                = "app-${var.prefijo}-worker"
-  location            = azurerm_resource_group.principal.location
-  resource_group_name = azurerm_resource_group.principal.name
-
-  # MISMO plan que la API: el rol worker no agrega costo (NFR-004).
-  service_plan_id = azurerm_service_plan.principal.id
-  https_only      = true
-
-  identity {
-    type = "SystemAssigned"
-  }
-
-  site_config {
-    # Sin always_on el plan suspende el despachador de outbox por inactividad.
-    always_on                               = true
-    minimum_tls_version                     = "1.2"
-    ftps_state                              = "Disabled"
-    container_registry_use_managed_identity = true
-
-    application_stack {
-      docker_image_name   = "nexolocal-api:latest"
-      docker_registry_url = "https://${data.azurerm_container_registry.principal.login_server}"
-    }
-  }
-
-  app_settings = merge(local.configuracion_comun, {
-    "NEXO_ROLE" = "worker"
-  })
-
-  tags = local.etiquetas
-
-  lifecycle {
-    ignore_changes = [site_config[0].application_stack[0].docker_image_name]
-  }
-}
-
-# Las dos apps extraen del ACR con su identidad administrada: sin usuario ni contrasena.
+# La app extrae del ACR con su identidad administrada: sin usuario ni contrasena.
 resource "azurerm_role_assignment" "api_acr_pull" {
   scope                = data.azurerm_container_registry.principal.id
   role_definition_name = "AcrPull"
   principal_id         = azurerm_linux_web_app.api.identity[0].principal_id
 }
 
-resource "azurerm_role_assignment" "worker_acr_pull" {
-  scope                = data.azurerm_container_registry.principal.id
-  role_definition_name = "AcrPull"
-  principal_id         = azurerm_linux_web_app.worker.identity[0].principal_id
-}

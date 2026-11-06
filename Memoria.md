@@ -304,3 +304,28 @@ Decisiones: la retirada **contradice FR-008 y deja AC-008 sin objeto**, y asi qu
 Deuda: definir **que operaciones van primero** antes de volver a escribir codigo; ese fue el error que se esta deshaciendo. Las specs `ep-01` a `ep-07` siguen en el repositorio describiendo lo retirado y quedan obsoletas hasta rehacerse. El inventario de operaciones tampoco se ha revisado contra esta decision.
 
 A evitar: reimplementar los mismos endpoints a partir de las specs `ep-*` sin antes acordar el conjunto correcto; dar por buena una operacion porque exista su ficha en el inventario.
+
+## Correo por MailKit y host unificado (2026-11-06)
+
+Estado: el codigo de verificacion **se envia de verdad**. `SmtpEmailSender` (MailKit) y
+`IdentityOutboxHandler` convierten `identity.email_code_requested` en un correo; probado contra
+Mailtrap sandbox: `POST /v1/identity/email/verification` devuelve 202 y el outbox queda en
+0 pendientes y 3 procesados. `dotnet build` en 0/0.
+
+Decisiones: **se retiro la separacion `NEXO_ROLE=api|worker`**. El host es un solo proceso que
+atiende HTTP y despacha el outbox. Motivo del usuario: no hay forma comoda de arrancar dos
+instancias del mismo proyecto desde Visual Studio, porque `launchSettings.json` pisa la variable
+de entorno con la del perfil. Con dos instancias en el plan no hay envios duplicados: el reclamo
+del outbox es un `UpdateOne` condicional que comprueba `ModifiedCount == 1`.
+
+Tambien se descarta el mensaje cuyo codigo ya vencio: un fallo de SMTP se reintentaba cada cinco
+segundos sin tope ni espera creciente, de modo que un correo inutil consumia cuota para siempre.
+
+Deuda: **esto contradice nv-00**, que describe los dos roles como decision gobernada
+(`spec.md`, `plan.md`, `task.md`, `gates.md`, la constitucion y `estructura-backend.md`).
+Corresponde una enmienda; no se redacto. El costo aceptado es que un envio SMTP lento ocupa el
+proceso que atiende peticiones. Mailtrap sandbox **no entrega** correos: para produccion falta un
+SMTP real. Sigue sin devolver tokens `POST /v1/identity/accounts` y no hay pruebas de 01-auth.
+
+A evitar: dar por hecho que el correo sale en local sin mirar el log del despachador; el endpoint
+responde 202 aunque el envio falle despues, que es justamente el proposito de la cola.
