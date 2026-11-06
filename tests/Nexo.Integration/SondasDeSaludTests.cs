@@ -21,7 +21,11 @@ public sealed class SondasDeSaludTests(InfraFixture infra)
             builder.UseEnvironment("Development");
             builder.ConfigureHostConfiguration(c => c.AddInMemoryCollection(new Dictionary<string, string?>
             {
-                
+                // El host valida estas al arrancar. La prueba las fija en memoria porque en CI
+                // no hay `.env`: sin esto, verde en local y rojo en el runner.
+                ["Identity:CodeHmacKey"] = "cHJ1ZWJhLWRlLWxsYXZlLWhtYWMtZGUtMzItYnl0ZXMh",
+                ["Mail:Host"] = "localhost",
+                ["Mail:From"] = "pruebas@nexolocal.mx",
                 ["Mongo:ConnectionString"] = mongo,
                 ["Redis:ConnectionString"] = redis
             }));
