@@ -1,18 +1,19 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Routing;
+using Nexo.Identity.Endpoints.Http;
 
 namespace Nexo.Identity.Endpoints;
 
 public static class IdentityEndpointMapping
 {
     /// <summary>
-    /// Superficie HTTP de Identity en `/v1/identity/*`; el host la monta sin conocer sus rutas.
-    /// Sin operaciones: las anteriores se retiraron por estar mal elegidas. Las nuevas se
-    /// cuelgan de este grupo, sin tocar el host.
+    /// Superficie HTTP de Identity: `/v1/identity/*` mas el endpoint de token en `/connect/token`,
+    /// que vive fuera del prefijo porque es la ruta estandar de OAuth 2.0.
     /// </summary>
     public static IEndpointRouteBuilder MapIdentityEndpoints(this IEndpointRouteBuilder app)
     {
-        app.MapGroup("/v1/identity").WithTags("Identity");
+        app.MapGroup("/v1/identity").WithTags("Identity").MapAuthEndpoints();
+        app.MapIdentityTokenEndpoint();
         return app;
     }
 }

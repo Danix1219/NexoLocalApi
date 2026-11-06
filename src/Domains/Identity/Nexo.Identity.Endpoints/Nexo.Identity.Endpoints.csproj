@@ -3,6 +3,9 @@
     <OutputType>Library</OutputType>
   </PropertyGroup>
   <ItemGroup>
+    <PackageReference Include="OpenIddict" />
+    <PackageReference Include="OpenIddict.Server.AspNetCore" />
+    <PackageReference Include="OpenIddict.Validation.AspNetCore" />
     <ProjectReference Include="../Nexo.Identity.Application/Nexo.Identity.Application.csproj" />
     <ProjectReference Include="../Nexo.Identity.Contracts/Nexo.Identity.Contracts.csproj" />
     <ProjectReference Include="../Nexo.Identity.Domain/Nexo.Identity.Domain.csproj" />

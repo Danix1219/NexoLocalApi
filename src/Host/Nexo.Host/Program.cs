@@ -8,6 +8,8 @@ using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.AspNetCore.RateLimiting;
 using Nexo.Common;
 using Nexo.Common.Mongo;
+using Nexo.Common.Errors;
+using Nexo.Common.RateLimiting;
 using Nexo.Common.Redis;
 using Nexo.Discovery.Endpoints;
 using Nexo.Discovery.Infrastructure;
@@ -58,6 +60,9 @@ static async Task RunApiAsync(string[] args)
     builder.Services.AddMongoDatabases(builder.Configuration);
     builder.Services.AddProblemDetails();
 
+    // OpenIddict registra su esquema; aqui solo hace falta la pieza de autorizacion.
+    builder.Services.AddAuthorization();
+
     // OpenAPI del framework (.NET 10), sin Swashbuckle. Se publica solo fuera de produccion.
     builder.Services.AddOpenApi();
 
@@ -80,19 +85,28 @@ static async Task RunApiAsync(string[] args)
     // Un cuerpo JSON invalido responde 400 en todos los entornos, no 500 solo en desarrollo.
     builder.Services.Configure<RouteHandlerOptions>(options => options.ThrowOnBadRequest = false);
 
+    // Politicas de abuso por minuto, en memoria por replica. Las exactas viven en Redis.
     builder.Services.AddRateLimiter(options =>
     {
         options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
-        options.AddPolicy("api", context => RateLimitPartition.GetFixedWindowLimiter(
-            context.Connection.RemoteIpAddress?.ToString() ?? "desconocida",
-            _ => new FixedWindowRateLimiterOptions
-            {
-                PermitLimit = 60,
-                Window = TimeSpan.FromMinutes(1)
-            }));
+
+        AddFixedWindow(options, NexoRateLimits.Public, NexoRateLimits.PublicPerMinute, ByIp);
+        AddFixedWindow(options, NexoRateLimits.Auth, NexoRateLimits.AuthPerMinute, ByIp);
+        AddFixedWindow(options, NexoRateLimits.User, NexoRateLimits.UserPerMinute, BySubject);
+        AddFixedWindow(options, NexoRateLimits.Chat, NexoRateLimits.ChatPerMinute, BySubject);
     });
 
-    builder.Services.AddIdentityInfrastructure();
+    static void AddFixedWindow(
+        RateLimiterOptions options, string policy, int permitLimit, Func<HttpContext, string> partition) =>
+        options.AddPolicy(policy, context => RateLimitPartition.GetFixedWindowLimiter(
+            partition(context),
+            _ => new FixedWindowRateLimiterOptions { PermitLimit = permitLimit, Window = TimeSpan.FromMinutes(1) }));
+
+    static string ByIp(HttpContext context) => context.Connection.RemoteIpAddress?.ToString() ?? "desconocida";
+
+    static string BySubject(HttpContext context) => context.User.FindFirst("sub")?.Value ?? ByIp(context);
+
+    builder.Services.AddIdentityInfrastructure(builder.Configuration);
     builder.Services.AddDiscoveryInfrastructure();
     builder.Services.AddEngagementInfrastructure();
     builder.Services.AddOutbox(NexoDatabaseKeys.Identity);
@@ -102,6 +116,29 @@ static async Task RunApiAsync(string[] args)
     app.UseExceptionHandler();
     app.UseResponseCompression();
     app.UseRateLimiter();
+
+    app.UseAuthentication();
+    app.UseAuthorization();
+
+    // Lista negra de `jti`: el access token sigue siendo valido criptograficamente hasta su `exp`,
+    // asi que sin esto el logout no surtiria efecto durante los minutos que le queden.
+    app.Use(async (context, next) =>
+    {
+        var jti = context.User.FindFirst("jti")?.Value;
+        if (!string.IsNullOrEmpty(jti))
+        {
+            var revocation = context.RequestServices.GetRequiredService<ISessionRevocationStore>();
+            if (await revocation.IsRevokedAsync(jti, context.RequestAborted))
+            {
+                await NexoProblem
+                    .From(NexoCodes.AuthTokenRevoked, "La sesion fue cerrada.", context)
+                    .ExecuteAsync(context);
+                return;
+            }
+        }
+
+        await next();
+    });
 
     // Techos compartidos en Redis para las dos instancias de App Service.
     app.Use(async (context, next) =>
