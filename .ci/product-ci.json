@@ -3,5 +3,11 @@
   "solution": "src/Nexo.sln",
   "workflow": ".github/workflows/backend-base.yml",
   "sddJobDependsOn": "product",
-  "expectedProjects": 28
+  "expectedProjects": 28,
+  "requiredCommands": [
+    "dotnet restore src/Nexo.sln",
+    "dotnet build src/Nexo.sln",
+    "dotnet test tests/Nexo.Architecture.Tests",
+    "dotnet test src/Nexo.sln"
+  ]
 }
