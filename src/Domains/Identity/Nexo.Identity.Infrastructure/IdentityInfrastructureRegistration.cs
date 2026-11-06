@@ -18,7 +18,7 @@ public static class IdentityInfrastructureRegistration
 {
     /// <summary>Adaptadores de Identity; recibe la base keyed y nunca un cliente global.</summary>
     public static IServiceCollection AddIdentityInfrastructure(
-        this IServiceCollection services, IConfiguration configuration)
+        this IServiceCollection services, IConfiguration configuration, bool isDevelopment)
     {
         services.AddOptions<IdentitySecretsOptions>()
             .Bind(configuration.GetSection(IdentitySecretsOptions.SectionName))
@@ -49,7 +49,7 @@ public static class IdentityInfrastructureRegistration
         services.AddScoped<SignOutService>();
 
         // Servidor OAuth: emite y revoca los tokens de la cuenta.
-        services.AddIdentityAuthorizationServer();
+        services.AddIdentityAuthorizationServer(configuration, isDevelopment);
 
         services.AddHostedService<IdentityIndexBootstrap>();
         return services;

@@ -21,6 +21,10 @@ using Nexo.Outbox;
 using Nexo.Screens.Endpoints;
 using Scalar.AspNetCore;
 
+// Primero el .env global: todas las variables, tambien NEXO_ROLE, salen de ahi.
+// Lo que ya este en el entorno gana, que es como llegan en Azure.
+Nexo.Host.DotEnv.Load(AppContext.BaseDirectory);
+
 var role = (Environment.GetEnvironmentVariable("NEXO_ROLE") ?? "api").Trim().ToLowerInvariant();
 
 if (role == "worker")
@@ -106,7 +110,7 @@ static async Task RunApiAsync(string[] args)
 
     static string BySubject(HttpContext context) => context.User.FindFirst("sub")?.Value ?? ByIp(context);
 
-    builder.Services.AddIdentityInfrastructure(builder.Configuration);
+    builder.Services.AddIdentityInfrastructure(builder.Configuration, builder.Environment.IsDevelopment());
     builder.Services.AddDiscoveryInfrastructure();
     builder.Services.AddEngagementInfrastructure();
     builder.Services.AddOutbox(NexoDatabaseKeys.Identity);

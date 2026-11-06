@@ -1,3 +1,5 @@
+using System.Security.Cryptography.X509Certificates;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -24,8 +26,10 @@ public static class OpenIddictSetup
 
     public const string ApiScope = "nexo_api";
 
-    public static IServiceCollection AddIdentityAuthorizationServer(this IServiceCollection services)
+    public static IServiceCollection AddIdentityAuthorizationServer(
+        this IServiceCollection services, IConfiguration configuration, bool isDevelopment)
     {
+        var certificates = configuration.GetSection(IdentitySecretsOptions.SectionName);
         services.AddOpenIddict()
             // La base concreta la enlaza OpenIddictDatabaseBinder: aqui no se resuelve el contenedor.
             .AddCore(options => options.UseMongoDb())
@@ -60,10 +64,39 @@ public static class OpenIddictSetup
                 // no cifrado, porque no lleva datos sensibles.
                 options.DisableAccessTokenEncryption();
 
-                // shortcut: certificados de desarrollo. Antes de desplegar, cargar los reales
-                // desde Key Vault con AddSigningCertificate/AddEncryptionCertificate.
-                options.AddDevelopmentEncryptionCertificate();
-                options.AddDevelopmentSigningCertificate();
+                // Certificados por variable de entorno (PFX en Base64). Fuera de Development,
+                // faltar uno es un fallo de arranque: con un certificado de desarrollo en
+                // produccion cualquiera podria firmar tokens validos.
+                var signing = ReadCertificate(certificates, "SigningCertificate");
+                var encryption = ReadCertificate(certificates, "EncryptionCertificate");
+
+                if (signing is not null)
+                {
+                    options.AddSigningCertificate(signing);
+                }
+                else if (isDevelopment)
+                {
+                    options.AddDevelopmentSigningCertificate();
+                }
+                else
+                {
+                    throw new InvalidOperationException(
+                        "Falta Identity__SigningCertificateBase64; sin el no se firman tokens en produccion.");
+                }
+
+                if (encryption is not null)
+                {
+                    options.AddEncryptionCertificate(encryption);
+                }
+                else if (isDevelopment)
+                {
+                    options.AddDevelopmentEncryptionCertificate();
+                }
+                else
+                {
+                    throw new InvalidOperationException(
+                        "Falta Identity__EncryptionCertificateBase64; sin el no se cifran los tokens de refresco.");
+                }
 
                 options.UseAspNetCore()
                     .EnableTokenEndpointPassthrough()
@@ -84,6 +117,21 @@ public static class OpenIddictSetup
 
         services.AddScoped<ISessionTerminator, OpenIddictSessionTerminator>();
         return services;
+    }
+
+    /// <summary>Lee un PFX en Base64 de la configuracion; null si no esta definido.</summary>
+    private static X509Certificate2? ReadCertificate(IConfiguration section, string name)
+    {
+        var raw = section[$"{name}Base64"];
+        if (string.IsNullOrWhiteSpace(raw))
+        {
+            return null;
+        }
+
+        return X509CertificateLoader.LoadPkcs12(
+            Convert.FromBase64String(raw),
+            section[$"{name}Password"],
+            X509KeyStorageFlags.EphemeralKeySet);
     }
 }
 
