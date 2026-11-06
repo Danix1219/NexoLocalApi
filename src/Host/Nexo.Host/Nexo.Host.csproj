@@ -1,5 +1,9 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
   <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" />
+    <PackageReference Include="Scalar.AspNetCore" />
+  </ItemGroup>
+  <ItemGroup>
     <ProjectReference Include="../../BuildingBlocks/Nexo.Common/Nexo.Common.csproj" />
     <ProjectReference Include="../../BuildingBlocks/Nexo.Outbox/Nexo.Outbox.csproj" />
     <ProjectReference Include="../../Domains/Identity/Nexo.Identity.Application/Nexo.Identity.Application.csproj" />

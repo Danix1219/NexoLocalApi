@@ -17,6 +17,7 @@ using Nexo.Identity.Endpoints;
 using Nexo.Identity.Infrastructure.Persistence;
 using Nexo.Outbox;
 using Nexo.Screens.Endpoints;
+using Scalar.AspNetCore;
 
 var role = (Environment.GetEnvironmentVariable("NEXO_ROLE") ?? "api").Trim().ToLowerInvariant();
 
@@ -56,6 +57,9 @@ static async Task RunApiAsync(string[] args)
     builder.Services.AddSharedRedis(builder.Configuration);
     builder.Services.AddMongoDatabases(builder.Configuration);
     builder.Services.AddProblemDetails();
+
+    // OpenAPI del framework (.NET 10), sin Swashbuckle. Se publica solo fuera de produccion.
+    builder.Services.AddOpenApi();
 
     builder.Services.AddResponseCompression(options =>
     {
@@ -127,6 +131,21 @@ static async Task RunApiAsync(string[] args)
     {
         Predicate = registration => registration.Tags.Contains("ready")
     });
+
+    // Fuera de produccion: contrato para el equipo movil. En produccion no se expone,
+    // porque publicar la superficie completa de la API no aporta nada al cliente ya compilado.
+    if (!app.Environment.IsProduction())
+    {
+        app.MapOpenApi();
+        app.MapScalarApiReference();
+
+        // La raiz daba 404 y mandaba a buscar /swagger, que no existe aqui.
+        app.MapGet("/", () => Results.Redirect("/scalar/v1")).ExcludeFromDescription();
+    }
+
+    // Sin CORS a proposito: la app movil es nativa y CORS es un mecanismo del navegador.
+    // Abrirlo sin un navegador que lo necesite solo añade superficie. Al aparecer Flutter Web
+    // o la landing, se añade una lista de origenes permitidos, nunca AllowAnyOrigin.
 
     app.MapIdentityEndpoints();
     app.MapDiscoveryEndpoints();

@@ -278,3 +278,19 @@ Defecto encontrado y corregido al verificar: los bootstraps de indices de Identi
 Deuda abierta: **AC-005, AC-006 y AC-007 positivo siguen sin evidencia** porque Docker Desktop no estaba levantado, y las 11 pruebas de `Nexo.Integration` fallan por eso, no por el codigo. El limite de conexiones del cluster M0 sigue sin confirmar en el panel, asi que `maxPoolSize = 40` es provisional. El costo de ~26 USD cubre solo el computo: el Redis hospedado añadiria del orden de 16 USD y aun no esta elegido. `Nexo.Engagement.Unit` sigue vacio. La enmienda **E-001 sigue siendo propuesta**: nada de esto esta aprobado hasta que Johann la revise y firme.
 
 A evitar: marcar los AC pendientes como cumplidos sin levantar Docker; tratar los ~26 USD como costo total del sistema; dar por aprobada E-001 porque el codigo ya exista.
+
+## nv-00: los 10 AC con evidencia ejecutada (2026-11-06)
+
+Con Docker levantado se cerraron los tres criterios que faltaban. **70 de 70 pruebas en verde**: Common 16, Identity 29, Architecture 7, Discovery 7, Integration 11.
+
+- **AC-005**: una escritura de un dominio no aparece en la base de otro, contra MongoDB real. Las tres bases las crea `scripts/mongo-init.js` de forma idempotente.
+- **AC-006**: un `jti` revocado en la instancia A es rechazado por la B, contra Redis real; con el contador de rate limit compartido y la idempotencia de un reintento que cae en la otra instancia.
+- **AC-007**: readiness responde 200 con el entorno arriba y **503** con Redis caido; liveness sigue en 200 en ambos casos.
+
+Documentacion de la API repuesta: OpenAPI nativo de .NET 10 mas Scalar en `/scalar/v1`, solo fuera de produccion. **Sin CORS a proposito**: la app es nativa y CORS solo lo aplica un navegador; al aparecer Flutter Web o la landing se añade una lista de origenes, nunca `AllowAnyOrigin`.
+
+Tres defectos mas encontrados al verificar y corregidos: el feed de Discovery estaba en `/api/v1/feed` en vez de `/v1/discovery/feed`, contra la seccion 3 de la spec; el contrato entregado al equipo movil citaba las rutas de la arquitectura anterior y quedo desfasado por completo; y `mongo-init.js` solo creaba la primera base porque `target._domain` choca con las propiedades internas de mongosh.
+
+Deuda que queda: el OpenAPI documenta las rutas pero **no las respuestas**: solo `200 OK` sin cuerpo, sin 400, 401, 409 ni 429 y sin esquema. Para que el equipo movil genere su cliente desde ahi hacen falta los `Produces<T>` en los nueve endpoints; es trabajo fuera de nv-00. Siguen pendientes el limite de conexiones real de M0, la eleccion del Redis hospedado y su costo, y `Nexo.Engagement.Unit` vacio.
+
+**E-001 sigue siendo propuesta.** Los diez AC tienen evidencia ejecutada, pero ninguna casilla de tarea se marca y nadie firma hasta que Johann revise la enmienda.

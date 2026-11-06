@@ -15,8 +15,9 @@ for (const [name, owner] of Object.entries(owners)) {
     target.createCollection('_domain');
   }
 
-  // Deja constancia de quien es el unico dominio autorizado a escribir esta base.
-  target._domain.replaceOne(
+  // getCollection y no target._domain: un nombre con guion bajo choca con las
+  // propiedades internas del objeto db en mongosh.
+  target.getCollection('_domain').replaceOne(
     { _id: 'owner' },
     { _id: 'owner', domain: owner, createdBy: 'nv-00/mongo-init.js' },
     { upsert: true },

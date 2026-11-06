@@ -48,16 +48,22 @@ No basta el camino feliz:
 |---|---|---|---|---|
 | AC-001 | `dotnet build src/Nexo.sln` · Windows, SDK 10.0.403 de `global.json` | **Compilacion correcta. 0 advertencias, 0 errores** (21 s), repetida despues de la retirada de T-012 | 2026-11-06 | pendiente de firma humana |
 | AC-002 | `dotnet run --project src/Host/Nexo.Host` con `NEXO_ROLE=api` y con `=worker` | **Ejecutado.** Rol `api`: escucha en 127.0.0.1:5188 y `/health/live` responde **200**. Rol `worker`: proceso vivo y **ningun puerto en escucha** para su PID, comprobado con `Get-NetTCPConnection` | 2026-11-06 | pendiente de firma humana |
-| AC-003 | `dotnet test src/Nexo.sln` | **59 pruebas unitarias, 0 fallos**: Common 16, Identity 29, Architecture 7, Discovery 7. Aparte, las 11 de `Nexo.Integration` **fallan** por falta de Docker, no por el codigo | 2026-11-06 | pendiente de firma humana |
+| AC-003 | `dotnet test src/Nexo.sln` con `docker compose up -d` | **70 pruebas, 0 fallos**: Common 16, Identity 29, Architecture 7, Discovery 7 e **Integration 11** | 2026-11-06 | pendiente de firma humana |
 | AC-004 | `dotnet test tests/Nexo.Architecture.Tests` | **7 pruebas en verde**, incluido el caso negativo con `Nexo.Fixtures.BadDiscovery` | 2026-11-06 | pendiente de firma humana |
-| AC-005 | Escritura cruzada entre bases | **Prueba escrita, sin ejecutar**: `tests/Nexo.Integration` compila; Docker Desktop no estaba levantado | — | — |
-| AC-006 | Revocacion de `jti` entre dos instancias | **Prueba escrita, sin ejecutar**: `tests/Nexo.Integration` compila; Docker Desktop no estaba levantado | — | — |
-| AC-007 | `/health/ready` con Mongo y Redis caidos | **Caso negativo ejecutado**: responde **503 Unhealthy**, no 200 por omision, y `/health/live` sigue en 200. El caso positivo (200 con el entorno arriba) sigue pendiente de Docker | 2026-11-06 | pendiente de firma humana |
+| AC-005 | `Una_escritura_de_un_dominio_no_aparece_en_la_base_de_otro` contra MongoDB real | **En verde.** Las tres bases existen (`mongo-init.js` las crea de forma idempotente) y lo escrito por un dominio no aparece en la base de otro | 2026-11-06 | pendiente de firma humana |
+| AC-006 | `Un_jti_revocado_en_A_es_rechazado_por_B` contra Redis real | **En verde**, junto con `La_revocacion_no_alcanza_a_otras_sesiones`, el contador de rate limit compartido entre instancias y la idempotencia de un reintento que cae en la otra instancia | 2026-11-06 | pendiente de firma humana |
+| AC-007 | Sondas con el entorno arriba y con Redis caido | **Los dos casos en verde**: con `docker compose up -d` readiness responde 200; con Redis caido responde **503 y no 200 por omision**; liveness sigue en 200 en ambos | 2026-11-06 | pendiente de firma humana |
 | AC-008 | `dotnet test tests/Nexo.Identity.Unit` | **29 pruebas, 0 fallos** sobre `Account`, `Session`, `EmailChallenge` y `EmailProof`. Nota: el `services/identity/tests` original solo contenia README, no habia asertos que conservar | 2026-11-06 | pendiente de firma humana |
 | AC-009 | Solucion sin los 7 proyectos; registro con motivos | **Ejecutado con `git rm`**: `services/` y `nexolocal.Api/` eliminados, `nexolocal.Api.slnx` retirada, `architecture-selection.json` archivado. Quedan 28 `.csproj` (20 en `src/`, 8 en `tests/`) y el build sigue en 0/0. Inventario y motivos en el [registro](../../../../docs/decisions/registro.md) | 2026-11-06 | pendiente de firma humana |
 | AC-010 | Workflow con plan B1 y dos instancias | **Workflow reescrito**: `deploy-azure.yml` declara un plan B1, `--number-of-workers 2` con verificacion que falla si hay menos, una app por rol en el mismo plan y el calculo (~26 USD/mes). **Sin desplegar** | 2026-11-06 | pendiente de firma humana |
 
-### Defecto encontrado y corregido durante la verificacion
+### Defectos encontrados y corregidos durante la verificacion
+
+**Prefijo de Discovery fuera de la spec.** El feed quedaba en `/api/v1/feed` mientras el resto de dominios usaba `/v1/<dominio>/*`, contra la superficie que fija la seccion 3 de la spec. Corregido a `/v1/discovery/feed` y comprobado en la UI de OpenAPI. Arrastraba ademas el contrato entregado al equipo movil, que citaba las rutas de la arquitectura anterior: [actualizado](../../../../docs/contracts/contrato-primeros-7-endpoints.md) con un aviso de que la version previa no corresponde a nada desplegado.
+
+**`mongo-init.js` solo creaba la primera base.** Usaba `target._domain`, y un nombre con guion bajo colisiona con las propiedades internas del objeto `db` de mongosh, asi que lanzaba tras la primera iteracion. Con `getCollection('_domain')` crea las tres.
+
+### Arranque bloqueado por una dependencia caida
 
 Con Mongo inalcanzable, `IdentityIndexBootstrap` y `DiscoveryIndexBootstrap` esperaban el timeout del driver **dentro de `StartAsync`**, de modo que el host tardaba ~30 s en escuchar y `/health/ready` no podia responder 503 mientras tanto. Ahora la verificacion de indices corre en segundo plano y el host escucha de inmediato: comprobado a los 12 s del arranque, con `live` en 200 y `ready` en 503. Sigue siendo idempotente y un fallo sigue quedando en el registro sin tumbar el proceso.
 
@@ -75,7 +81,7 @@ Con Mongo inalcanzable, `IdentityIndexBootstrap` y `DiscoveryIndexBootstrap` esp
 - [x] Consolidación de specs 26 → 14, ejecutada el 2026-11-05. Ver [mapa](../../README.md).
 - [x] `deploy-azure.yml` migrado de Container Apps a App Service B1 con dos instancias, el 2026-11-06.
 - [x] `Nexo.Identity.Unit` cubierto (29 pruebas) y `Nexo.Integration` escrito el 2026-11-06.
-- [ ] Ejecutar `tests/Nexo.Integration` con Docker levantado: AC-005, AC-006 y AC-007 siguen sin evidencia.
+- [x] `tests/Nexo.Integration` ejecutado con Docker levantado el 2026-11-06: AC-005, AC-006 y AC-007 con evidencia, 11 de 11 en verde.
 - [ ] `Nexo.Engagement.Unit` sigue vacio: el dominio Engagement son 53 lineas de andamiaje.
 - [ ] `terraform validate` y `terraform apply` de `infra/terraform`: la Fase 0 no esta cerrada hasta que Azure responda 200.
 - [x] Front Door descartado por costo el 2026-11-06: CDN en Cloudflare R2 (enmienda **E-002**), ~63 → ~28 USD/mes.

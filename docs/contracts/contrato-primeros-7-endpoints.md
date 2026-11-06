@@ -6,13 +6,17 @@ Version: 0.5.0 | Fecha: 2026-11-05 | Especificaciones: [specs/endpoints/](../../
 
 ## 1. Antes de empezar
 
+> **Actualizado el 2026-11-06 (nv-00).** El backend paso de ocho microservicios a **una sola API
+> modular**. Cambian **todas las rutas y el host**. La version anterior de este documento, con
+> `/api/v1/...` y dos puertos, ya no corresponde a nada que exista.
+
 | Dato | Valor |
 |---|---|
 | Identificador de cuenta | **correo electronico** (no telefono) |
-| Host S01 Identity | `http://127.0.0.1:5188` |
-| Host S03 Community | `http://127.0.0.1:5190` |
-| Gateway G01 | `http://localhost:5079` — **todavia no enruta**: llamar a cada host directo |
-| Prefijo de todas las rutas | `/api/v1` (quedan fuera `/health`, `/internal`, `/ws`, `/graphql`) |
+| Host unico (local) | `http://127.0.0.1:5188` |
+| Prefijo por dominio | `/v1/identity/*`, `/v1/discovery/*`, `/v1/engagement/*`, `/v1/screens/*` |
+| Fuera del prefijo | `/health/live`, `/health/ready` |
+| Documentacion viva | `/scalar/v1` (UI) y `/openapi/v1.json` (contrato), solo fuera de produccion |
 | Content-Type de peticion | `application/json` |
 | Autenticacion | `Authorization: Bearer <accessToken>` |
 | Tipo del token de acceso | **opaco**, no JWT: no intenten decodificarlo ni leer claims |
@@ -35,15 +39,15 @@ Los nombres de campo van en `camelCase` tal cual aparecen abajo. Todas las fecha
 
 | # | Spec / EP | Metodo y ruta | Host | Auth | Cuerpo de peticion | Respuesta correcta | Errores |
 |---|---|---|---|---|---|---|---|
-| 1 | ep-01 / EP-030 | `GET /api/v1/feed` | S03 | no | — (parametros de consulta) | `200` `{ items[], nextCursor, partial }` | `429` |
-| 2 | ep-03 / EP-001 | `POST /api/v1/auth/otp` | S01 | no | `{ email, purpose }` | `202` `{ challengeId, retryAfter }` | `400`, `429` |
-| 3 | ep-03 / EP-002 | `POST /api/v1/auth/otp/verify` | S01 | no | `{ challengeId, code }` | `200` `{ proofToken, expiresAt }` | `400`, `429` |
-| 4 | ep-02 / EP-003 | `POST /api/v1/auth/register` | S01 | no | `{ proofToken, password, displayName, consentVersion, deviceId }` | `201` `{ accountId, session }` + `Location: /api/v1/me` | `400`, `401`, `409`, `429` |
-| 5 | ep-04 / EP-004 | `POST /api/v1/auth/login` | S01 | no | `{ email, password, deviceId }` | `200` `session` | `401`, `429` |
-| 6 | ep-05 / EP-005 | `POST /api/v1/auth/refresh` | S01 | no | `{ refreshToken, deviceId }` | `200` `session` | `401`, `429` |
-| 7 | ep-05 / EP-007 | `POST /api/v1/auth/logout` | S01 | **si** | sin cuerpo | `204` | `401`, `429` |
-| 8 | ep-06 / EP-008 | `GET /api/v1/me` | S01 | **si** | — | `200` `{ accountId, email, displayName, createdAt, consentVersion }` | `401`, `404`, `429` |
-| 9 | ep-07 / EP-006 | `POST /api/v1/auth/password-reset` | S01 | no | `{ proofToken, newPassword }` | `204` | `400`, `401`, `429` |
+| 1 | ep-01 / EP-030 | `GET /v1/discovery/feed` | Discovery | no | — (parametros de consulta) | `200` `{ items[], nextCursor, partial }` | `429` |
+| 2 | ep-03 / EP-001 | `POST /v1/identity/auth/otp` | Identity | no | `{ email, purpose }` | `202` `{ challengeId, retryAfter }` | `400`, `429` |
+| 3 | ep-03 / EP-002 | `POST /v1/identity/auth/otp/verify` | Identity | no | `{ challengeId, code }` | `200` `{ proofToken, expiresAt }` | `400`, `429` |
+| 4 | ep-02 / EP-003 | `POST /v1/identity/auth/register` | Identity | no | `{ proofToken, password, displayName, consentVersion, deviceId }` | `201` `{ accountId, session }` + `Location: /v1/identity/me` | `400`, `401`, `409`, `429` |
+| 5 | ep-04 / EP-004 | `POST /v1/identity/auth/login` | Identity | no | `{ email, password, deviceId }` | `200` `session` | `401`, `429` |
+| 6 | ep-05 / EP-005 | `POST /v1/identity/auth/refresh` | Identity | no | `{ refreshToken, deviceId }` | `200` `session` | `401`, `429` |
+| 7 | ep-05 / EP-007 | `POST /v1/identity/auth/logout` | Identity | **si** | sin cuerpo | `204` | `401`, `429` |
+| 8 | ep-06 / EP-008 | `GET /v1/identity/me` | Identity | **si** | — | `200` `{ accountId, email, displayName, createdAt, consentVersion }` | `401`, `404`, `429` |
+| 9 | ep-07 / EP-006 | `POST /v1/identity/auth/password-reset` | Identity | no | `{ proofToken, newPassword }` | `204` | `400`, `401`, `429` |
 
 Son 7 specs y 9 operaciones: ep-03 y ep-05 agrupan dos cada una.
 
@@ -59,7 +63,7 @@ Son 7 specs y 9 operaciones: ep-03 y ep-05 agrupan dos cada una.
 | `refreshToken` | string | opaco; **cambia en cada refresh** |
 | `refreshExpiresAt` | fecha UTC | vencimiento del refresh |
 
-### `POST /api/v1/auth/otp` — pedir codigo
+### `POST /v1/identity/auth/otp` — pedir codigo
 
 | Campo | Tipo | Obligatorio | Regla |
 |---|---|---|---|
@@ -68,7 +72,7 @@ Son 7 specs y 9 operaciones: ep-03 y ep-05 agrupan dos cada una.
 
 Respuesta `202`: `challengeId` (string) y `retryAfter` (entero, segundos). El codigo **nunca** viaja en la respuesta. La respuesta es la misma exista o no la cuenta: no sirve para averiguar si un correo esta registrado.
 
-### `POST /api/v1/auth/otp/verify` — canjear codigo por prueba
+### `POST /v1/identity/auth/otp/verify` — canjear codigo por prueba
 
 | Campo | Tipo | Obligatorio | Regla |
 |---|---|---|---|
@@ -77,7 +81,7 @@ Respuesta `202`: `challengeId` (string) y `retryAfter` (entero, segundos). El co
 
 Respuesta `200`: `proofToken` (string) y `expiresAt` (fecha UTC). Un `400` cubre codigo incorrecto, vencido, agotado o ya canjeado: el mensaje no distingue cual.
 
-### `POST /api/v1/auth/register` — crear cuenta
+### `POST /v1/identity/auth/register` — crear cuenta
 
 | Campo | Tipo | Obligatorio | Regla |
 |---|---|---|---|
@@ -89,7 +93,7 @@ Respuesta `200`: `proofToken` (string) y `expiresAt` (fecha UTC). Un `400` cubre
 
 El correo **no se envia**: sale del `proofToken`. Respuesta `201`: `accountId` (string) y `session`. Un `409` significa que el correo ya tiene cuenta, con mensaje neutral.
 
-### `POST /api/v1/auth/login`
+### `POST /v1/identity/auth/login`
 
 | Campo | Tipo | Obligatorio |
 |---|---|---|
@@ -99,7 +103,7 @@ El correo **no se envia**: sale del `proofToken`. Respuesta `201`: `accountId` (
 
 Correo inexistente y contrasena incorrecta devuelven el **mismo** `401` y tardan lo mismo. No usar la diferencia para nada, porque no hay diferencia.
 
-### `POST /api/v1/auth/refresh`
+### `POST /v1/identity/auth/refresh`
 
 | Campo | Tipo | Obligatorio | Regla |
 |---|---|---|---|
@@ -111,11 +115,11 @@ Correo inexistente y contrasena incorrecta devuelven el **mismo** `401` y tardan
 - guardar el nuevo par de forma atomica antes de seguir;
 - no reintentar un refresh que fallo con `401`: entonces toca `/auth/login`.
 
-### `POST /api/v1/auth/logout`
+### `POST /v1/identity/auth/logout`
 
 Solo cabecera `Authorization`. Sin cuerpo. Devuelve `204`. Despues de cerrar sesion ese `accessToken` queda revocado: llamarlo otra vez con el mismo token da `401`, que es lo esperado.
 
-### `GET /api/v1/me`
+### `GET /v1/identity/me`
 
 | Campo de respuesta | Tipo |
 |---|---|
@@ -127,7 +131,7 @@ Solo cabecera `Authorization`. Sin cuerpo. Devuelve `204`. Despues de cerrar ses
 
 No incluye contrasena, hashes ni sesiones. El resumen de solicitudes, experiencias y guardados aun no esta: llegara por composicion autorizada, no en este contrato.
 
-### `POST /api/v1/auth/password-reset`
+### `POST /v1/identity/auth/password-reset`
 
 | Campo | Tipo | Obligatorio | Regla |
 |---|---|---|---|
@@ -136,7 +140,7 @@ No incluye contrasena, hashes ni sesiones. El resumen de solicitudes, experienci
 
 Devuelve `204` exista o no la cuenta. Al cambiar la contrasena se revocan **todas** las sesiones y refresh de esa cuenta: la app debe borrar sus tokens y volver a la pantalla de acceso. Una prueba con `purpose: registration` da `401`.
 
-### `GET /api/v1/feed`
+### `GET /v1/discovery/feed`
 
 | Parametro | Tipo | Obligatorio | Regla |
 |---|---|---|---|
@@ -183,17 +187,17 @@ Mostrar `detail` al usuario solo cuando el codigo es `400`. En `401` y `409` el 
 
 ## 6. Flujos completos
 
-**Alta de cuenta:** `POST /api/v1/auth/otp` con `purpose: registration` → la persona teclea el codigo → `POST /api/v1/auth/otp/verify` → `POST /api/v1/auth/register` con el `proofToken` → ya hay sesion, no hace falta iniciar sesion aparte.
+**Alta de cuenta:** `POST /v1/identity/auth/otp` con `purpose: registration` → la persona teclea el codigo → `POST /v1/identity/auth/otp/verify` → `POST /v1/identity/auth/register` con el `proofToken` → ya hay sesion, no hace falta iniciar sesion aparte.
 
-**Recuperar acceso:** `POST /api/v1/auth/otp` con `purpose: recovery` → `POST /api/v1/auth/otp/verify` → `POST /api/v1/auth/password-reset` → borrar los tokens guardados → `POST /api/v1/auth/login` con la contrasena nueva.
+**Recuperar acceso:** `POST /v1/identity/auth/otp` con `purpose: recovery` → `POST /v1/identity/auth/otp/verify` → `POST /v1/identity/auth/password-reset` → borrar los tokens guardados → `POST /v1/identity/auth/login` con la contrasena nueva.
 
-**Sesion normal:** `POST /api/v1/auth/login` → guardar el par → usar `accessToken` → cuando venza o llegue un `401`, un unico `POST /api/v1/auth/refresh` → guardar el par nuevo. `POST /api/v1/auth/logout` al salir.
+**Sesion normal:** `POST /v1/identity/auth/login` → guardar el par → usar `accessToken` → cuando venza o llegue un `401`, un unico `POST /v1/identity/auth/refresh` → guardar el par nuevo. `POST /v1/identity/auth/logout` al salir.
 
 ## 7. Limites de hoy que afectan al trabajo movil
 
 1. **No hay proveedor de correo** (decision D04 abierta). El codigo no se envia a ningun buzon: en Development queda escrito en el registro del host, y fuera de Development no se entrega nada. Para probar el alta hace falta leer el log del backend o pedir el codigo al equipo de API.
-2. **El gateway no enruta todavia**. Hoy son dos URL base distintas. Cuando G01 enrute, las rutas no cambian; solo el host. Conviene tener la URL base en configuracion desde el primer dia.
-3. **El token de acceso es opaco**, no JWT. No hay claims que leer en el cliente: el estado de la sesion se consulta con `GET /api/v1/me`. Pasar a JWT es una decision de contrato aun no tomada y cambiaria esta parte.
+2. **Una sola URL base.** Ya no hay gateway ni un host por dominio: es una API modular y todo cuelga del mismo host, separado por prefijo de dominio. Aun asi, tengan la URL base en configuracion: lo que cambia al desplegar es el host, no las rutas.
+3. **El token de acceso es opaco**, no JWT. No hay claims que leer en el cliente: el estado de la sesion se consulta con `GET /v1/identity/me`. Pasar a JWT es una decision de contrato aun no tomada y cambiaria esta parte.
 4. **No guardar tokens en almacenamiento sin cifrar.** El refresh vale 30 dias y, si se filtra, su reuso revoca la sesion de la persona.
 5. Lo que **no** existe aun: perfiles de prestador, busqueda, solicitudes, pedidos, mensajeria, notificaciones y listado de sesiones. Estan en el [inventario](inventario.json) con su spec, sin implementar.
 6. Este contrato describe lo implementado y comprobado contra base real; **no** es una aceptacion formal. El contrato formal por operacion sigue pendiente en las [fichas](fichas-operaciones.md).
