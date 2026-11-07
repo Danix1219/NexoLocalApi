@@ -1,10 +1,13 @@
-name: CI
+name: CI/CD DevSecOps
 
-# Canalizacion de producto: estilo, dependencias, compilacion y pruebas.
+# Un trabajo por etapa, encadenados con `needs:`, para que la pestana Actions muestre el arbol
+# completo de una sola corrida en vez de una caja unica con todo dentro.
 #
-# Existe aparte de `sdd.yml` porque aquel valida la documentacion y solo arrastra el build
-# como dependencia; quien mira la lista de checks de un PR no deberia tener que saberlo.
-# Estos son los nombres que se exigen en la proteccion de rama (ver docs/ci-cd.md).
+# Existe aparte de `sdd.yml` porque aquel valida la documentacion y solo arrastra el build como
+# dependencia; quien mira los checks de un PR no deberia tener que saber eso.
+#
+# Sin acciones de terceros: la politica del repositorio solo admite las propias y las de GitHub.
+# Lo que no viene en el runner se baja con su version y su huella clavadas.
 
 on:
   pull_request:
@@ -19,13 +22,36 @@ permissions:
 
 concurrency:
   group: ci-${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+env:
+  SOLUCION: src/Nexo.sln
 
 jobs:
-  estilo:
-    name: CI / estilo
-    runs-on: ubuntu-latest
+  secretos:
+    name: 1 · Secretos (gitleaks)
+    runs-on: ubuntu-24.04
     timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          # Historial completo: un secreto borrado en el ultimo commit sigue estando en el anterior.
+          fetch-depth: 0
+          persist-credentials: false
+
+      # Imagen, no accion: `gitleaks-action` exige licencia en organizaciones y ademas la politica
+      # del repositorio no la admitiria.
+      - name: Buscar secretos en el historial
+        run: |
+          set -euo pipefail
+          docker run --rm -v "$PWD:/repo:ro" zricethezav/gitleaks:v8.18.4 \
+            detect --source /repo --config /repo/.gitleaks.toml --redact --no-banner
+
+  compilacion:
+    name: 2 · Compilación y estilo
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
@@ -37,14 +63,23 @@ jobs:
         with:
           global-json-file: global.json
 
-      # Formato y convenciones de `.editorconfig`. No reformatea: falla y senala el archivo,
-      # para que el arreglo quede en el commit de quien lo rompio y no en uno de la CI.
+      - name: Restaurar
+        run: dotnet restore "$SOLUCION"
+
+      # `Directory.Build.props` ya trata las advertencias como errores y activa los analizadores:
+      # el build es el primer linter y una advertencia rompe la CI.
+      - name: Compilar
+        run: dotnet build "$SOLUCION" --no-restore --configuration Release
+
+      # No reformatea: falla y senala el archivo, para que el arreglo quede en el commit de quien
+      # lo rompio y no en uno de la CI.
       - name: Formato y convenciones
-        run: dotnet format src/Nexo.sln --verify-no-changes --verbosity diagnostic
+        run: dotnet format "$SOLUCION" --verify-no-changes --verbosity diagnostic
 
   dependencias:
-    name: CI / dependencias
-    runs-on: ubuntu-latest
+    name: 3 · Dependencias (NuGet)
+    needs: compilacion
+    runs-on: ubuntu-24.04
     timeout-minutes: 10
     steps:
       - name: Checkout
@@ -57,26 +92,31 @@ jobs:
         with:
           global-json-file: global.json
 
-      - name: Restore solution
-        run: dotnet restore src/Nexo.sln
+      - name: Restaurar
+        run: dotnet restore "$SOLUCION"
 
       # `dotnet list` siempre sale con 0, tambien cuando encuentra algo: hay que leer la salida.
-      # Incluye las transitivas porque asi llego la ultima: Snappier dentro de MongoDB.Driver.
+      # Se incluyen las transitivas porque asi llego la ultima: Snappier dentro de MongoDB.Driver.
+      # El marcador `>` es el unico fiable: buscar la severidad por texto encuentra "low" dentro
+      # de "following".
       - name: Paquetes con vulnerabilidades conocidas
         run: |
           set -euo pipefail
-          dotnet list src/Nexo.sln package --vulnerable --include-transitive > vulnerables.txt
-          cat vulnerables.txt
-          # `dotnet` antepone "> " a cada paquete vulnerable y no usa ese marcador para nada mas.
-          # Buscar la severidad por palabra suelta no sirve: "following" contiene "low".
+          dotnet list "$SOLUCION" package --vulnerable --include-transitive | tee vulnerables.txt
           if grep -qE '^[[:space:]]*>' vulnerables.txt; then
             echo "::error::Hay paquetes con vulnerabilidades conocidas; revisar la salida."
             exit 1
           fi
 
+      # Informativo: un paquete en desuso no rompe nada hoy, pero deja de recibir parches.
+      - name: Paquetes en desuso
+        continue-on-error: true
+        run: dotnet list "$SOLUCION" package --deprecated
+
   infraestructura:
-    name: CI / infraestructura
-    runs-on: ubuntu-latest
+    name: 3 · Infraestructura (Terraform)
+    needs: compilacion
+    runs-on: ubuntu-24.04
     timeout-minutes: 10
     steps:
       - name: Checkout
@@ -84,9 +124,8 @@ jobs:
         with:
           persist-credentials: false
 
-      # Sin `hashicorp/setup-terraform`: la politica del repositorio solo admite acciones propias
-      # o de GitHub. El runner no trae Terraform, asi que se baja el binario con su version y su
-      # huella clavadas; una descarga alterada o a medias no pasa de aqui.
+      # El runner no trae Terraform y la politica no admite `hashicorp/setup-terraform`.
+      # Version y huella clavadas: una descarga alterada o a medias no pasa de aqui.
       - name: Instalar Terraform
         env:
           TF_VERSION: 1.9.8
@@ -104,16 +143,125 @@ jobs:
       - name: Formato
         run: terraform -chdir=infra/terraform fmt -check -recursive
 
-      # `-backend=false` descarga los proveedores sin tocar el estado remoto: la validacion no
-      # necesita credenciales de Azure ni puede modificar nada.
+      # `-backend=false` descarga los proveedores sin tocar el estado remoto: esta etapa no
+      # necesita credenciales de Azure ni puede modificar infraestructura.
       - name: Inicializar sin backend
         run: terraform -chdir=infra/terraform init -backend=false -input=false
 
       - name: Validar
         run: terraform -chdir=infra/terraform validate
 
-  # Compilacion, fronteras entre dominios y pruebas. Reutiliza el mismo workflow que usan
-  # `sdd.yml` y el despliegue, para que los tres comprueben exactamente lo mismo.
-  build:
-    name: CI / build y pruebas
-    uses: ./.github/workflows/backend-base.yml
+  arquitectura:
+    name: 4 · Fronteras de arquitectura
+    needs: compilacion
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+
+      - name: Install pinned .NET SDK
+        uses: actions/setup-dotnet@26b0ec14cb23fa6904739307f278c14f94c95bf1 # v5 verified from official repository
+        with:
+          global-json-file: global.json
+
+      # NetArchTest con caso negativo: `Nexo.Fixtures.BadDiscovery` cruza un dominio a proposito
+      # y la prueba debe detectarlo (nv-00 AC-004).
+      - name: Pruebas de arquitectura
+        run: >
+          dotnet test tests/Nexo.Architecture.Tests --configuration Release
+          --logger "trx;LogFileName=arquitectura.trx" --results-directory resultados
+
+      - name: Resumen
+        if: always()
+        run: python3 -B .ci/resumen-pruebas.py resultados >> "$GITHUB_STEP_SUMMARY"
+
+  pruebas-unitarias:
+    name: 4 · Pruebas unitarias
+    needs: compilacion
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+
+      - name: Install pinned .NET SDK
+        uses: actions/setup-dotnet@26b0ec14cb23fa6904739307f278c14f94c95bf1 # v5 verified from official repository
+        with:
+          global-json-file: global.json
+
+      # Sin infraestructura: deben pasar en cualquier maquina y en segundos.
+      - name: Pruebas unitarias
+        run: >
+          dotnet test tests/Nexo.Common.Unit tests/Nexo.Identity.Unit tests/Nexo.Discovery.Unit
+          tests/Nexo.Engagement.Unit --configuration Release
+          --logger "trx;LogFileName=unitarias.trx" --results-directory resultados
+
+      - name: Resumen
+        if: always()
+        run: python3 -B .ci/resumen-pruebas.py resultados >> "$GITHUB_STEP_SUMMARY"
+
+  pruebas-integracion:
+    name: 4 · Pruebas de integración
+    needs: compilacion
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+
+      - name: Install pinned .NET SDK
+        uses: actions/setup-dotnet@26b0ec14cb23fa6904739307f278c14f94c95bf1 # v5 verified from official repository
+        with:
+          global-json-file: global.json
+
+      # Mongo y Redis reales, levantados por Testcontainers dentro del propio proyecto. No hace
+      # falta ningun secreto: nada toca Atlas ni Upstash.
+      - name: Pruebas de integración
+        run: >
+          dotnet test tests/Nexo.Integration --configuration Release
+          --logger "trx;LogFileName=integracion.trx" --results-directory resultados
+
+      - name: Resumen
+        if: always()
+        run: python3 -B .ci/resumen-pruebas.py resultados >> "$GITHUB_STEP_SUMMARY"
+
+  puerta-de-calidad:
+    name: 5 · Puerta de calidad
+    if: always()
+    needs: [secretos, compilacion, dependencias, infraestructura, arquitectura, pruebas-unitarias, pruebas-integracion]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      # Una etapa cancelada o saltada no es un aprobado. Sin esta puerta, un `needs` que no corre
+      # deja el arbol en verde sin que nadie haya comprobado nada.
+      - name: Resumir y decidir
+        env:
+          RESULTADOS: ${{ toJSON(needs) }}
+        run: |
+          set -euo pipefail
+          {
+            echo "## Puerta de calidad"
+            echo
+            echo "| Etapa | Resultado |"
+            echo "|---|---|"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+          fallos=0
+          while IFS=$'\t' read -r etapa resultado; do
+            if [ "$resultado" = "success" ]; then marca="✅"; else marca="❌"; fallos=$((fallos + 1)); fi
+            echo "| $marca $etapa | $resultado |" >> "$GITHUB_STEP_SUMMARY"
+          done < <(echo "$RESULTADOS" | jq -r 'to_entries[] | "\(.key)\t\(.value.result)"')
+
+          echo >> "$GITHUB_STEP_SUMMARY"
+          if [ "$fallos" -gt 0 ]; then
+            echo "**$fallos etapa(s) sin aprobar.**" >> "$GITHUB_STEP_SUMMARY"
+            exit 1
+          fi
+          echo "**Todas las etapas aprobadas.**" >> "$GITHUB_STEP_SUMMARY"

@@ -24,20 +24,57 @@
 dependencia de un workflow llamado «SDD documentation»: quien mira la lista de checks de un PR no
 tiene por qué saber eso. Ahora los checks de producto se llaman por lo que son.
 
-### Validaciones de `ci.yml`
+### Etapas de `ci.yml`
 
-1. **Estilo** — `dotnet format --verify-no-changes` contra `.editorconfig`. No reformatea: falla y
-   señala el archivo, para que el arreglo quede en el commit de quien lo rompió.
-2. **Dependencias** — `dotnet list package --vulnerable --include-transitive`. Incluye las
-   transitivas porque así llegó la última: Snappier dentro de MongoDB.Driver.
-3. **Infraestructura** — `terraform fmt -check` y `terraform validate` sobre `infra/terraform/`.
-   El `init` va con `-backend=false`: descarga los proveedores sin tocar el estado remoto, así que
-   no necesita credenciales de Azure ni puede modificar nada.
-4. **Compilación** — `dotnet build --configuration Release`. Con `TreatWarningsAsErrors` y los
-   analizadores de .NET activos, el build **ya es un linter**: una advertencia rompe la CI.
-5. **Fronteras de arquitectura** — NetArchTest, con caso negativo: `Nexo.Fixtures.BadDiscovery`
-   cruza un dominio a propósito y la prueba debe detectarlo.
-6. **Pruebas** — las 41 de la solución, con Mongo y Redis reales.
+Un trabajo por etapa, encadenados con `needs:`, para que la pestana Actions muestre el arbol
+completo de una corrida en vez de una caja unica con todo dentro.
+
+```
+1 · Secretos (gitleaks)
+2 · Compilacion y estilo
+      |-- 3 · Dependencias (NuGet)
+      |-- 3 · Infraestructura (Terraform)
+      |-- 4 · Fronteras de arquitectura
+      |-- 4 · Pruebas unitarias
+      |-- 4 · Pruebas de integracion
+                   `-- 5 · Puerta de calidad
+```
+
+| Etapa | Que comprueba | Bloquea |
+|---|---|---|
+| 1 · Secretos | gitleaks sobre **todo el historial**, no solo el arbol de trabajo | si |
+| 2 · Compilacion y estilo | `dotnet build` en Release y `dotnet format --verify-no-changes` | si |
+| 3 · Dependencias | Paquetes con vulnerabilidades conocidas, transitivas incluidas | si |
+| 3 · Infraestructura | `terraform fmt -check` y `validate` sobre `infra/terraform` | si |
+| 4 · Fronteras de arquitectura | NetArchTest, con su caso negativo | si |
+| 4 · Pruebas unitarias | Las cuatro suites sin infraestructura | si |
+| 4 · Pruebas de integracion | Mongo y Redis reales por Testcontainers | si |
+| 5 · Puerta de calidad | Que ninguna etapa anterior quedara sin aprobar | si |
+
+La puerta final existe porque un `needs` cancelado o saltado **no es un aprobado**: sin ella, una
+etapa que no llega a correr deja el arbol en verde sin que nadie haya comprobado nada.
+
+Con `TreatWarningsAsErrors` y los analizadores de .NET activos, el build **ya es un linter**: una
+advertencia rompe la CI.
+
+`terraform init` va con `-backend=false`: descarga los proveedores sin tocar el estado remoto, de
+modo que la etapa no necesita credenciales de Azure ni puede modificar nada.
+
+### Sin acciones de terceros
+
+La politica del repositorio solo admite acciones propias o de GitHub. Lo que no viene en el runner
+se resuelve sin accion: gitleaks corre como imagen de Docker y Terraform se baja con su version y
+su huella SHA-256 clavadas en el propio paso.
+
+### Falsos positivos de gitleaks
+
+`.gitleaks.toml` mantiene enteras las reglas por omision y anota las excepciones una por una, con
+su motivo: los marcadores de `.env.example`, la contrasena y la llave de las pruebas, la sonda que
+genera su contrasena en cada ejecucion, y los `Idempotency-Key` de ejemplo de las fichas, que son
+UUID que el cliente inventa por peticion y no autentican nada.
+
+Nada se silencia en bloque: un escaner que grita en falso acaba ignorandose, y entonces deja de
+servir el dia que acierta.
 
 ### Resultado de las pruebas
 
@@ -91,17 +128,16 @@ Los checks no bloquean nada por sí solos: hay que exigirlos en la protección d
    - En el buscador, añadir **exactamente** estos nombres:
 
      ```
-     CI / estilo
-     CI / dependencias
-     CI / infraestructura
-     CI / build y pruebas / Backend / build
+     5 · Puerta de calidad
      SDD / docs
      Git / flow
-     PR / traceability
      ```
 
-     El tercero lleva dos nombres encadenados porque es un workflow reutilizable: GitHub une el
-     del trabajo que llama con el del trabajo llamado.
+     Basta la puerta de calidad: ya depende de las siete etapas anteriores y falla si cualquiera
+     de ellas no aprobo. Exigir cada una por separado seria la misma regla escrita siete veces, y
+     habria que tocar la proteccion de rama cada vez que se anada una etapa.
+
+     `PR / traceability` queda fuera a proposito mientras no existan Jira ni Confluence.
 
    - Los nombres solo aparecen en el buscador **después** de que el check haya corrido al menos una
      vez en el repositorio. Si no los ves, abrí un PR de prueba, esperá a que terminen y volvé.
@@ -115,7 +151,7 @@ pendiente.
 ### Comprobar que funciona
 
 Abrí un PR con un fallo deliberado — por ejemplo, una línea mal indentada en cualquier `.cs` — y
-verificá que `CI / estilo` se pone en rojo y que el botón de merge queda bloqueado. Después
+verificá que `2 · Compilación y estilo` se pone en rojo, que `5 · Puerta de calidad` lo refleja y que el botón de merge queda bloqueado. Después
 revertilo. Una protección que nadie probó no es una protección.
 
 ## Limitación conocida

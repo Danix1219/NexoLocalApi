@@ -1,0 +1,48 @@
+# Configuracion de gitleaks. Las reglas por omision se mantienen enteras; aqui solo se anotan
+# los falsos positivos ya revisados, archivo por archivo y con su motivo.
+#
+# Un escaner que grita en falso acaba ignorandose, y entonces deja de servir el dia que acierta.
+# Por eso cada excepcion lleva escrito por que no es un secreto. Nada se silencia en bloque.
+
+[extend]
+useDefault = true
+
+[[rules]]
+id = "nexo-sin-reglas-propias"
+description = "Marcador: el repositorio no anade reglas; solo usa las de gitleaks."
+regex = '''\$^'''
+
+[allowlist]
+description = "Falsos positivos revisados el 2026-11-06"
+
+paths = [
+  # Plantilla de variables. Los valores son marcadores entre <angulos>, nunca credenciales:
+  # el `.env` real esta en .gitignore y no se versiona.
+  '''\.env\.example$''',
+
+  # Contrasena y llave HMAC de las pruebas. Las cuentas que usan no existen y la llave se calcula
+  # en `ConfiguracionDePrueba`; no abren nada, ni aqui ni en ningun entorno.
+  '''^tests/Nexo\.Integration/.*\.cs$''',
+
+  # Documentacion de la configuracion: describe los nombres de las variables y como generarlas,
+  # sin ningun valor real.
+  '''^docs/configuracion-secretos\.md$''',
+
+  # Sonda manual de endpoints. No lleva ninguna credencial escrita: genera la contrasena en cada
+  # ejecucion con `secrets.token_urlsafe`, que es justo lo contrario de un secreto filtrado.
+  '''^scripts/probe_endpoints\.py$''',
+]
+
+# Sin esto, los patrones se comparan contra el valor capturado y no contra la linea, de modo que
+# no hay forma de distinguir un UUID de ejemplo de uno que fuera un secreto de verdad.
+regexTarget = "line"
+
+regexes = [
+  # Cadena de conexion de ejemplo con marcadores en lugar de usuario y contrasena.
+  '''mongodb\+srv://<[^>]+>:<[^>]+>@''',
+
+  # `Idempotency-Key` de ejemplo en las fichas de endpoint. Es un UUID que el cliente inventa en
+  # cada peticion para que un reintento no duplique el efecto; no autentica nada. La regla
+  # `generic-api-key` dispara con cualquier cosa que termine en `Key:`.
+  '''Idempotency-Key:\s*[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}''',
+]
