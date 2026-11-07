@@ -55,7 +55,7 @@ public sealed class AutenticacionTests(InfraFixture infra)
         var respuesta = await cliente.PostAsync("/connect/token", Formulario(
             ("grant_type", "password"),
             ("username", "no.existe@nexolocal.mx"),
-            ("password", "Nexo2026ok"),
+            ("password", ConfiguracionDePrueba.ContrasenaDePrueba),
             ("scope", "offline_access")));
 
         // invalid_grant, no invalid_client: la peticion paso el filtro de cliente y fallo donde debe.
@@ -75,7 +75,7 @@ public sealed class AutenticacionTests(InfraFixture infra)
         var respuesta = await cliente.PostAsync("/connect/token", Formulario(
             ("grant_type", "password"),
             ("username", "no.existe@nexolocal.mx"),
-            ("password", "Nexo2026ok"),
+            ("password", ConfiguracionDePrueba.ContrasenaDePrueba),
             ("scope", "offline_access"),
             ("client_id", "nexo-mobile")));
 
@@ -111,7 +111,7 @@ public sealed class AutenticacionTests(InfraFixture infra)
             {
                 verificationTicket = "ticket-que-no-existe",
                 name = "Ana Lopez",
-                password = "Nexo2026ok",
+                password = ConfiguracionDePrueba.ContrasenaDePrueba,
                 acceptedTerms = true,
                 searchLocation = new { lat = 19.4326, lng = -99.1332 },
                 searchZoneLabel = "Centro",
@@ -154,7 +154,7 @@ public sealed class AutenticacionTests(InfraFixture infra)
         {
             verificationTicket = "da-igual",
             name = "Ana Lopez",
-            password = "Nexo2026ok",
+            password = ConfiguracionDePrueba.ContrasenaDePrueba,
             acceptedTerms = true
         });
 

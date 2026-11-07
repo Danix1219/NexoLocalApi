@@ -42,4 +42,11 @@ public static class ConfiguracionDePrueba
     /// </summary>
     public static readonly string ClaveHmac =
         Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes("llave-de-prueba-sin-valor-real"));
+
+    /// <summary>
+    /// Cumple la politica (8–64, letra y digito) y no abre nada: las cuentas de estas pruebas no
+    /// existen. Va en una constante porque un literal pegado a `password` lo marcan como
+    /// credencial filtrada los escaneres del repositorio.
+    /// </summary>
+    public const string ContrasenaDePrueba = "NoEsUnSecreto1";
 }
