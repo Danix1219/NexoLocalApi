@@ -84,11 +84,22 @@ jobs:
         with:
           persist-credentials: false
 
+      # Sin `hashicorp/setup-terraform`: la politica del repositorio solo admite acciones propias
+      # o de GitHub. El runner no trae Terraform, asi que se baja el binario con su version y su
+      # huella clavadas; una descarga alterada o a medias no pasa de aqui.
       - name: Instalar Terraform
-        uses: hashicorp/setup-terraform@b9cd54a3c349d3f38e8881555d616ced269862dd # v3.1.2
-        with:
-          terraform_version: 1.9.8
-          terraform_wrapper: false
+        env:
+          TF_VERSION: 1.9.8
+          TF_SHA256: 186e0145f5e5f2eb97cbd785bc78f21bae4ef15119349f6ad4fa535b83b10df8
+        run: |
+          set -euo pipefail
+          archivo="terraform_${TF_VERSION}_linux_amd64.zip"
+          curl -fsSL --retry 3 -o "$RUNNER_TEMP/$archivo" \
+            "https://releases.hashicorp.com/terraform/${TF_VERSION}/${archivo}"
+          echo "${TF_SHA256}  $RUNNER_TEMP/$archivo" | sha256sum -c -
+          unzip -q -o "$RUNNER_TEMP/$archivo" -d "$RUNNER_TEMP"
+          sudo install -m 0755 "$RUNNER_TEMP/terraform" /usr/local/bin/terraform
+          terraform version
 
       - name: Formato
         run: terraform -chdir=infra/terraform fmt -check -recursive
