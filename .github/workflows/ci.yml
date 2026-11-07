@@ -195,11 +195,17 @@ jobs:
           global-json-file: global.json
 
       # Sin infraestructura: deben pasar en cualquier maquina y en segundos.
+      # Uno por uno porque `dotnet test` solo acepta un proyecto, y sin cortar al primer fallo:
+      # saber que fallan dos suites vale mas que enterarse de una y volver a empezar.
       - name: Pruebas unitarias
-        run: >
-          dotnet test tests/Nexo.Common.Unit tests/Nexo.Identity.Unit tests/Nexo.Discovery.Unit
-          tests/Nexo.Engagement.Unit --configuration Release
-          --logger "trx;LogFileName=unitarias.trx" --results-directory resultados
+        run: |
+          set -uo pipefail
+          fallos=0
+          for dominio in Common Identity Discovery Engagement; do
+            dotnet test "tests/Nexo.${dominio}.Unit" --configuration Release \
+              --logger "trx;LogFileName=${dominio}.trx" --results-directory resultados || fallos=1
+          done
+          exit "$fallos"
 
       - name: Resumen
         if: always()
