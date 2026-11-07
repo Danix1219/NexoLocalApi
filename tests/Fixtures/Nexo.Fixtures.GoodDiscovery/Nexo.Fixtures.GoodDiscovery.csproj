@@ -1,0 +1,5 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <ProjectReference Include="../../../src/Domains/Discovery/Nexo.Discovery.Contracts/Nexo.Discovery.Contracts.csproj" />
+  </ItemGroup>
+</Project>

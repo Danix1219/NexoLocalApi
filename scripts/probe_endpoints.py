@@ -18,7 +18,7 @@ import urllib.error
 import urllib.request
 
 # Host de S01 segun launchSettings; se puede sobreescribir con el segundo argumento.
-BASE = (sys.argv[2] if len(sys.argv) > 2 else "http://127.0.0.1:5188") + "/api/v1"
+BASE = (sys.argv[2] if len(sys.argv) > 2 else "http://127.0.0.1:5188") + "/v1/identity"
 LOG = sys.argv[1]
 EMAIL = f"prueba.ep.{int(time.time())}@nexolocal.test"
 # Generadas por ejecucion: la cuenta es desechable y el repositorio no guarda ninguna clave.

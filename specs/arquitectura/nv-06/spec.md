@@ -1,6 +1,8 @@
 # NV-06 — Perfiles, catálogo, cobertura y edición
 
-Versión: 0.4.1 | Fecha: 2026-11-02 | Rama prevista: `nv-06`
+Versión: 0.5.0 | Fecha: 2026-11-06 | Rama prevista: `nv-06`
+
+> **Alineación E-001.** Este incremento se implementa en el módulo **Discovery** de la API modular por dominios, con datos en **`nexo_discovery`**. No es un servicio desplegable independiente: comparte host, se despliega en una app de App Service con **2 instancias**, y el estado compartido vive en **Redis**. Los identificadores `S01`–`S08` se conservan como **mapa de dominios**. Ver [mapa de specs](../README.md) y [constitución §4](../../../.specify/memory/constitution.md).
 
 ## 1. Objetivo
 
@@ -18,8 +20,8 @@ Requisitos Móvil v2: 04, 09, 14, 15, 16. Componentes: M04, M10, M11, M21. Halla
 
 Dependencias: nv-04, nv-05.
 
-- FR-001: Cuenta crea perfil persona/negocio y completa opcionales; consume catálogo de nv-17.
-- FR-002: Prestador edita permanentemente horario/precios/condiciones; integra políticas de contacto de nv-25.
+- FR-001: Cuenta crea perfil persona/negocio y completa opcionales; consume catálogo de este spec.
+- FR-002: Prestador edita permanentemente horario/precios/condiciones; integra políticas de contacto de este spec.
 
 - NFR-001: autorización, aislamiento, privacidad y manejo de errores según constitución.
 - NFR-002: trazabilidad y evidencia real; no declarar integraciones reales con dobles.
@@ -85,10 +87,10 @@ Fuera: funcionalidades ajenas y despliegue no encargado.
 
 | Operación integrada | Nuevo dueño de incremento |
 |---|---|
-| EP-014 | [nv-17](../nv-17/spec.md) |
-| EP-015 | [nv-17](../nv-17/spec.md) |
-| EP-091 | [nv-25](../nv-25/spec.md) |
-| EP-096 | [nv-25](../nv-25/spec.md) |
+| EP-014 | [este spec](spec.md) |
+| EP-015 | [este spec](spec.md) |
+| EP-091 | [este spec](spec.md) |
+| EP-096 | [este spec](spec.md) |
 
 Los FR/AC heredados de esta fase comprueban integración con esas capacidades; sus tareas EP y casos de uso se ejecutan únicamente en la spec primaria del inventario. El propietario S01–S08 no cambia.
 
@@ -196,8 +198,8 @@ Cobertura de diseño, no ejecución aprobada. Contratos formales, decisiones y e
 
 Dueño de este incremento: S02 Directory. [Mapa backend](../../../docs/estructura-backend.md) y [orden SDD](../../../docs/orden-desarrollo-backend.md) concretan la propuesta; no ratifican proveedores ni crean proyectos. Las rutas siguientes son objetivo hasta ejecutarse.
 
-- FR-950: Antes de Ready, concretar archivos/rutas, dueño, referencias y pruebas del alcance: perfiles/cobertura/edicion y consumo del catalogo de nv-17 sin reimplementarlo. Ubicacion objetivo: services/directory/src/ y services/directory/tests/.
-- NFR-950: Separar preparacion documental de ejecucion; respetar capas y datos por propietario, conservar Git/SDD y exigir CI de producto al introducir codigo. Jira/Confluence pospuestos no se inventan; ningun endpoint, estado Ready o aceptacion se deriva de una carpeta.
+- FR-950: Antes de Ready, concretar archivos/rutas, dueño, referencias y pruebas del alcance: perfiles/cobertura/edicion y consumo del catalogo de este spec sin reimplementarlo. Ubicacion objetivo: src/Domains/directory/ y services/directory/tests/.
+- NFR-950: Separar preparacion documental de ejecucion; respetar capas y datos por propietario, conservar Git/SDD y exigir CI de producto al introducir codigo. Ningun endpoint, estado Ready o aceptacion se deriva de una carpeta.
 
 - [ ] AC-950 → FR-950/NFR-950: Plan contiene rutas actuales/objetivo, decisiones previas, dependencia de entrada, historia seleccionada, suites/evidencia y dueño; matriz de tareas cubre el cambio y Ready espera esa preparacion. Si una ruta no aplica, justificar con superficie/autoridad, sin crear un proyecto artificial. Verificacion de producto queda pendiente hasta ejecutarse.
 

@@ -6,7 +6,7 @@ Spec: [spec.md](spec.md). Tareas: [task.md](task.md). Estado: diseño, sin imple
 
 Definir contratos de frontera y matriz de versiones para el subset de una historia, con compatibilidad y ejemplos negativos.
 
-Dependencias: nv-01.
+Dependencias: nv-00.
 
 ## 2. Diseño técnico
 

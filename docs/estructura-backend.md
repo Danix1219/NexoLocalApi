@@ -1,95 +1,122 @@
-# Estructura backend sobre el proyecto nexolocal.Api
+# Estructura backend — API REST modular por dominios
 
-Actualizacion: 2026-11-03. Correccion solicitada por el usuario: conservar su solucion/proyecto existente y la arquitectura por microservicios. Decision explicita: **nexolocal.Api es G01 Gateway; los microservicios tienen hosts propios**. La solucion paralela NexoLocal.Backend.slnx generada anteriormente se retiro; no forma parte del trabajo actual.
+Actualizacion: 2026-11-06. Vigente desde la **enmienda E-001** de la [constitucion](../.specify/memory/constitution.md) (§3 y §4).
 
-Autoridades: [constitucion](../.specify/memory/constitution.md), [datos por propietario](modelo-datos.md), [orden SDD](orden-desarrollo-backend.md), [fundacion](../specs/arquitectura/nv-01/spec.md) y [calidad](../specs/arquitectura/nv-03/spec.md). La estructura anterior de referencia usa gateway y services/<servicio>/src/{Domain,Application,Infrastructure,Api}; se adapta preservando la ruta del host ya creado por el usuario, sin duplicarlo.
+**Que cambio.** La estructura anterior (`nexolocal.Api.slnx` como G01 Gateway, ocho microservicios en
+`services/<servicio>/src/{Domain,Application,Infrastructure,Api}`, nueve hosts HTTP y ocho
+arquitecturas internas distintas) **ya no existe en disco**. Se sustituyo por una sola solucion con
+una sola arquitectura interna, desplegada como una app con dos instancias. El motivo esta en
+[E-001](../.specify/memory/constitution.md) §11: ocho microservicios no caben en el plan B1
+disponible. El registro de lo retirado esta en [decisions/registro.md](decisions/registro.md).
+
+Los identificadores `S01`–`S08` **se conservan como mapa de dominios**, no como unidades
+desplegables. Ver [arquitectura/servicios/](arquitectura/servicios/).
 
 ## Estructura fisica actual
 
-En C:/Users/kevin/source/repos/nexolocal.Api:
-
 ```text
-nexolocal.Api.slnx                         # UNICA solucion, la original
-nexolocal.Api/                            # G01, proyecto existente y nombre conservado
-  nexolocal.Api.csproj                    # host Gateway, no servicio de negocio universal
-  Program.cs
-  appsettings.json
-  appsettings.Development.json
-  Properties/launchSettings.json
-  nexolocal.Api.http
-  Dockerfile
-services/
-  identity/                              # S01: limite de microservicio
-    src/
-      Domain/NexoLocal.Identity.Domain.csproj
-      Application/NexoLocal.Identity.Application.csproj
-      Infrastructure/NexoLocal.Identity.Infrastructure.csproj
-      Api/NexoLocal.Identity.Api.csproj   # host propio de Identity
-      Api/Program.cs
-      Api/Dockerfile
-    README.md
-scripts/check_architecture.py
-tests/Architecture/test_project_references.py
-.github/workflows/backend-base.yml
-docs/reference-template/                # copia textual del ejemplo anterior
-AGENTS.md / CLAUDE.md / README.md
-global.json / Directory.Build.props / .editorconfig / .gitignore / .dockerignore
+Directory.Build.props                  # net10.0, nullable, warnings como errores
+Directory.Packages.props               # versiones centralizadas: ningun csproj fija versiones
+global.json                            # SDK anclado
+docker-compose.yml                     # MongoDB en replica + Redis para desarrollo
+src/
+  Nexo.sln                             # UNICA solucion
+  BuildingBlocks/
+    Nexo.Common/                       # Result<T>, PagedResult<T>, GeoPoint, ICurrentUser
+                                       #   Mongo/  tres bases keyed + health check
+                                       #   Redis/  cache, revocacion, rate limit, idempotencia, backplane
+    Nexo.Outbox/                       # OutboxMessage, IOutboxService, OutboxDispatcher
+  Domains/
+    Identity/                          # S01
+    Discovery/                         # S02 + parte de S03, S08
+    Engagement/                        # S04, S05, S06, S07
+      Nexo.<Dominio>.Contracts/        # lo unico que otro dominio puede referenciar
+      Nexo.<Dominio>.Domain/
+      Nexo.<Dominio>.Application/
+      Nexo.<Dominio>.Infrastructure/
+      Nexo.<Dominio>.Endpoints/
+    Screens/                           # composicion de pantallas: Application + Endpoints
+  Host/
+    Nexo.Host/                         # UNICO host: Program.cs de dos roles, Dockerfile
+tests/
+  Nexo.Architecture.Tests/             # NetArchTest: fronteras entre dominios
+  Fixtures/                            # Good/BadDiscovery: el caso negativo de AC-004
+  Nexo.Common.Unit/  Nexo.Identity.Unit/  Nexo.Discovery.Unit/  Nexo.Engagement.Unit/
+  Nexo.Integration/                    # Testcontainers: MongoDB + Redis
 ```
 
-La solucion agrupa el proyecto original bajo Gateway y S01 bajo Services/Identity. El host G01 conserva la ruta nexolocal.Api/ en lugar de forzar mover una carpeta bloqueada por el IDE; no se cerro Visual Studio ni se creo otro proyecto Gateway. La separacion arquitectonica no depende de renombrar la carpeta original.
+## Arquitectura interna unica
 
-Hay cinco proyectos .NET, pero dos hosts: G01 y S01.Api. Domain/Application/Infrastructure son capas internas de S01; **no son microservicios ni sustituyen su separacion**. Los hosts se publican/ejecutan por separado; una solucion comun no los convierte en monolito.
+La misma en los tres dominios, en lugar de las ocho de `architecture-selection.json`
+(archivado en [decisions/archivo/](decisions/archivo/)):
 
-## Responsabilidad y referencias
+```text
+Contracts <- Domain <- Application <- Infrastructure <- Endpoints
+```
 
-| Limite/proyecto | Funcion | Referencias de proyecto |
+| Capa | Contenido | No puede |
 |---|---|---|
-| G01 nexolocal.Api | Entrada HTTP/WS y futura composicion/proxy | Ninguna a proyectos de negocio de servicios |
-| S01 Domain | Reglas/estados/invariantes propios | Ninguna |
-| S01 Application | Casos/puertos/autorizacion del caso | Domain de S01 |
-| S01 Infrastructure | Adaptadores propios de datos/proveedores | Application/Domain de S01 |
-| S01 Api | HTTP/DTO/composicion de S01 | Application/Infrastructure de S01 |
+| `Contracts` | DTOs e interfaces que otros dominios consumen | depender de nada |
+| `Domain` | Agregados, value objects, eventos | referenciar infraestructura |
+| `Application` | Casos de uso y permisos, interfaces de repositorio | conocer MongoDB |
+| `Infrastructure` | MongoDB, Redis, colas, Blob, adaptadores externos | contener reglas de negocio |
+| `Endpoints` | Minimal APIs, un archivo por caso de uso | contener logica |
 
-Gateway no concentra identidades, pedidos o acceso a todas las bases. Futura comunicacion Gateway→servicios por contrato HTTP/WS, y entre dueños por contratos/eventos versionados; no referencias a sus DLL ni acceso a sus bases. Cada servicio escribe solo sus datos. Flutter consume la entrada/API autorizada, nunca MongoDB/Neo4j.
+Un dominio solo puede referenciar `*.Contracts` de otro. Lo comprueba
+`tests/Nexo.Architecture.Tests`, **con caso negativo**: `Nexo.Fixtures.BadDiscovery` referencia
+`Nexo.Discovery.Domain` a proposito y la prueba debe fallar ante esa referencia.
 
-Ambos hosts estan vacios y sin rutas de negocio/proxy. Se retiraron WeatherForecast y sus paquetes de ejemplo del proyecto activo, conservando referencia textual. YARP/persistencia/Redis/eventos/SMS no se instalan ni se dan por ratificados con esta correccion. Un host denominado Gateway no acredita proxy funcionando hasta implementar y probar su incremento.
+## Un solo proceso
 
-## Servicios previstos: se agregan por incremento
+`Nexo.Host` atiende el pipeline HTTP (endpoints de los cuatro modulos, rate limiting,
+`/health/live` y `/health/ready`) y corre el `OutboxDispatcher` en el mismo proceso.
 
-| Codigo | Carpeta futura o actual | Dueño y arranque |
-|---|---|---|
-| G01 | nexolocal.Api/ existente | Gateway; nv-01 y composicion pertinente |
-| S01 | services/identity/ actual | Identidad nv-04, cuenta nv-16, coordinacion borrado nv-12 |
-| S02 | services/directory/ futura | Directorio/catalogo/busqueda nv-17/nv-06/nv-07 |
-| S03 | services/community/ futura | Comunidad/experiencias/guardados nv-08/nv-19/nv-18 |
-| S04 | services/orders/ futura | Solicitudes/intereses/pedidos nv-09/nv-20/nv-10 |
-| S05 | services/messaging/ futura | Chat nv-11 y politicas pertinentes |
-| S06 | services/trust/ futura | Moderacion/medios/admin nv-05/nv-24 |
-| S07 | services/notifications/ futura | Dispositivos/push nv-21 y cierre nv-12 |
-| S08 | services/relations/ condicional | Proyeccion publica nv-15; sin PII ni autoridad de permisos |
+Antes habia dos roles por `NEXO_ROLE`. Se unificaron porque no hay forma comoda de arrancar dos
+instancias del mismo proyecto en local y la separacion no se estaba usando.
 
-Cada nuevo dueño usa services/<nombre>/src/Api como host propio y sus capas necesarias; tests del dueño en services/<nombre>/tests/ cuando haya historias reales. No generar ocho servicios o entidades vacios para aparentar una arquitectura distribuida. No duplicar servicio por cada una de las 26 specs. Contratos API siguen en el SDD como autoridad hasta una migracion expresa, no crear otra copia divergente en cada host.
+Con dos instancias en el plan no hay trabajo duplicado: el outbox reclama cada mensaje con una
+actualizacion condicional atomica y solo una instancia se lo lleva. El costo es que un envio SMTP
+lento ocupa el mismo proceso que atiende peticiones.
 
-## Codigo y SDD/Git
+## Datos
 
-La ubicacion fisica actual del codigo es la solicitada por el usuario. API_NexoLocal sigue siendo el checkout Git con constitucion/specs/contratos; la consolidacion revisada codigo/SDD permanece pendiente, sin segundo .git ni publicacion. Al consolidar: una sola solucion original, conservar historial/controles y mover el conjunto coherente de hosts/referencias/CI/Docker, sin copiar .git o sobrescribir cambios.
+Un cluster M0, tres bases, inyectadas por clave (`NexoDatabaseKeys`). Ningun dominio recibe el
+cliente global, asi que no puede escribir en la base de otro por descuido.
 
-CI local preparada compila nexolocal.Api.slnx y verifica arquitectura. Dockerfiles de cada host tienen contexto raiz y publish/entrypoint propios; no se declara imagen construida ni deploy. La CI documental del checkout sigue rechazando csproj hasta reemplazar ese bloqueo por gates de producto reales en el mismo cambio. Datos Jira/Confluence siguen pospuestos; no se inventan para publicar.
+| Dominio | Base |
+|---|---|
+| Identity | `nexo_identity` |
+| Discovery | `nexo_discovery` |
+| Engagement | `nexo_engagement` |
+| Screens | ninguna: solo compone lecturas de los otros modulos |
 
-## Orden de arranque
+`MaxConnectionPoolSize` se configura en `Mongo:MaxPoolSize`. **Pendiente**: confirmar el limite real
+de conexiones de M0 en el panel de Atlas antes de fijarlo (nv-00 T-008).
 
-Seguir [paquete nv-00](inicio-backend/README.md) y [orden SDD](orden-desarrollo-backend.md): gobierno/decisiones → fundacion y contrato de la historia → gates reales → primera funcionalidad Identity. El usuario autorizo esqueleto fisico sin negocio; eso no firma Ready o ratificacion funcional. nv-01 posee estructura/referencias, nv-02 contratos, nv-03 CI, nv-04 identidad. G01 se mantiene separado de S01 desde el arranque.
+## Estado compartido entre las dos instancias
 
-Comandos y resultados actuales: [correccion y evidencia](inicio-backend/correccion-base-microservicios.md). El [informe anterior](inicio-backend/base-fisica.md) se conserva como historia del cambio descartado, no instruccion para abrir otra solucion.
+Con dos instancias, lo siguiente **no puede vivir en memoria**. Todo en Redis:
 
-## Perfiles por propietario
+| Estado | Por que |
+|---|---|
+| Revocacion de sesion (`jti`) | Sin esto el logout no surte efecto en la otra instancia (requisito 10) |
+| Cache L2 | Requisito 9 |
+| Contadores exactos de rate limit | Los limites por dia deben ser exactos entre replicas |
+| Backplane de tiempo real | Emisor y receptor pueden estar en instancias distintas |
+| Idempotencia de POST | Un reintento puede caer en la otra instancia |
 
-El [catálogo de arquitectura](arquitectura/README.md) define estructura, patrones, puertos, consistencia y fallos de G01 y S01–S08. Aplicar sus políticas comunes al refinar cada historia; no crea proyectos, ratifica proveedores ni reemplaza contratos.
+Los limites por minuto contra abuso si van en memoria por replica: toleran ser aproximados.
 
-## Ampliación física vigente (2026-11-03)
+## Verificacion
 
-Por encargo explícito posterior, la solución original incorpora la base de S01–S08, además de G01, y Worker S07. [Inventario y evidencia de la ampliación](inicio-backend/base-todos-microservicios.md). Son 33 proyectos; patrones de negocio y proveedores pendientes. Esta ampliación reemplaza el límite previo de crear únicamente G01/S01; S08 continúa condicional.
+```bash
+dotnet build src/Nexo.sln                      # 0 advertencias, 0 errores
+dotnet test  src/Nexo.sln                      # unitarias y arquitectura
+docker compose up -d                           # MongoDB replica + Redis
+```
 
-## Estructura vigente revisada por caso de uso
-
-La [selección de arquitecturas](arquitectura/seleccion-arquitecturas.md) y los perfiles sustituyen las rutas comunes Domain/Application/Infrastructure de los apartados anteriores donde no aplican. Solución original con 28 proyectos: S01/S04 conservan cuatro capas; otros usan núcleos por funcionalidad, módulo, procesamiento o proyección y Adapters. Los nombres históricos describen el scaffold previo; no son instrucciones de crear capas adicionales.
+Autoridades: [constitucion](../.specify/memory/constitution.md),
+[mapa de specs](../specs/arquitectura/README.md),
+[arquitectura base nv-00](../specs/arquitectura/nv-00/spec.md),
+[datos por propietario](modelo-datos.md), [orden SDD](orden-desarrollo-backend.md),
+[calidad](../specs/arquitectura/nv-03/spec.md).

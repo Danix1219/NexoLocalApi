@@ -11,7 +11,7 @@ jobs:
   build:
     name: Backend / build
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
@@ -21,14 +21,23 @@ jobs:
         uses: actions/setup-dotnet@26b0ec14cb23fa6904739307f278c14f94c95bf1 # v5 verified from official repository
         with:
           global-json-file: global.json
-      - name: Restore enabled projects
-        run: dotnet restore nexolocal.Api.slnx
-      - name: Compile enabled projects
-        run: dotnet build nexolocal.Api.slnx --no-restore --configuration Release
-      - name: Check project boundaries
-        run: python3 -B scripts/check_architecture.py
-      - name: Test architecture validator
-        run: python3 -B -m unittest discover -s tests/Architecture -p 'test_*.py' -v
-      - name: Smoke all scaffold hosts
-        shell: pwsh
-        run: ./scripts/Test-ScaffoldHosts.ps1
+      - name: Restore solution
+        run: dotnet restore src/Nexo.sln
+      # Las advertencias son errores (Directory.Build.props): el build es el primer gate.
+      - name: Build solution
+        run: dotnet build src/Nexo.sln --no-restore --configuration Release
+      # Sustituye a check_architecture.py: las fronteras entre dominios se comprueban
+      # con NetArchTest, incluido el caso negativo (nv-00 AC-004).
+      - name: Architecture boundaries
+        run: dotnet test tests/Nexo.Architecture.Tests --no-build --configuration Release
+      # `src/Nexo.sln` incluye las de arquitectura: el paso anterior las aisla para que, cuando
+      # rompan, se vea en la lista de pasos cual fue sin abrir el log entero.
+      - name: Unit and integration tests
+        run: >
+          dotnet test src/Nexo.sln --no-build --configuration Release
+          --logger "trx;LogFileName=pruebas.trx" --results-directory resultados
+      # Sin esto la CI corre las pruebas y solo deja un numero en el log. Corre tambien cuando
+      # fallan, que es justo cuando hace falta leerlas.
+      - name: Resumen de pruebas
+        if: always()
+        run: python3 -B .ci/resumen-pruebas.py resultados >> "$GITHUB_STEP_SUMMARY"

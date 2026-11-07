@@ -1,6 +1,8 @@
 # NV-03 — Gates de calidad y DevSecOps
 
-Versión: 0.4.1 | Fecha: 2026-11-02 | Rama prevista: `nv-03`
+Versión: 0.5.0 | Fecha: 2026-11-06 | Rama prevista: `nv-03`
+
+> **Alineación E-001.** Incremento **transversal**: aplica a los tres módulos (`Identity`, `Discovery`, `Engagement`) de la API modular por dominios, no a servicios desplegables independientes. Los identificadores `S01`–`S08` se conservan como **mapa de dominios**. Ver [mapa de specs](../README.md) y [constitución §4](../../../.specify/memory/constitution.md).
 
 ## 1. Objetivo
 
@@ -122,7 +124,7 @@ Cobertura de diseño, no ejecución aprobada. Contratos formales, decisiones y e
 Dueño de este incremento: Calidad por proyecto habilitado. [Mapa backend](../../../docs/estructura-backend.md) y [orden SDD](../../../docs/orden-desarrollo-backend.md) concretan la propuesta; no ratifican proveedores ni crean proyectos. Las rutas siguientes son objetivo hasta ejecutarse.
 
 - FR-950: Antes de Ready, concretar archivos/rutas, dueño, referencias y pruebas del alcance: transicion de CI documental a CI de producto y dependencias de arquitectura verificables. Ubicacion objetivo: .github/workflows/, .ci/, scripts/ y tests/ del propietario.
-- NFR-950: Separar preparacion documental de ejecucion; respetar capas y datos por propietario, conservar Git/SDD y exigir CI de producto al introducir codigo. Jira/Confluence pospuestos no se inventan; ningun endpoint, estado Ready o aceptacion se deriva de una carpeta.
+- NFR-950: Separar preparacion documental de ejecucion; respetar capas y datos por propietario, conservar Git/SDD y exigir CI de producto al introducir codigo. Ningun endpoint, estado Ready o aceptacion se deriva de una carpeta.
 
 - [ ] AC-950 → FR-950/NFR-950: Plan contiene rutas actuales/objetivo, decisiones previas, dependencia de entrada, historia seleccionada, suites/evidencia y dueño; matriz de tareas cubre el cambio y Ready espera esa preparacion. Si una ruta no aplica, justificar con superficie/autoridad, sin crear un proyecto artificial. Verificacion de producto queda pendiente hasta ejecutarse.
 

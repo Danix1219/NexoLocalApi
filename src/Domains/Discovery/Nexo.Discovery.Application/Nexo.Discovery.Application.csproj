@@ -1,0 +1,6 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <ProjectReference Include="../Nexo.Discovery.Domain/Nexo.Discovery.Domain.csproj" />
+    <ProjectReference Include="../../../BuildingBlocks/Nexo.Common/Nexo.Common.csproj" />
+  </ItemGroup>
+</Project>

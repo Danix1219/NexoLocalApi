@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" />
+    <PackageReference Include="Scalar.AspNetCore" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="../../BuildingBlocks/Nexo.Common/Nexo.Common.csproj" />
+    <ProjectReference Include="../../BuildingBlocks/Nexo.Outbox/Nexo.Outbox.csproj" />
+    <ProjectReference Include="../../Domains/Identity/Nexo.Identity.Application/Nexo.Identity.Application.csproj" />
+    <ProjectReference Include="../../Domains/Identity/Nexo.Identity.Contracts/Nexo.Identity.Contracts.csproj" />
+    <ProjectReference Include="../../Domains/Identity/Nexo.Identity.Domain/Nexo.Identity.Domain.csproj" />
+    <ProjectReference Include="../../Domains/Identity/Nexo.Identity.Endpoints/Nexo.Identity.Endpoints.csproj" />
+    <ProjectReference Include="../../Domains/Identity/Nexo.Identity.Infrastructure/Nexo.Identity.Infrastructure.csproj" />
+    <ProjectReference Include="../../Domains/Discovery/Nexo.Discovery.Endpoints/Nexo.Discovery.Endpoints.csproj" />
+    <ProjectReference Include="../../Domains/Discovery/Nexo.Discovery.Infrastructure/Nexo.Discovery.Infrastructure.csproj" />
+    <ProjectReference Include="../../Domains/Engagement/Nexo.Engagement.Endpoints/Nexo.Engagement.Endpoints.csproj" />
+    <ProjectReference Include="../../Domains/Engagement/Nexo.Engagement.Infrastructure/Nexo.Engagement.Infrastructure.csproj" />
+    <ProjectReference Include="../../Domains/Screens/Nexo.Screens.Endpoints/Nexo.Screens.Endpoints.csproj" />
+  </ItemGroup>
+</Project>

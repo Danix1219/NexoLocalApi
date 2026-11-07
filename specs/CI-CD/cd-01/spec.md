@@ -1,5 +1,8 @@
 # Spec — CD-01 · Despliegue continuo a Azure (Linux dockerizado)
 
+> **Desalineado por E-001 y E-002.** Este spec se redacto para ocho servicios en **Container Apps** con alta manual de recursos. Vigente hoy: **App Service B1 con 2 instancias** (`.github/workflows/deploy-azure.yml`), **Terraform** en `infra/terraform/` (ya no es no-alcance) y **Cloudflare R2** en lugar de Front Door. El no-alcance de *dominio propio* sigue en pie y por eso R2 se sirve por su URL `r2.dev`. Ver [mapa de specs](../../arquitectura/README.md).
+
+
 Versión: 0.1.0 | Fecha: 2026-11-05 | Estado: Borrador documental | Rama prevista: cd-01
 
 ## 1. Objetivo
@@ -32,7 +35,20 @@ Sin cambios. Cada servicio conserva su propia base (`Mongo:Database`); la cadena
 3. **Secrets vs variables de GitHub.** Secrets: `AZURE_CLIENT_ID`, `AZURE_TENANT_ID`, `AZURE_SUBSCRIPTION_ID`, `MONGO_CONNECTION_STRING` (solo si se automatiza la carga). Variables: `AZURE_ACR_NAME`, `AZURE_RESOURCE_GROUP`. Ningún valor se imprime en los logs.
 4. **Entorno protegido.** El job de despliegue corre bajo el environment `produccion`, con revisores requeridos; `main` protegido exige el job de build previo.
 5. **Contenedor.** Imagen base `mcr.microsoft.com/dotnet/aspnet:10.0` (Linux), usuario no root (`USER $APP_UID`), sin SDK en la capa final, puerto 8080 sin TLS propio (TLS lo termina el ingress de Container Apps).
-6. **Arquitectura limpia preservada.** El despliegue no añade referencias entre capas; `scripts/check_architecture.py` sigue siendo gate obligatorio antes de publicar.
+6. **Gates DevSecOps de la cadena de publicación.** El dueño del gobierno de calidad es [nv-03](../../arquitectura/nv-03/spec.md) (FR-001: SAST, dependencias y secretos); aquí se fija solo *dónde* corre cada control dentro de este pipeline y *qué lo bloquea*, para que al ejecutar nv-03 no haya que rediseñarlo:
+
+| Control | Herramienta prevista | Momento en el pipeline | Criterio de bloqueo | Estado |
+|---|---|---|---|---|
+| SCA (dependencias) | Dependabot + `dependency-review-action` | PR y semanal | vulnerabilidad High o Critical sin excepción registrada | configurado (`.github/dependabot.yml`); falta el gate de PR |
+| Secretos | GitGuardian + `git grep` del checklist | PR | cualquier hallazgo nuevo sin resolver | activo |
+| SAST | CodeQL (C#) | PR y semanal | alerta High o Critical | pendiente |
+| Imagen de contenedor | Trivy sobre la imagen recién construida | job `deploy`, entre el build y el push a ACR | CVE High o Critical con parche disponible | pendiente |
+| IaC | Trivy config / Checkov | solo cuando exista Terraform o Bicep | regla High | no aplica todavía |
+| DAST | OWASP ZAP API scan contra el OpenAPI publicado | después del despliegue, contra la revisión nueva | alerta High | pendiente |
+
+Reglas al activarlos: los controles bloqueantes corren **antes** del push a ACR, de modo que una imagen con hallazgo High nunca llega al registro; el DAST corre después y, si falla, se revierte el tráfico a la revisión anterior en vez de dejar la nueva publicada. Las excepciones se registran con motivo y fecha de caducidad, nunca se silencian en la herramienta.
+
+7. **Arquitectura limpia preservada.** El despliegue no añade referencias entre capas; `scripts/check_architecture.py` sigue siendo gate obligatorio antes de publicar.
 
 ## 6. Tests / Gates
 

@@ -75,7 +75,7 @@ Vista documental generada del [inventario](inventario.json), autoridad única de
 - Resultado de diseño: 204.
 - Invariante: No aceptar prueba de registro ni código ya consumido
 - Referencia funcional del catálogo: `aunext newpass`; entidad: `accounts`.
-- Spec primaria: [nv-16](../../specs/arquitectura/nv-16/spec.md); FR-206 → T-206 → AC-206.
+- Spec primaria: [nv-16](../../specs/arquitectura/nv-04/spec.md); FR-206 → T-206 → AC-206.
 - Estado: Previsto en línea base; contrato formal y aceptación pendientes. formalContract sigue null.
 - Consumidor móvil primario: [017-cuenta-recuperacion-sesiones](../../../App_NexoLocal/specs/017-cuenta-recuperacion-sesiones/spec.md). La app enlaza autoridad, no redefine payload.
 - Ensayo: permitido obtiene resultado previsto; entradas inválidas, estado/identidad no permitidos o recurso retirado no filtran datos; fallos/reintentos siguen contrato. Confirmar efecto durable/idempotencia o ticket/secuencia según operación; nunca interpretar timeout como éxito.
@@ -114,7 +114,7 @@ Vista documental generada del [inventario](inventario.json), autoridad única de
 - Resultado de diseño: 200 cuenta y nueva version.
 - Invariante: Lista blanca; moderar nombre; no permitir cambio libre de roles; fotos propias aprobadas; origen privado nunca se publica.
 - Referencia funcional del catálogo: `uint, chan, mode`; entidad: `accounts`.
-- Spec primaria: [nv-16](../../specs/arquitectura/nv-16/spec.md); FR-209 → T-209 → AC-209.
+- Spec primaria: [nv-16](../../specs/arquitectura/nv-04/spec.md); FR-209 → T-209 → AC-209.
 - Estado: Previsto en línea base; contrato formal y aceptación pendientes. formalContract sigue null.
 - Consumidor móvil primario: [017-cuenta-recuperacion-sesiones](../../../App_NexoLocal/specs/017-cuenta-recuperacion-sesiones/spec.md). La app enlaza autoridad, no redefine payload.
 - Ensayo: permitido obtiene resultado previsto; entradas inválidas, estado/identidad no permitidos o recurso retirado no filtran datos; fallos/reintentos siguen contrato. Confirmar efecto durable/idempotencia o ticket/secuencia según operación; nunca interpretar timeout como éxito.
@@ -127,7 +127,7 @@ Vista documental generada del [inventario](inventario.json), autoridad única de
 - Resultado de diseño: 200 lista de sesiones sin secretos.
 - Invariante: No devolver refreshHash ni direcciones completas
 - Referencia funcional del catálogo: `Ampliación de seguridad`; entidad: `sessions`.
-- Spec primaria: [nv-16](../../specs/arquitectura/nv-16/spec.md); FR-210 → T-210 → AC-210.
+- Spec primaria: [nv-16](../../specs/arquitectura/nv-04/spec.md); FR-210 → T-210 → AC-210.
 - Estado: Previsto en línea base; contrato formal y aceptación pendientes. formalContract sigue null.
 - Consumidor móvil primario: [017-cuenta-recuperacion-sesiones](../../../App_NexoLocal/specs/017-cuenta-recuperacion-sesiones/spec.md). La app enlaza autoridad, no redefine payload.
 - Ensayo: permitido obtiene resultado previsto; entradas inválidas, estado/identidad no permitidos o recurso retirado no filtran datos; fallos/reintentos siguen contrato. Leer no cambia estado; comprobar filtros/cursor cuando apliquen.
@@ -140,7 +140,7 @@ Vista documental generada del [inventario](inventario.json), autoridad única de
 - Resultado de diseño: 204.
 - Invariante: Verificar dueño de sesión antes de revocar
 - Referencia funcional del catálogo: `Ampliación de seguridad`; entidad: `sessions`.
-- Spec primaria: [nv-16](../../specs/arquitectura/nv-16/spec.md); FR-211 → T-211 → AC-211.
+- Spec primaria: [nv-16](../../specs/arquitectura/nv-04/spec.md); FR-211 → T-211 → AC-211.
 - Estado: Previsto en línea base; contrato formal y aceptación pendientes. formalContract sigue null.
 - Consumidor móvil primario: [017-cuenta-recuperacion-sesiones](../../../App_NexoLocal/specs/017-cuenta-recuperacion-sesiones/spec.md). La app enlaza autoridad, no redefine payload.
 - Ensayo: permitido obtiene resultado previsto; entradas inválidas, estado/identidad no permitidos o recurso retirado no filtran datos; fallos/reintentos siguen contrato. Confirmar efecto durable/idempotencia o ticket/secuencia según operación; nunca interpretar timeout como éxito.
@@ -179,7 +179,7 @@ Vista documental generada del [inventario](inventario.json), autoridad única de
 - Resultado de diseño: 200 catálogo y ETag.
 - Invariante: Excluir altas inactivas; caché público 24 h
 - Referencia funcional del catálogo: `CATS, SPEC, obStep`; entidad: `categories`.
-- Spec primaria: [nv-17](../../specs/arquitectura/nv-17/spec.md); FR-214 → T-214 → AC-214.
+- Spec primaria: [nv-17](../../specs/arquitectura/nv-06/spec.md); FR-214 → T-214 → AC-214.
 - Estado: Previsto en línea base; contrato formal y aceptación pendientes. formalContract sigue null.
 - Consumidor móvil primario: [018-catalogo-seleccion](../../../App_NexoLocal/specs/018-catalogo-seleccion/spec.md). La app enlaza autoridad, no redefine payload.
 - Ensayo: permitido obtiene resultado previsto; entradas inválidas, estado/identidad no permitidos o recurso retirado no filtran datos; fallos/reintentos siguen contrato. Leer no cambia estado; comprobar filtros/cursor cuando apliquen.
@@ -192,7 +192,7 @@ Vista documental generada del [inventario](inventario.json), autoridad única de
 - Resultado de diseño: 200/201 categoría.
 - Invariante: Auditar; conservar referencias; invalidar caché
 - Referencia funcional del catálogo: `Operación requerida`; entidad: `categories`.
-- Spec primaria: [nv-17](../../specs/arquitectura/nv-17/spec.md); FR-215 → T-215 → AC-215.
+- Spec primaria: [nv-17](../../specs/arquitectura/nv-06/spec.md); FR-215 → T-215 → AC-215.
 - Estado: Previsto en línea base; contrato formal y aceptación pendientes. formalContract sigue null.
 - Consumo móvil directo: ninguno. La app solo prueba el efecto de negocio por su API pública; no invoca esta superficie.
 - Ensayo: permitido obtiene resultado previsto; entradas inválidas, estado/identidad no permitidos o recurso retirado no filtran datos; fallos/reintentos siguen contrato. Confirmar efecto durable/idempotencia o ticket/secuencia según operación; nunca interpretar timeout como éxito.
@@ -465,7 +465,7 @@ Vista documental generada del [inventario](inventario.json), autoridad única de
 - Resultado de diseño: 200 estado recomendado.
 - Invariante: Una reacción por cuenta/objetivo; tipo validado; no contador libre
 - Referencia funcional del catálogo: `rec`; entidad: `saved`.
-- Spec primaria: [nv-18](../../specs/arquitectura/nv-18/spec.md); FR-236 → T-236 → AC-236.
+- Spec primaria: [nv-18](../../specs/arquitectura/nv-08/spec.md); FR-236 → T-236 → AC-236.
 - Estado: Previsto en línea base; contrato formal y aceptación pendientes. formalContract sigue null.
 - Consumidor móvil primario: [019-guardados-indicadores](../../../App_NexoLocal/specs/019-guardados-indicadores/spec.md). La app enlaza autoridad, no redefine payload.
 - Ensayo: permitido obtiene resultado previsto; entradas inválidas, estado/identidad no permitidos o recurso retirado no filtran datos; fallos/reintentos siguen contrato. Confirmar efecto durable/idempotencia o ticket/secuencia según operación; nunca interpretar timeout como éxito.
@@ -478,7 +478,7 @@ Vista documental generada del [inventario](inventario.json), autoridad única de
 - Resultado de diseño: 204.
 - Invariante: Idempotente; recalcular agregados por evento
 - Referencia funcional del catálogo: `rec`; entidad: `saved`.
-- Spec primaria: [nv-18](../../specs/arquitectura/nv-18/spec.md); FR-237 → T-237 → AC-237.
+- Spec primaria: [nv-18](../../specs/arquitectura/nv-08/spec.md); FR-237 → T-237 → AC-237.
 - Estado: Previsto en línea base; contrato formal y aceptación pendientes. formalContract sigue null.
 - Consumidor móvil primario: [019-guardados-indicadores](../../../App_NexoLocal/specs/019-guardados-indicadores/spec.md). La app enlaza autoridad, no redefine payload.
 - Ensayo: permitido obtiene resultado previsto; entradas inválidas, estado/identidad no permitidos o recurso retirado no filtran datos; fallos/reintentos siguen contrato. Confirmar efecto durable/idempotencia o ticket/secuencia según operación; nunca interpretar timeout como éxito.
@@ -491,7 +491,7 @@ Vista documental generada del [inventario](inventario.json), autoridad única de
 - Resultado de diseño: 200 lista.
 - Invariante: Autorización al hidratar cada recurso; mostrar retirado cuando aplique
 - Referencia funcional del catálogo: `V.saved`; entidad: `saved`.
-- Spec primaria: [nv-18](../../specs/arquitectura/nv-18/spec.md); FR-238 → T-238 → AC-238.
+- Spec primaria: [nv-18](../../specs/arquitectura/nv-08/spec.md); FR-238 → T-238 → AC-238.
 - Estado: Previsto en línea base; contrato formal y aceptación pendientes. formalContract sigue null.
 - Consumidor móvil primario: [019-guardados-indicadores](../../../App_NexoLocal/specs/019-guardados-indicadores/spec.md). La app enlaza autoridad, no redefine payload.
 - Ensayo: permitido obtiene resultado previsto; entradas inválidas, estado/identidad no permitidos o recurso retirado no filtran datos; fallos/reintentos siguen contrato. Leer no cambia estado; comprobar filtros/cursor cuando apliquen.
@@ -504,7 +504,7 @@ Vista documental generada del [inventario](inventario.json), autoridad única de
 - Resultado de diseño: 201 o 200.
 - Invariante: Restricción única; verificar visibilidad del objetivo
 - Referencia funcional del catálogo: `savep, savew, saver`; entidad: `saved`.
-- Spec primaria: [nv-18](../../specs/arquitectura/nv-18/spec.md); FR-239 → T-239 → AC-239.
+- Spec primaria: [nv-18](../../specs/arquitectura/nv-08/spec.md); FR-239 → T-239 → AC-239.
 - Estado: Previsto en línea base; contrato formal y aceptación pendientes. formalContract sigue null.
 - Consumidor móvil primario: [019-guardados-indicadores](../../../App_NexoLocal/specs/019-guardados-indicadores/spec.md). La app enlaza autoridad, no redefine payload.
 - Ensayo: permitido obtiene resultado previsto; entradas inválidas, estado/identidad no permitidos o recurso retirado no filtran datos; fallos/reintentos siguen contrato. Confirmar efecto durable/idempotencia o ticket/secuencia según operación; nunca interpretar timeout como éxito.
@@ -517,7 +517,7 @@ Vista documental generada del [inventario](inventario.json), autoridad única de
 - Resultado de diseño: 204.
 - Invariante: Idempotente y sincronizable offline
 - Referencia funcional del catálogo: `savep, savew, saver`; entidad: `saved`.
-- Spec primaria: [nv-18](../../specs/arquitectura/nv-18/spec.md); FR-240 → T-240 → AC-240.
+- Spec primaria: [nv-18](../../specs/arquitectura/nv-08/spec.md); FR-240 → T-240 → AC-240.
 - Estado: Previsto en línea base; contrato formal y aceptación pendientes. formalContract sigue null.
 - Consumidor móvil primario: [019-guardados-indicadores](../../../App_NexoLocal/specs/019-guardados-indicadores/spec.md). La app enlaza autoridad, no redefine payload.
 - Ensayo: permitido obtiene resultado previsto; entradas inválidas, estado/identidad no permitidos o recurso retirado no filtran datos; fallos/reintentos siguen contrato. Confirmar efecto durable/idempotencia o ticket/secuencia según operación; nunca interpretar timeout como éxito.
@@ -530,7 +530,7 @@ Vista documental generada del [inventario](inventario.json), autoridad única de
 - Resultado de diseño: 201 experiencia con tipo de evidencia.
 - Invariante: Pedido done propio para registeredOrder; no autoevaluación; verificar prestador activo, un solo destinatario y campos obligatorios también en servidor; outbox review.upserted con versión.
 - Referencia funcional del catálogo: `publishexp, mreview`; entidad: `reviews`.
-- Spec primaria: [nv-19](../../specs/arquitectura/nv-19/spec.md); FR-241 → T-241 → AC-241.
+- Spec primaria: [nv-19](../../specs/arquitectura/nv-08/spec.md); FR-241 → T-241 → AC-241.
 - Estado: Previsto en línea base; contrato formal y aceptación pendientes. formalContract sigue null.
 - Consumidor móvil primario: [020-experiencias-reputacion](../../../App_NexoLocal/specs/020-experiencias-reputacion/spec.md). La app enlaza autoridad, no redefine payload.
 - Ensayo: permitido obtiene resultado previsto; entradas inválidas, estado/identidad no permitidos o recurso retirado no filtran datos; fallos/reintentos siguen contrato. Confirmar efecto durable/idempotencia o ticket/secuencia según operación; nunca interpretar timeout como éxito.
@@ -543,7 +543,7 @@ Vista documental generada del [inventario](inventario.json), autoridad única de
 - Resultado de diseño: 200 experiencias y agregados.
 - Invariante: Distinguir declarado de pedido registrado; no inflar contadores
 - Referencia funcional del catálogo: `V.profile trust`; entidad: `reviews`.
-- Spec primaria: [nv-19](../../specs/arquitectura/nv-19/spec.md); FR-242 → T-242 → AC-242.
+- Spec primaria: [nv-19](../../specs/arquitectura/nv-08/spec.md); FR-242 → T-242 → AC-242.
 - Estado: Previsto en línea base; contrato formal y aceptación pendientes. formalContract sigue null.
 - Consumidor móvil primario: [020-experiencias-reputacion](../../../App_NexoLocal/specs/020-experiencias-reputacion/spec.md). La app enlaza autoridad, no redefine payload.
 - Ensayo: permitido obtiene resultado previsto; entradas inválidas, estado/identidad no permitidos o recurso retirado no filtran datos; fallos/reintentos siguen contrato. Leer no cambia estado; comprobar filtros/cursor cuando apliquen.
@@ -556,7 +556,7 @@ Vista documental generada del [inventario](inventario.json), autoridad única de
 - Resultado de diseño: 200 experiencia.
 - Invariante: Moderar de nuevo y recalcular agregados; no cambiar autor/pedido; en registeredOrder providerId queda ligado al pedido; snapshot reemplaza relaciones de mención/recomendación anteriores.
 - Referencia funcional del catálogo: `Complemento CRUD`; entidad: `reviews`.
-- Spec primaria: [nv-19](../../specs/arquitectura/nv-19/spec.md); FR-243 → T-243 → AC-243.
+- Spec primaria: [nv-19](../../specs/arquitectura/nv-08/spec.md); FR-243 → T-243 → AC-243.
 - Estado: Previsto en línea base; contrato formal y aceptación pendientes. formalContract sigue null.
 - Consumidor móvil primario: [020-experiencias-reputacion](../../../App_NexoLocal/specs/020-experiencias-reputacion/spec.md). La app enlaza autoridad, no redefine payload.
 - Ensayo: permitido obtiene resultado previsto; entradas inválidas, estado/identidad no permitidos o recurso retirado no filtran datos; fallos/reintentos siguen contrato. Confirmar efecto durable/idempotencia o ticket/secuencia según operación; nunca interpretar timeout como éxito.
@@ -569,7 +569,7 @@ Vista documental generada del [inventario](inventario.json), autoridad única de
 - Resultado de diseño: 204.
 - Invariante: Actualizar promedio y recomendaciones; auditar retiro administrativo
 - Referencia funcional del catálogo: `Complemento CRUD`; entidad: `reviews`.
-- Spec primaria: [nv-19](../../specs/arquitectura/nv-19/spec.md); FR-244 → T-244 → AC-244.
+- Spec primaria: [nv-19](../../specs/arquitectura/nv-08/spec.md); FR-244 → T-244 → AC-244.
 - Estado: Previsto en línea base; contrato formal y aceptación pendientes. formalContract sigue null.
 - Consumidor móvil primario: [020-experiencias-reputacion](../../../App_NexoLocal/specs/020-experiencias-reputacion/spec.md). La app enlaza autoridad, no redefine payload.
 - Ensayo: permitido obtiene resultado previsto; entradas inválidas, estado/identidad no permitidos o recurso retirado no filtran datos; fallos/reintentos siguen contrato. Confirmar efecto durable/idempotencia o ticket/secuencia según operación; nunca interpretar timeout como éxito.
@@ -582,7 +582,7 @@ Vista documental generada del [inventario](inventario.json), autoridad única de
 - Resultado de diseño: 202.
 - Invariante: Minimizar datos; idempotente; no equiparar clic con servicio realizado
 - Referencia funcional del catálogo: `share, contact, stats`; entidad: `metrics`.
-- Spec primaria: [nv-18](../../specs/arquitectura/nv-18/spec.md); FR-245 → T-245 → AC-245.
+- Spec primaria: [nv-18](../../specs/arquitectura/nv-08/spec.md); FR-245 → T-245 → AC-245.
 - Estado: Previsto en línea base; contrato formal y aceptación pendientes. formalContract sigue null.
 - Consumidor móvil primario: [019-guardados-indicadores](../../../App_NexoLocal/specs/019-guardados-indicadores/spec.md). La app enlaza autoridad, no redefine payload.
 - Ensayo: permitido obtiene resultado previsto; entradas inválidas, estado/identidad no permitidos o recurso retirado no filtran datos; fallos/reintentos siguen contrato. Confirmar efecto durable/idempotencia o ticket/secuencia según operación; nunca interpretar timeout como éxito.
@@ -595,7 +595,7 @@ Vista documental generada del [inventario](inventario.json), autoridad única de
 - Resultado de diseño: 200 agregados.
 - Invariante: Sin identidad de visitantes ni datos privados
 - Referencia funcional del catálogo: `V.account stats`; entidad: `metrics`.
-- Spec primaria: [nv-18](../../specs/arquitectura/nv-18/spec.md); FR-246 → T-246 → AC-246.
+- Spec primaria: [nv-18](../../specs/arquitectura/nv-08/spec.md); FR-246 → T-246 → AC-246.
 - Estado: Previsto en línea base; contrato formal y aceptación pendientes. formalContract sigue null.
 - Consumidor móvil primario: [019-guardados-indicadores](../../../App_NexoLocal/specs/019-guardados-indicadores/spec.md). La app enlaza autoridad, no redefine payload.
 - Ensayo: permitido obtiene resultado previsto; entradas inválidas, estado/identidad no permitidos o recurso retirado no filtran datos; fallos/reintentos siguen contrato. Leer no cambia estado; comprobar filtros/cursor cuando apliquen.
@@ -686,7 +686,7 @@ Vista documental generada del [inventario](inventario.json), autoridad única de
 - Resultado de diseño: 200 interés.
 - Invariante: Solicitud abierta ajena y perfil activo; una relación única; no impedir por categoría no coincidente: la maqueta permite esa acción; mantener visibilidad y estado como restricciones.
 - Referencia funcional del catálogo: `reqint`; entidad: `interests`.
-- Spec primaria: [nv-20](../../specs/arquitectura/nv-20/spec.md); FR-253 → T-253 → AC-253.
+- Spec primaria: [nv-20](../../specs/arquitectura/nv-09/spec.md); FR-253 → T-253 → AC-253.
 - Estado: Previsto en línea base; contrato formal y aceptación pendientes. formalContract sigue null.
 - Consumidor móvil primario: [021-interesados-candidatos](../../../App_NexoLocal/specs/021-interesados-candidatos/spec.md). La app enlaza autoridad, no redefine payload.
 - Ensayo: permitido obtiene resultado previsto; entradas inválidas, estado/identidad no permitidos o recurso retirado no filtran datos; fallos/reintentos siguen contrato. Confirmar efecto durable/idempotencia o ticket/secuencia según operación; nunca interpretar timeout como éxito.
@@ -699,7 +699,7 @@ Vista documental generada del [inventario](inventario.json), autoridad única de
 - Resultado de diseño: 204.
 - Invariante: No alterar asignación existente; retirar relación propia
 - Referencia funcional del catálogo: `reqint`; entidad: `interests`.
-- Spec primaria: [nv-20](../../specs/arquitectura/nv-20/spec.md); FR-254 → T-254 → AC-254.
+- Spec primaria: [nv-20](../../specs/arquitectura/nv-09/spec.md); FR-254 → T-254 → AC-254.
 - Estado: Previsto en línea base; contrato formal y aceptación pendientes. formalContract sigue null.
 - Consumidor móvil primario: [021-interesados-candidatos](../../../App_NexoLocal/specs/021-interesados-candidatos/spec.md). La app enlaza autoridad, no redefine payload.
 - Ensayo: permitido obtiene resultado previsto; entradas inválidas, estado/identidad no permitidos o recurso retirado no filtran datos; fallos/reintentos siguen contrato. Confirmar efecto durable/idempotencia o ticket/secuencia según operación; nunca interpretar timeout como éxito.
@@ -712,7 +712,7 @@ Vista documental generada del [inventario](inventario.json), autoridad única de
 - Resultado de diseño: 200 candidatos.
 - Invariante: Enriquecer por lote con S02/S03 y mantener cursor estable
 - Referencia funcional del catálogo: `V.ints, intsort`; entidad: `interests`.
-- Spec primaria: [nv-20](../../specs/arquitectura/nv-20/spec.md); FR-255 → T-255 → AC-255.
+- Spec primaria: [nv-20](../../specs/arquitectura/nv-09/spec.md); FR-255 → T-255 → AC-255.
 - Estado: Previsto en línea base; contrato formal y aceptación pendientes. formalContract sigue null.
 - Consumidor móvil primario: [021-interesados-candidatos](../../../App_NexoLocal/specs/021-interesados-candidatos/spec.md). La app enlaza autoridad, no redefine payload.
 - Ensayo: permitido obtiene resultado previsto; entradas inválidas, estado/identidad no permitidos o recurso retirado no filtran datos; fallos/reintentos siguen contrato. Leer no cambia estado; comprobar filtros/cursor cuando apliquen.
@@ -725,7 +725,7 @@ Vista documental generada del [inventario](inventario.json), autoridad única de
 - Resultado de diseño: 200 preselección.
 - Invariante: Requiere interés existente; no equivale a aceptación
 - Referencia funcional del catálogo: `Ampliación opcional: reqshort residual, sin control visible en T31`; entidad: `interests`.
-- Spec primaria: [nv-20](../../specs/arquitectura/nv-20/spec.md); FR-256 → T-256 → AC-256.
+- Spec primaria: [nv-20](../../specs/arquitectura/nv-09/spec.md); FR-256 → T-256 → AC-256.
 - Estado: Opcional; no bloquea alcance obligatorio si no se habilita. formalContract sigue null.
 - Consumidor móvil primario: [021-interesados-candidatos](../../../App_NexoLocal/specs/021-interesados-candidatos/spec.md). La app enlaza autoridad, no redefine payload.
 - Ensayo: permitido obtiene resultado previsto; entradas inválidas, estado/identidad no permitidos o recurso retirado no filtran datos; fallos/reintentos siguen contrato. Confirmar efecto durable/idempotencia o ticket/secuencia según operación; nunca interpretar timeout como éxito.
@@ -738,7 +738,7 @@ Vista documental generada del [inventario](inventario.json), autoridad única de
 - Resultado de diseño: 204.
 - Invariante: Solo dueño; operación idempotente
 - Referencia funcional del catálogo: `Ampliación opcional: reqshort residual, sin control visible en T31`; entidad: `interests`.
-- Spec primaria: [nv-20](../../specs/arquitectura/nv-20/spec.md); FR-257 → T-257 → AC-257.
+- Spec primaria: [nv-20](../../specs/arquitectura/nv-09/spec.md); FR-257 → T-257 → AC-257.
 - Estado: Opcional; no bloquea alcance obligatorio si no se habilita. formalContract sigue null.
 - Consumidor móvil primario: [021-interesados-candidatos](../../../App_NexoLocal/specs/021-interesados-candidatos/spec.md). La app enlaza autoridad, no redefine payload.
 - Ensayo: permitido obtiene resultado previsto; entradas inválidas, estado/identidad no permitidos o recurso retirado no filtran datos; fallos/reintentos siguen contrato. Confirmar efecto durable/idempotencia o ticket/secuencia según operación; nunca interpretar timeout como éxito.
@@ -1037,7 +1037,7 @@ Vista documental generada del [inventario](inventario.json), autoridad única de
 - Resultado de diseño: 200 expedientes autorizados.
 - Invariante: Acceso administrativo separado; auditoría de consulta sensible
 - Referencia funcional del catálogo: `Operación de moderación`; entidad: `reports`.
-- Spec primaria: [nv-24](../../specs/arquitectura/nv-24/spec.md); FR-280 → T-280 → AC-280.
+- Spec primaria: [nv-24](../../specs/arquitectura/nv-05/spec.md); FR-280 → T-280 → AC-280.
 - Estado: Previsto en línea base; contrato formal y aceptación pendientes. formalContract sigue null.
 - Consumo móvil directo: ninguno. La app solo prueba el efecto de negocio por su API pública; no invoca esta superficie.
 - Ensayo: permitido obtiene resultado previsto; entradas inválidas, estado/identidad no permitidos o recurso retirado no filtran datos; fallos/reintentos siguen contrato. Leer no cambia estado; comprobar filtros/cursor cuando apliquen.
@@ -1050,7 +1050,7 @@ Vista documental generada del [inventario](inventario.json), autoridad única de
 - Resultado de diseño: 200 decisión y evento.
 - Invariante: No escribir base ajena; propietario aplica evento idempotente
 - Referencia funcional del catálogo: `Operación de moderación`; entidad: `reports`.
-- Spec primaria: [nv-24](../../specs/arquitectura/nv-24/spec.md); FR-281 → T-281 → AC-281.
+- Spec primaria: [nv-24](../../specs/arquitectura/nv-05/spec.md); FR-281 → T-281 → AC-281.
 - Estado: Previsto en línea base; contrato formal y aceptación pendientes. formalContract sigue null.
 - Consumo móvil directo: ninguno. La app solo prueba el efecto de negocio por su API pública; no invoca esta superficie.
 - Ensayo: permitido obtiene resultado previsto; entradas inválidas, estado/identidad no permitidos o recurso retirado no filtran datos; fallos/reintentos siguen contrato. Confirmar efecto durable/idempotencia o ticket/secuencia según operación; nunca interpretar timeout como éxito.
@@ -1076,7 +1076,7 @@ Vista documental generada del [inventario](inventario.json), autoridad única de
 - Resultado de diseño: 200 dispositivo.
 - Invariante: Asociado a sid actual; token único; rotación
 - Referencia funcional del catálogo: `Requisito push`; entidad: `devices`.
-- Spec primaria: [nv-21](../../specs/arquitectura/nv-21/spec.md); FR-283 → T-283 → AC-283.
+- Spec primaria: [nv-21](../../specs/arquitectura/nv-12/spec.md); FR-283 → T-283 → AC-283.
 - Estado: Previsto en línea base; contrato formal y aceptación pendientes. formalContract sigue null.
 - Consumidor móvil primario: [022-push-dispositivos](../../../App_NexoLocal/specs/022-push-dispositivos/spec.md). La app enlaza autoridad, no redefine payload.
 - Ensayo: permitido obtiene resultado previsto; entradas inválidas, estado/identidad no permitidos o recurso retirado no filtran datos; fallos/reintentos siguen contrato. Confirmar efecto durable/idempotencia o ticket/secuencia según operación; nunca interpretar timeout como éxito.
@@ -1089,7 +1089,7 @@ Vista documental generada del [inventario](inventario.json), autoridad única de
 - Resultado de diseño: 204.
 - Invariante: Idempotente; no afectar otro usuario
 - Referencia funcional del catálogo: `Logout/push`; entidad: `devices`.
-- Spec primaria: [nv-21](../../specs/arquitectura/nv-21/spec.md); FR-284 → T-284 → AC-284.
+- Spec primaria: [nv-21](../../specs/arquitectura/nv-12/spec.md); FR-284 → T-284 → AC-284.
 - Estado: Previsto en línea base; contrato formal y aceptación pendientes. formalContract sigue null.
 - Consumidor móvil primario: [022-push-dispositivos](../../../App_NexoLocal/specs/022-push-dispositivos/spec.md). La app enlaza autoridad, no redefine payload.
 - Ensayo: permitido obtiene resultado previsto; entradas inválidas, estado/identidad no permitidos o recurso retirado no filtran datos; fallos/reintentos siguen contrato. Confirmar efecto durable/idempotencia o ticket/secuencia según operación; nunca interpretar timeout como éxito.
@@ -1102,7 +1102,7 @@ Vista documental generada del [inventario](inventario.json), autoridad única de
 - Resultado de diseño: 200 lista.
 - Invariante: Payload mínimo, acceso al destino se revalida al abrir
 - Referencia funcional del catálogo: `notifSheet, bell`; entidad: `notifications`.
-- Spec primaria: [nv-21](../../specs/arquitectura/nv-21/spec.md); FR-285 → T-285 → AC-285.
+- Spec primaria: [nv-21](../../specs/arquitectura/nv-12/spec.md); FR-285 → T-285 → AC-285.
 - Estado: Previsto en línea base; contrato formal y aceptación pendientes. formalContract sigue null.
 - Consumidor móvil primario: [022-push-dispositivos](../../../App_NexoLocal/specs/022-push-dispositivos/spec.md). La app enlaza autoridad, no redefine payload.
 - Ensayo: permitido obtiene resultado previsto; entradas inválidas, estado/identidad no permitidos o recurso retirado no filtran datos; fallos/reintentos siguen contrato. Leer no cambia estado; comprobar filtros/cursor cuando apliquen.
@@ -1115,7 +1115,7 @@ Vista documental generada del [inventario](inventario.json), autoridad única de
 - Resultado de diseño: 204.
 - Invariante: Solo aviso propio, idempotente
 - Referencia funcional del catálogo: `seenotif`; entidad: `notifications`.
-- Spec primaria: [nv-21](../../specs/arquitectura/nv-21/spec.md); FR-286 → T-286 → AC-286.
+- Spec primaria: [nv-21](../../specs/arquitectura/nv-12/spec.md); FR-286 → T-286 → AC-286.
 - Estado: Previsto en línea base; contrato formal y aceptación pendientes. formalContract sigue null.
 - Consumidor móvil primario: [022-push-dispositivos](../../../App_NexoLocal/specs/022-push-dispositivos/spec.md). La app enlaza autoridad, no redefine payload.
 - Ensayo: permitido obtiene resultado previsto; entradas inválidas, estado/identidad no permitidos o recurso retirado no filtran datos; fallos/reintentos siguen contrato. Confirmar efecto durable/idempotencia o ticket/secuencia según operación; nunca interpretar timeout como éxito.
@@ -1154,7 +1154,7 @@ Vista documental generada del [inventario](inventario.json), autoridad única de
 - Resultado de diseño: 200 sin detalles sensibles.
 - Invariante: No consultar todas las dependencias en liveness
 - Referencia funcional del catálogo: `Operación`; entidad: `outbox_inbox`.
-- Spec primaria: [nv-01](../../specs/arquitectura/nv-01/spec.md); FR-289 → T-289 → AC-289.
+- Spec primaria: [nv-01](../../specs/arquitectura/nv-00/spec.md); FR-289 → T-289 → AC-289.
 - Estado: Previsto en línea base; contrato formal y aceptación pendientes. formalContract sigue null.
 - Consumo móvil directo: ninguno. La app solo prueba el efecto de negocio por su API pública; no invoca esta superficie.
 - Ensayo: permitido obtiene resultado previsto; entradas inválidas, estado/identidad no permitidos o recurso retirado no filtran datos; fallos/reintentos siguen contrato. Leer no cambia estado; comprobar filtros/cursor cuando apliquen.
@@ -1167,7 +1167,7 @@ Vista documental generada del [inventario](inventario.json), autoridad única de
 - Resultado de diseño: 200 o 503.
 - Invariante: Comprobar dependencias indispensables del servicio, no datos de usuario
 - Referencia funcional del catálogo: `Operación`; entidad: `outbox_inbox`.
-- Spec primaria: [nv-01](../../specs/arquitectura/nv-01/spec.md); FR-290 → T-290 → AC-290.
+- Spec primaria: [nv-01](../../specs/arquitectura/nv-00/spec.md); FR-290 → T-290 → AC-290.
 - Estado: Previsto en línea base; contrato formal y aceptación pendientes. formalContract sigue null.
 - Consumo móvil directo: ninguno. La app solo prueba el efecto de negocio por su API pública; no invoca esta superficie.
 - Ensayo: permitido obtiene resultado previsto; entradas inválidas, estado/identidad no permitidos o recurso retirado no filtran datos; fallos/reintentos siguen contrato. Leer no cambia estado; comprobar filtros/cursor cuando apliquen.
@@ -1180,7 +1180,7 @@ Vista documental generada del [inventario](inventario.json), autoridad única de
 - Resultado de diseño: 200 teléfono y canales autorizados.
 - Invariante: Respuesta privada sin caché compartida; número validado por identidad; no mezclar en DTO público cacheable; exigir showPhone=true vigente; no confiar solo en canal visible en Flutter.
 - Referencia funcional del catálogo: `contactSheet, copy`; entidad: `providers`.
-- Spec primaria: [nv-25](../../specs/arquitectura/nv-25/spec.md); FR-291 → T-291 → AC-291.
+- Spec primaria: [nv-25](../../specs/arquitectura/nv-10/spec.md); FR-291 → T-291 → AC-291.
 - Estado: Previsto en línea base; contrato formal y aceptación pendientes. formalContract sigue null.
 - Consumidor móvil primario: [025-contacto-consentimiento](../../../App_NexoLocal/specs/025-contacto-consentimiento/spec.md). La app enlaza autoridad, no redefine payload.
 - Ensayo: permitido obtiene resultado previsto; entradas inválidas, estado/identidad no permitidos o recurso retirado no filtran datos; fallos/reintentos siguen contrato. Leer no cambia estado; comprobar filtros/cursor cuando apliquen.
@@ -1193,7 +1193,7 @@ Vista documental generada del [inventario](inventario.json), autoridad única de
 - Resultado de diseño: 200 teléfono autorizado.
 - Invariante: Cliente: teléfono del prestador solo con showPhone vigente. Prestador: teléfono del cliente solo asignado en ok/done y clientContactPreference=both vigente. Cancelado o revocado: 403/404. No caché de contacto; comprobación autoritativa.
 - Referencia funcional del catálogo: `chatmenu, V.match, copy`; entidad: `orders`.
-- Spec primaria: [nv-25](../../specs/arquitectura/nv-25/spec.md); FR-292 → T-292 → AC-292.
+- Spec primaria: [nv-25](../../specs/arquitectura/nv-10/spec.md); FR-292 → T-292 → AC-292.
 - Estado: Previsto en línea base; contrato formal y aceptación pendientes. formalContract sigue null.
 - Consumidor móvil primario: [025-contacto-consentimiento](../../../App_NexoLocal/specs/025-contacto-consentimiento/spec.md). La app enlaza autoridad, no redefine payload.
 - Ensayo: permitido obtiene resultado previsto; entradas inválidas, estado/identidad no permitidos o recurso retirado no filtran datos; fallos/reintentos siguen contrato. Leer no cambia estado; comprobar filtros/cursor cuando apliquen.
@@ -1206,7 +1206,7 @@ Vista documental generada del [inventario](inventario.json), autoridad única de
 - Resultado de diseño: 200 id, nombre, avatar, oficio y zona aproximada.
 - Invariante: Excluir perfil propio/inactivo; sin q sugerir cobertura cercana; con q buscar nombre/oficio sin imponer cercanía, como mresHTML. Sin teléfono ni coordenadas privadas. Búsqueda infija debe preservar resultados mediante índice/adaptador medido; no sustituirla silenciosamente por solo prefijo.
 - Referencia funcional del catálogo: `mresHTML, mentionHTML, exptag`; entidad: `providers`.
-- Spec primaria: [nv-19](../../specs/arquitectura/nv-19/spec.md); FR-293 → T-293 → AC-293.
+- Spec primaria: [nv-19](../../specs/arquitectura/nv-08/spec.md); FR-293 → T-293 → AC-293.
 - Estado: Previsto en línea base; contrato formal y aceptación pendientes. formalContract sigue null.
 - Consumidor móvil primario: [020-experiencias-reputacion](../../../App_NexoLocal/specs/020-experiencias-reputacion/spec.md). La app enlaza autoridad, no redefine payload.
 - Ensayo: permitido obtiene resultado previsto; entradas inválidas, estado/identidad no permitidos o recurso retirado no filtran datos; fallos/reintentos siguen contrato. Leer no cambia estado; comprobar filtros/cursor cuando apliquen.
@@ -1219,7 +1219,7 @@ Vista documental generada del [inventario](inventario.json), autoridad única de
 - Resultado de diseño: 200 experiencias propias y nextCursor.
 - Invariante: Filtrar authorId del JWT; incluir prestador y estado visible al autor; sin depender del nombre Tú.; caso de aceptación obligatorio: Ana publica, logout, Carlos entra y no la obtiene como propia.
 - Referencia funcional del catálogo: `V.myprofile, mtab`; entidad: `reviews`.
-- Spec primaria: [nv-19](../../specs/arquitectura/nv-19/spec.md); FR-294 → T-294 → AC-294.
+- Spec primaria: [nv-19](../../specs/arquitectura/nv-08/spec.md); FR-294 → T-294 → AC-294.
 - Estado: Previsto en línea base; contrato formal y aceptación pendientes. formalContract sigue null.
 - Consumidor móvil primario: [020-experiencias-reputacion](../../../App_NexoLocal/specs/020-experiencias-reputacion/spec.md). La app enlaza autoridad, no redefine payload.
 - Ensayo: permitido obtiene resultado previsto; entradas inválidas, estado/identidad no permitidos o recurso retirado no filtran datos; fallos/reintentos siguen contrato. Leer no cambia estado; comprobar filtros/cursor cuando apliquen.
@@ -1232,7 +1232,7 @@ Vista documental generada del [inventario](inventario.json), autoridad única de
 - Resultado de diseño: 200 DTO público o propio; 404 si no visible.
 - Invariante: Complemento de navegación: necesario para enlace estable/notificación propuesta, no pantalla individual confirmada en maqueta.
 - Referencia funcional del catálogo: `Complemento de contrato para referencias y enlaces`; entidad: `reviews`.
-- Spec primaria: [nv-19](../../specs/arquitectura/nv-19/spec.md); FR-295 → T-295 → AC-295.
+- Spec primaria: [nv-19](../../specs/arquitectura/nv-08/spec.md); FR-295 → T-295 → AC-295.
 - Estado: Complemento de diseño; condición/UX y alcance se ratifican antes de Ready, sin pantalla inventada. formalContract sigue null.
 - Consumidor móvil primario: [020-experiencias-reputacion](../../../App_NexoLocal/specs/020-experiencias-reputacion/spec.md). La app enlaza autoridad, no redefine payload.
 - Ensayo: permitido obtiene resultado previsto; entradas inválidas, estado/identidad no permitidos o recurso retirado no filtran datos; fallos/reintentos siguen contrato. Leer no cambia estado; comprobar filtros/cursor cuando apliquen.
@@ -1245,7 +1245,7 @@ Vista documental generada del [inventario](inventario.json), autoridad única de
 - Resultado de diseño: 200 preferencias y version.
 - Invariante: showPhone=false revoca lectura de teléfono inmediatamente. chatEnabled=false impide nuevas conversaciones; propuesta: historial y pedidos activos conservan chat. S05 consulta regla vigente. Alias local wa significa chat interno, no WhatsApp.
 - Referencia funcional del catálogo: `V.account, ACT.chan`; entidad: `providers`.
-- Spec primaria: [nv-25](../../specs/arquitectura/nv-25/spec.md); FR-296 → T-296 → AC-296.
+- Spec primaria: [nv-25](../../specs/arquitectura/nv-10/spec.md); FR-296 → T-296 → AC-296.
 - Estado: Previsto en línea base; contrato formal y aceptación pendientes. formalContract sigue null.
 - Consumidor móvil primario: [025-contacto-consentimiento](../../../App_NexoLocal/specs/025-contacto-consentimiento/spec.md). La app enlaza autoridad, no redefine payload.
 - Ensayo: permitido obtiene resultado previsto; entradas inválidas, estado/identidad no permitidos o recurso retirado no filtran datos; fallos/reintentos siguen contrato. Confirmar efecto durable/idempotencia o ticket/secuencia según operación; nunca interpretar timeout como éxito.
@@ -1258,7 +1258,7 @@ Vista documental generada del [inventario](inventario.json), autoridad única de
 - Resultado de diseño: 200 preferencia y version.
 - Invariante: Ampliación de privacidad: en pend/ok/done permite revocar; cancel no admite conceder. Cambiar a both no revela teléfono antes de ok. S04 es autoridad y retira cachés de contacto.
 - Referencia funcional del catálogo: `CH_OPT y corrección de ACT.chatmenu`; entidad: `orders`.
-- Spec primaria: [nv-25](../../specs/arquitectura/nv-25/spec.md); FR-297 → T-297 → AC-297.
+- Spec primaria: [nv-25](../../specs/arquitectura/nv-10/spec.md); FR-297 → T-297 → AC-297.
 - Estado: Complemento de diseño; condición/UX y alcance se ratifican antes de Ready, sin pantalla inventada. formalContract sigue null.
 - Consumidor móvil primario: [025-contacto-consentimiento](../../../App_NexoLocal/specs/025-contacto-consentimiento/spec.md). La app enlaza autoridad, no redefine payload.
 - Ensayo: permitido obtiene resultado previsto; entradas inválidas, estado/identidad no permitidos o recurso retirado no filtran datos; fallos/reintentos siguen contrato. Confirmar efecto durable/idempotencia o ticket/secuencia según operación; nunca interpretar timeout como éxito.
@@ -1271,7 +1271,7 @@ Vista documental generada del [inventario](inventario.json), autoridad única de
 - Resultado de diseño: 200 data/errors, generatedAt, stale; error explícito o fallback REST disponible.
 - Invariante: Extensión opcional de lectura, sin mutations ni Cypher arbitrario. Authorization por recurso/campo, dos saltos y profundidad propuesta 4; máximo 100 objetos, una operación y timeout 2 s. Coste y rate limit por usuario. No caché compartida de datos personalizados.
 - Referencia funcional del catálogo: `Propuesta S08; operaciones SocialProviderContext y RelatedProviders`; entidad: `social_graph`.
-- Spec primaria: [nv-15](../../specs/arquitectura/nv-15/spec.md); FR-298 → T-298 → AC-298.
+- Spec primaria: [nv-15](../../specs/arquitectura/README.md); FR-298 → T-298 → AC-298.
 - Estado: Opcional; no bloquea alcance obligatorio si no se habilita. formalContract sigue null.
 - Consumidor móvil primario: [015-relaciones-opcional](../../../App_NexoLocal/specs/015-relaciones-opcional/spec.md). La app enlaza autoridad, no redefine payload.
 - Ensayo: permitido obtiene resultado previsto; entradas inválidas, estado/identidad no permitidos o recurso retirado no filtran datos; fallos/reintentos siguen contrato. Confirmar efecto durable/idempotencia o ticket/secuencia según operación; nunca interpretar timeout como éxito.
@@ -1297,7 +1297,7 @@ Vista documental generada del [inventario](inventario.json), autoridad única de
 - Resultado de diseño: 200 chatEnabled, showPhone, status, policyVersion; sin teléfono.
 - Invariante: Solo servicios permitidos; S05 verifica antes de nueva conversación y S04 antes de contacto. No conceder por caché obsoleta; dependencia caída niega divulgación.
 - Referencia funcional del catálogo: `Regla autoritativa para EP-066/091/092/096`; entidad: `providers`.
-- Spec primaria: [nv-25](../../specs/arquitectura/nv-25/spec.md); FR-300 → T-300 → AC-300.
+- Spec primaria: [nv-25](../../specs/arquitectura/nv-10/spec.md); FR-300 → T-300 → AC-300.
 - Estado: Previsto en línea base; contrato formal y aceptación pendientes. formalContract sigue null.
 - Consumo móvil directo: ninguno. La app solo prueba el efecto de negocio por su API pública; no invoca esta superficie.
 - Ensayo: permitido obtiene resultado previsto; entradas inválidas, estado/identidad no permitidos o recurso retirado no filtran datos; fallos/reintentos siguen contrato. Leer no cambia estado; comprobar filtros/cursor cuando apliquen.

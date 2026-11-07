@@ -1,0 +1,71 @@
+# Entorno local de nv-00 (FR-007): MongoDB en replica, Redis y emulador de colas.
+# Levantar con: docker compose up -d
+# La API arranca contra el sin configuracion adicional: appsettings.Development.json ya apunta aqui.
+
+services:
+  mongo:
+    image: mongo:7.0
+    container_name: nexo-mongo
+    # Replica set de un nodo: las transacciones y los change streams lo exigen.
+    command: ["mongod", "--replSet", "rs0", "--bind_ip_all"]
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+    healthcheck:
+      # Se auto-inicia la replica en el primer arranque y luego solo confirma el estado.
+      test: >-
+        mongosh --quiet --eval "
+          try { if (rs.status().ok) { quit(0) } }
+          catch (error) {
+            rs.initiate({ _id: 'rs0', members: [{ _id: 0, host: 'localhost:27017' }] });
+            quit(1)
+          }
+          quit(1)"
+      interval: 5s
+      timeout: 10s
+      retries: 20
+      start_period: 10s
+
+  mongo-init:
+    image: mongo:7.0
+    container_name: nexo-mongo-init
+    depends_on:
+      mongo:
+        condition: service_healthy
+    volumes:
+      - ./scripts/mongo-init.js:/scripts/mongo-init.js:ro
+    # Crea las tres bases con su marca de propietario. Idempotente (nv-00 FR-005).
+    command: ["mongosh", "mongodb://mongo:27017/?replicaSet=rs0&directConnection=true", "--quiet", "--file", "/scripts/mongo-init.js"]
+    restart: "no"
+
+  redis:
+    image: redis:7.2-alpine
+    container_name: nexo-redis
+    # Sin persistencia: Redis guarda estado compartido vivo, no historial durable.
+    command: ["redis-server", "--save", "", "--appendonly", "no"]
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  queues:
+    image: mcr.microsoft.com/azure-storage/azurite:3.33.0
+    container_name: nexo-queues
+    command: ["azurite-queue", "--queueHost", "0.0.0.0", "--queuePort", "10001", "--location", "/data"]
+    ports:
+      - "10001:10001"
+    volumes:
+      - queue-data:/data
+    healthcheck:
+      test: ["CMD", "nc", "-z", "127.0.0.1", "10001"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  mongo-data:
+  queue-data:

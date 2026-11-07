@@ -6,7 +6,7 @@ Spec: [spec.md](spec.md). Tareas: [task.md](task.md). Estado: diseño, sin imple
 
 Definir CI/CD, dos réplicas, TLS, CDN/observabilidad, ciclo crear/desplegar/eliminar y manifiesto; cerrar paquete académico sin inventar costo cero.
 
-Dependencias: Preparación desde nv-00..04; cierre requiere nv-04..13 y decisiones D03..D08; nv-15 opcional.
+Dependencias: Preparación desde nv-00..04; cierre requiere nv-04..13 y decisiones D03..D08. El grafo (nv-15) fue retirado por decisión D-2; sus relaciones se resuelven con $graphLookup.
 
 ## 2. Diseño técnico
 

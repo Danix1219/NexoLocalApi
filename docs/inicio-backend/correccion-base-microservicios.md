@@ -1,5 +1,8 @@
 # Correccion de la base: solucion original y microservicios
 
+> **Documento historico.** Describe la estructura de ocho microservicios que la **enmienda E-001** retiro el 2026-11-06. Ya no refleja lo que hay en disco: no existen `nexolocal.Api.slnx`, `services/` ni los hosts por servicio. Se conserva como evidencia del trabajo ejecutado y de por que se cambio. **Estado vigente:** [estructura-backend.md](../estructura-backend.md) y [mapa de specs](../../specs/arquitectura/README.md).
+
+
 Fecha: 2026-11-03. El usuario corrige la creacion de una solucion paralela y confirma **Gateway G01; los microservicios tendran sus propios hosts**. Se reutiliza el proyecto nexolocal.Api existente y la unica solucion activa es nexolocal.Api.slnx. NexoLocal.Backend.slnx se retiro.
 
 ## Estructura aplicada

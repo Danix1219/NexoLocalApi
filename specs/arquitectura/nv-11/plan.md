@@ -71,7 +71,7 @@ FR-711 → T-711 → AC-711: Nueva orden no reescribe contexto histórico; mensa
 
 ## Rutas, propietario y orden verificable 0.4.1
 
-Dueño: S05 Messaging. Rutas objetivo: `services/messaging/src/ y services/messaging/tests/` (no creadas por este plan). Alcance propio: mensajes, pertenencia e idempotencia; upgrade WS de Gateway no posee mensajes. Leer [mapa de carpetas](../../../docs/estructura-backend.md) y [secuencia SDD](../../../docs/orden-desarrollo-backend.md).
+Dueño: S05 Messaging. Rutas objetivo: `src/Domains/messaging/ y services/messaging/tests/` (no creadas por este plan). Alcance propio: mensajes, pertenencia e idempotencia; upgrade WS de Gateway no posee mensajes. Leer [mapa de carpetas](../../../docs/estructura-backend.md) y [secuencia SDD](../../../docs/orden-desarrollo-backend.md).
 
 Actual: SDD/validadores en este checkout y plantilla Visual Studio separada, sin consolidacion ejecutada. Antes de Ready, T-950 concreta archivos existentes/objetivo y decisiones de la historia; T-001 depende de esa salida ademas del refinamiento. Preservar dependencias de negocio ya declaradas, contratos formales y autoridad API/app.
 

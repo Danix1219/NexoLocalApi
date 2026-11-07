@@ -26,3 +26,11 @@ Versión: 0.1.0 | Fecha: 2026-11-05 | Spec: [spec.md](../spec.md)
 - [ ] Reversión ensayada con `az containerapp ingress traffic set`.
 
 Sin estas casillas marcadas con evidencia real, el despliegue no se declara Ready.
+
+## Al habilitar los gates DevSecOps (nv-03)
+
+- [ ] Ningún control bloqueante corre después del `docker push`: una imagen con hallazgo High no llega al registro.
+- [ ] CodeQL y Trivy fallan el job, no solo anotan el PR.
+- [ ] El DAST corre contra la revisión nueva y, al fallar, el tráfico vuelve a la anterior.
+- [ ] Cada excepción tiene motivo y fecha de caducidad registrados; ninguna silenciada en la herramienta.
+- [ ] Rulesets de `main`, `develop` y `release` aplicados, no solo propuestos.

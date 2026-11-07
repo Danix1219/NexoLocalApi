@@ -1,6 +1,8 @@
 # NV-10 — Pedidos, privacidad de contacto y resolución
 
-Versión: 0.4.1 | Fecha: 2026-11-02 | Rama prevista: `nv-10`
+Versión: 0.5.0 | Fecha: 2026-11-06 | Rama prevista: `nv-10`
+
+> **Alineación E-001.** Este incremento se implementa en el módulo **Engagement** de la API modular por dominios, con datos en **`nexo_engagement`**. No es un servicio desplegable independiente: comparte host, se despliega en una app de App Service con **2 instancias**, y el estado compartido vive en **Redis**. Los identificadores `S01`–`S08` se conservan como **mapa de dominios**. Ver [mapa de specs](../README.md) y [constitución §4](../../../.specify/memory/constitution.md).
 
 ## 1. Objetivo
 
@@ -80,9 +82,9 @@ Fuera: funcionalidades ajenas y despliegue no encargado.
 
 | Operación integrada | Nuevo dueño de incremento |
 |---|---|
-| EP-092 | [nv-25](../nv-25/spec.md) |
-| EP-097 | [nv-25](../nv-25/spec.md) |
-| EP-100 | [nv-25](../nv-25/spec.md) |
+| EP-092 | [este spec](spec.md) |
+| EP-097 | [este spec](spec.md) |
+| EP-100 | [este spec](spec.md) |
 
 Los FR/AC heredados de esta fase comprueban integración con esas capacidades; sus tareas EP y casos de uso se ejecutan únicamente en la spec primaria del inventario. El propietario S01–S08 no cambia.
 
@@ -182,8 +184,8 @@ Cobertura de diseño, no ejecución aprobada. Contratos formales, decisiones y e
 
 Dueño de este incremento: S04 Orders. [Mapa backend](../../../docs/estructura-backend.md) y [orden SDD](../../../docs/orden-desarrollo-backend.md) concretan la propuesta; no ratifican proveedores ni crean proyectos. Las rutas siguientes son objetivo hasta ejecutarse.
 
-- FR-950: Antes de Ready, concretar archivos/rutas, dueño, referencias y pruebas del alcance: pedido/asignacion/outbox locales y privacidad de contacto; integrar nv-25 sin trasladar reglas a Gateway. Ubicacion objetivo: services/orders/src/ y services/orders/tests/.
-- NFR-950: Separar preparacion documental de ejecucion; respetar capas y datos por propietario, conservar Git/SDD y exigir CI de producto al introducir codigo. Jira/Confluence pospuestos no se inventan; ningun endpoint, estado Ready o aceptacion se deriva de una carpeta.
+- FR-950: Antes de Ready, concretar archivos/rutas, dueño, referencias y pruebas del alcance: pedido/asignacion/outbox locales y privacidad de contacto; integrar este spec sin trasladar reglas a Gateway. Ubicacion objetivo: src/Domains/orders/ y services/orders/tests/.
+- NFR-950: Separar preparacion documental de ejecucion; respetar capas y datos por propietario, conservar Git/SDD y exigir CI de producto al introducir codigo. Ningun endpoint, estado Ready o aceptacion se deriva de una carpeta.
 
 - [ ] AC-950 → FR-950/NFR-950: Plan contiene rutas actuales/objetivo, decisiones previas, dependencia de entrada, historia seleccionada, suites/evidencia y dueño; matriz de tareas cubre el cambio y Ready espera esa preparacion. Si una ruta no aplica, justificar con superficie/autoridad, sin crear un proyecto artificial. Verificacion de producto queda pendiente hasta ejecutarse.
 

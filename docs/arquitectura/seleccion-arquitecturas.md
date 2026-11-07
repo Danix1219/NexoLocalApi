@@ -1,5 +1,8 @@
 # Arquitectura interna por caso de uso
 
+> **Documento historico.** Describe la estructura de ocho microservicios que la **enmienda E-001** retiro el 2026-11-06. Ya no refleja lo que hay en disco: no existen `nexolocal.Api.slnx`, `services/` ni los hosts por servicio. Se conserva como evidencia del trabajo ejecutado y de por que se cambio. **Estado vigente:** [estructura-backend.md](../estructura-backend.md) y [mapa de specs](../../specs/arquitectura/README.md).
+
+
 Revisión aplicada al scaffold el 2026-11-03, por encargo del usuario. Elección razonada según las operaciones e invariantes del inventario, sin afirmar que exista una arquitectura universalmente mejor. Proveedores/contratos y aceptación funcional siguen pendientes. Se mantienen los ocho límites de servicio y G01, la solución original y los diez procesos previstos.
 
 | Propietario | Arquitectura interna | Proyectos | Patrones asociados |
