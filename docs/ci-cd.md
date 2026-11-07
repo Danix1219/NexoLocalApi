@@ -15,7 +15,7 @@
 
 | Workflow | Se dispara con | Comprueba |
 |---|---|---|
-| `ci.yml` | PR a `develop`, `main` o `release/**`; push a `develop` | Formato, vulnerabilidades, compilación, fronteras de arquitectura y las 41 pruebas |
+| `ci.yml` | PR a `develop`, `main` o `release/**`; push a `develop` | Formato, vulnerabilidades, Terraform, compilación, fronteras de arquitectura y las 41 pruebas |
 | `sdd.yml` | Cualquier push y cualquier PR | Documentación SDD: estructura, enlaces y trazabilidad. Arrastra el build como dependencia |
 | `pr-governance.yml` | PR a `main`, `develop` o `release/**` | Trazabilidad del PR y dirección de rama |
 | `deploy-azure.yml` | Push a `main` | Publica en App Service con OIDC |
@@ -30,11 +30,23 @@ tiene por qué saber eso. Ahora los checks de producto se llaman por lo que son.
    señala el archivo, para que el arreglo quede en el commit de quien lo rompió.
 2. **Dependencias** — `dotnet list package --vulnerable --include-transitive`. Incluye las
    transitivas porque así llegó la última: Snappier dentro de MongoDB.Driver.
-3. **Compilación** — `dotnet build --configuration Release`. Con `TreatWarningsAsErrors` y los
+3. **Infraestructura** — `terraform fmt -check` y `terraform validate` sobre `infra/terraform/`.
+   El `init` va con `-backend=false`: descarga los proveedores sin tocar el estado remoto, así que
+   no necesita credenciales de Azure ni puede modificar nada.
+4. **Compilación** — `dotnet build --configuration Release`. Con `TreatWarningsAsErrors` y los
    analizadores de .NET activos, el build **ya es un linter**: una advertencia rompe la CI.
-4. **Fronteras de arquitectura** — NetArchTest, con caso negativo: `Nexo.Fixtures.BadDiscovery`
+5. **Fronteras de arquitectura** — NetArchTest, con caso negativo: `Nexo.Fixtures.BadDiscovery`
    cruza un dominio a propósito y la prueba debe detectarlo.
-5. **Pruebas** — las 41 de la solución, con Mongo y Redis reales.
+6. **Pruebas** — las 41 de la solución, con Mongo y Redis reales.
+
+### Resultado de las pruebas
+
+`dotnet test` escribe un `.trx` y `.ci/resumen-pruebas.py` lo convierte en el resumen que GitHub
+muestra al abrir la ejecución: una fila por grupo con su marca, y el mensaje completo de cada
+prueba que falló. Sin eso había que abrir el job y buscar el número en el log.
+
+Corre también cuando las pruebas fallan (`if: always()`), que es justo cuando hace falta leerlo.
+No usa ninguna acción de terceros: es un lector de XML de 80 líneas.
 
 ## Variables y secretos
 
@@ -81,6 +93,7 @@ Los checks no bloquean nada por sí solos: hay que exigirlos en la protección d
      ```
      CI / estilo
      CI / dependencias
+     CI / infraestructura
      CI / build y pruebas / Backend / build
      SDD / docs
      Git / flow

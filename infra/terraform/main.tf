@@ -1,7 +1,7 @@
 locals {
   etiquetas = {
-    proyecto  = "nexo-local"
-    entorno   = "produccion"
+    proyecto   = "nexo-local"
+    entorno    = "produccion"
     gestionado = "terraform"
   }
 }
@@ -90,10 +90,10 @@ resource "azurerm_linux_web_app" "api" {
   }
 
   site_config {
-    always_on              = true
-    minimum_tls_version    = "1.2"
-    ftps_state             = "Disabled"
-    health_check_path      = "/health/ready"
+    always_on                               = true
+    minimum_tls_version                     = "1.2"
+    ftps_state                              = "Disabled"
+    health_check_path                       = "/health/ready"
     container_registry_use_managed_identity = true
 
     application_stack {

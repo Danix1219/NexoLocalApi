@@ -30,5 +30,14 @@ jobs:
       # con NetArchTest, incluido el caso negativo (nv-00 AC-004).
       - name: Architecture boundaries
         run: dotnet test tests/Nexo.Architecture.Tests --no-build --configuration Release
-      - name: Unit tests
-        run: dotnet test src/Nexo.sln --no-build --configuration Release
+      # `src/Nexo.sln` incluye las de arquitectura: el paso anterior las aisla para que, cuando
+      # rompan, se vea en la lista de pasos cual fue sin abrir el log entero.
+      - name: Unit and integration tests
+        run: >
+          dotnet test src/Nexo.sln --no-build --configuration Release
+          --logger "trx;LogFileName=pruebas.trx" --results-directory resultados
+      # Sin esto la CI corre las pruebas y solo deja un numero en el log. Corre tambien cuando
+      # fallan, que es justo cuando hace falta leerlas.
+      - name: Resumen de pruebas
+        if: always()
+        run: python3 -B .ci/resumen-pruebas.py resultados >> "$GITHUB_STEP_SUMMARY"

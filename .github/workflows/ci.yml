@@ -74,6 +74,33 @@ jobs:
             exit 1
           fi
 
+  infraestructura:
+    name: CI / infraestructura
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+
+      - name: Instalar Terraform
+        uses: hashicorp/setup-terraform@b9cd54a3c349d3f38e8881555d616ced269862dd # v3.1.2
+        with:
+          terraform_version: 1.9.8
+          terraform_wrapper: false
+
+      - name: Formato
+        run: terraform -chdir=infra/terraform fmt -check -recursive
+
+      # `-backend=false` descarga los proveedores sin tocar el estado remoto: la validacion no
+      # necesita credenciales de Azure ni puede modificar nada.
+      - name: Inicializar sin backend
+        run: terraform -chdir=infra/terraform init -backend=false -input=false
+
+      - name: Validar
+        run: terraform -chdir=infra/terraform validate
+
   # Compilacion, fronteras entre dominios y pruebas. Reutiliza el mismo workflow que usan
   # `sdd.yml` y el despliegue, para que los tres comprueben exactamente lo mismo.
   build:
