@@ -67,7 +67,9 @@ jobs:
           set -euo pipefail
           dotnet list src/Nexo.sln package --vulnerable --include-transitive > vulnerables.txt
           cat vulnerables.txt
-          if grep -qiE '(Low|Moderate|High|Critical)' vulnerables.txt; then
+          # `dotnet` antepone "> " a cada paquete vulnerable y no usa ese marcador para nada mas.
+          # Buscar la severidad por palabra suelta no sirve: "following" contiene "low".
+          if grep -qE '^[[:space:]]*>' vulnerables.txt; then
             echo "::error::Hay paquetes con vulnerabilidades conocidas; revisar la salida."
             exit 1
           fi

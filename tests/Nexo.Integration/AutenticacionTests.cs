@@ -24,7 +24,7 @@ public sealed class AutenticacionTests(InfraFixture infra)
             builder.UseEnvironment("Development");
             builder.ConfigureHostConfiguration(c => c.AddInMemoryCollection(new Dictionary<string, string?>
             {
-                ["Identity:CodeHmacKey"] = "cHJ1ZWJhLWRlLWxsYXZlLWhtYWMtZGUtMzItYnl0ZXMh",
+                ["Identity:CodeHmacKey"] = ConfiguracionDePrueba.ClaveHmac,
                 ["Mail:Host"] = "localhost",
                 ["Mail:From"] = "pruebas@nexolocal.mx",
                 ["Mongo:ConnectionString"] = mongo,

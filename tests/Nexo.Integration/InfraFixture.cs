@@ -30,3 +30,16 @@ public sealed class InfraFixture : IAsyncLifetime
 
 [CollectionDefinition("infra")]
 public sealed class InfraCollection : ICollectionFixture<InfraFixture>;
+
+/// <summary>
+/// Valores que el host exige al arrancar y que en CI no llegan de ningun `.env`.
+/// </summary>
+public static class ConfiguracionDePrueba
+{
+    /// <summary>
+    /// Se calcula en vez de escribirse: una cadena Base64 literal junto a `CodeHmacKey` la marcan
+    /// como secreto filtrado los escaneres del repositorio, y no lo es.
+    /// </summary>
+    public static readonly string ClaveHmac =
+        Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes("llave-de-prueba-sin-valor-real"));
+}

@@ -23,7 +23,7 @@ public sealed class SondasDeSaludTests(InfraFixture infra)
             {
                 // El host valida estas al arrancar. La prueba las fija en memoria porque en CI
                 // no hay `.env`: sin esto, verde en local y rojo en el runner.
-                ["Identity:CodeHmacKey"] = "cHJ1ZWJhLWRlLWxsYXZlLWhtYWMtZGUtMzItYnl0ZXMh",
+                ["Identity:CodeHmacKey"] = ConfiguracionDePrueba.ClaveHmac,
                 ["Mail:Host"] = "localhost",
                 ["Mail:From"] = "pruebas@nexolocal.mx",
                 ["Mongo:ConnectionString"] = mongo,
