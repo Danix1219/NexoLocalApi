@@ -27,22 +27,22 @@ Dependencias: ninguna. Es la fase de fundamento.
 
 ### Requisitos locales
 
-- **FR-001**: Solución .NET 10 con tres APIs de dominio (`Identity`, `Discovery`, `Engagement`) más `Screens`, cada una con las capas `Contracts/Domain/Application/Infrastructure/Endpoints` y **una única arquitectura interna para todas**.
-- **FR-002**: Un solo host que arranca en rol `api` o `worker` según `NEXO_ROLE`.
-- **FR-003**: Bloques comunes `Nexo.Common` (`Result<T>`, `PagedResult<T>` con cursor, `GeoPoint`, `ICurrentUser`) y `Nexo.Outbox` (mensaje, repositorio, servicio y despachador idempotente).
-- **FR-004**: Frontera entre dominios verificada automáticamente: un dominio solo referencia `*.Contracts` de otro, nunca sus capas internas.
-- **FR-005**: Tres bases en el cluster M0 (`nexo_identity`, `nexo_discovery`, `nexo_engagement`), cada una escrita por un único dominio, con `maxPoolSize` acotado para no agotar las conexiones del plan gratuito.
-- **FR-006**: Estado compartido entre instancias en Redis: caché L2, contadores exactos de rate limit, revocación de sesión y backplane de tiempo real. **Nada de eso en memoria del proceso.**
-- **FR-007**: Entorno local reproducible con MongoDB (réplica), Redis y emulador de colas; la API arranca contra él sin configuración manual adicional.
-- **FR-008**: Conservar el dominio `Identity` existente (14 archivos, ~1361 líneas) sin reescribir su lógica; cambia su ubicación y su unidad de despliegue, no su código.
-- **FR-009**: Retirar los 7 proyectos de servicio sin implementación y las tecnologías descartadas en constitución §3, dejando constancia de lo retirado y su motivo.
+- FR-001: Solución .NET 10 con tres APIs de dominio (`Identity`, `Discovery`, `Engagement`) más `Screens`, cada una con las capas `Contracts/Domain/Application/Infrastructure/Endpoints` y **una única arquitectura interna para todas**.
+- FR-002: Un solo host que arranca en rol `api` o `worker` según `NEXO_ROLE`.
+- FR-003: Bloques comunes `Nexo.Common` (`Result<T>`, `PagedResult<T>` con cursor, `GeoPoint`, `ICurrentUser`) y `Nexo.Outbox` (mensaje, repositorio, servicio y despachador idempotente).
+- FR-004: Frontera entre dominios verificada automáticamente: un dominio solo referencia `*.Contracts` de otro, nunca sus capas internas.
+- FR-005: Tres bases en el cluster M0 (`nexo_identity`, `nexo_discovery`, `nexo_engagement`), cada una escrita por un único dominio, con `maxPoolSize` acotado para no agotar las conexiones del plan gratuito.
+- FR-006: Estado compartido entre instancias en Redis: caché L2, contadores exactos de rate limit, revocación de sesión y backplane de tiempo real. **Nada de eso en memoria del proceso.**
+- FR-007: Entorno local reproducible con MongoDB (réplica), Redis y emulador de colas; la API arranca contra él sin configuración manual adicional.
+- FR-008: Conservar el dominio `Identity` existente (14 archivos, ~1361 líneas) sin reescribir su lógica; cambia su ubicación y su unidad de despliegue, no su código.
+- FR-009: Retirar los 7 proyectos de servicio sin implementación y las tecnologías descartadas en constitución §3, dejando constancia de lo retirado y su motivo.
 
 ### Requisitos no funcionales
 
-- **NFR-001**: Autorización, aislamiento por usuario, privacidad y errores explícitos según constitución §2 y §6.
-- **NFR-002**: Trazabilidad y evidencia real; no declarar integración ejecutada con dobles.
-- **NFR-003**: Las dos instancias son intercambiables: una petición puede caer en cualquiera con el mismo resultado, incluida la sesión revocada.
-- **NFR-004**: Presupuesto verificable: un plan B1, dos instancias, ~26 USD/mes, worker en el mismo plan sin costo adicional.
+- NFR-001: Autorización, aislamiento por usuario, privacidad y errores explícitos según constitución §2 y §6.
+- NFR-002: Trazabilidad y evidencia real; no declarar integración ejecutada con dobles.
+- NFR-003: Las dos instancias son intercambiables: una petición puede caer en cualquiera con el mismo resultado, incluida la sesión revocada.
+- NFR-004: Presupuesto verificable: un plan B1, dos instancias, ~26 USD/mes, worker en el mismo plan sin costo adicional.
 
 ### Fuera de alcance
 
@@ -110,16 +110,16 @@ Ver [checklist ASVS L2](../../../docs/asvs-l2-checklist.md).
 
 ## 6. Tests / Gates
 
-- [ ] **AC-001 → FR-001/FR-003**: `dotnet build` compila la solución completa; las pruebas de arquitectura confirman la dirección de dependencias dentro de cada dominio.
-- [ ] **AC-002 → FR-002**: el mismo binario responde `/health/live` con `NEXO_ROLE=api`, y procesa la cola sin exponer HTTP con `NEXO_ROLE=worker`.
-- [ ] **AC-003 → FR-003**: prueba unitaria de `Result<T>` en éxito y fallo y de `PagedResult<T>` con cursor; el despachador procesa el mismo `MessageId` dos veces **sin duplicar efecto**.
-- [ ] **AC-004 → FR-004**: NetArchTest **falla** cuando un dominio referencia una capa interna de otro y **pasa** cuando solo referencia `*.Contracts`. Se comprueba el caso negativo, no solo el positivo.
-- [ ] **AC-005 → FR-005**: existen las tres bases y cada una es escrita por un único dominio; una escritura cruzada en pruebas falla. `maxPoolSize` declarado y por debajo del límite del cluster.
-- [ ] **AC-006 → FR-006/NFR-003**: con dos instancias levantadas, un token revocado en la instancia A es rechazado por la instancia B **en la petición siguiente**.
-- [ ] **AC-007 → FR-007**: con el entorno local arriba, `/health/ready` responde 200; al detener Redis responde **503 y no 200 por omisión**.
-- [ ] **AC-008 → FR-008**: las pruebas existentes de Identity siguen pasando tras el traslado, sin cambios en su lógica de dominio.
-- [ ] **AC-009 → FR-009**: la solución no contiene los 7 proyectos retirados, y `docs/decisions/registro.md` enumera lo retirado con su motivo.
-- [ ] **AC-010 → NFR-004**: la configuración de despliegue declara un plan B1 con dos instancias y el cálculo de costo consta en la evidencia.
+- [ ] AC-001 → FR-001/FR-003: `dotnet build` compila la solución completa; las pruebas de arquitectura confirman la dirección de dependencias dentro de cada dominio.
+- [ ] AC-002 → FR-002: el mismo binario responde `/health/live` con `NEXO_ROLE=api`, y procesa la cola sin exponer HTTP con `NEXO_ROLE=worker`.
+- [ ] AC-003 → FR-003: prueba unitaria de `Result<T>` en éxito y fallo y de `PagedResult<T>` con cursor; el despachador procesa el mismo `MessageId` dos veces **sin duplicar efecto**.
+- [ ] AC-004 → FR-004: NetArchTest **falla** cuando un dominio referencia una capa interna de otro y **pasa** cuando solo referencia `*.Contracts`. Se comprueba el caso negativo, no solo el positivo.
+- [ ] AC-005 → FR-005: existen las tres bases y cada una es escrita por un único dominio; una escritura cruzada en pruebas falla. `maxPoolSize` declarado y por debajo del límite del cluster.
+- [ ] AC-006 → FR-006/NFR-003: con dos instancias levantadas, un token revocado en la instancia A es rechazado por la instancia B **en la petición siguiente**.
+- [ ] AC-007 → FR-007: con el entorno local arriba, `/health/ready` responde 200; al detener Redis responde **503 y no 200 por omisión**.
+- [ ] AC-008 → FR-008: las pruebas existentes de Identity siguen pasando tras el traslado, sin cambios en su lógica de dominio.
+- [ ] AC-009 → FR-009: la solución no contiene los 7 proyectos retirados, y `docs/decisions/registro.md` enumera lo retirado con su motivo.
+- [ ] AC-010 → NFR-004: la configuración de despliegue declara un plan B1 con dos instancias y el cálculo de costo consta en la evidencia.
 
 Suites y gate: [roles y gates](../../../docs/roles-y-gates.md). Pendiente de ejecución: hoy solo hay validación documental.
 

@@ -59,7 +59,7 @@ No basta el camino feliz:
 
 ### Defectos encontrados y corregidos durante la verificacion
 
-**Prefijo de Discovery fuera de la spec.** El feed quedaba en `/api/v1/feed` mientras el resto de dominios usaba `/v1/<dominio>/*`, contra la superficie que fija la seccion 3 de la spec. Corregido a `/v1/discovery/feed` y comprobado en la UI de OpenAPI. Arrastraba ademas el contrato entregado al equipo movil, que citaba las rutas de la arquitectura anterior: [actualizado](../../../../docs/contracts/contrato-primeros-7-endpoints.md) con un aviso de que la version previa no corresponde a nada desplegado.
+**Prefijo de Discovery fuera de la spec.** El feed quedaba en `/api/v1/feed` mientras el resto de dominios usaba `/v1/<dominio>/*`, contra la superficie que fija la seccion 3 de la spec. Corregido a `/v1/discovery/feed` y comprobado en la UI de OpenAPI. Arrastraba ademas el contrato entregado al equipo movil, que citaba las rutas de la arquitectura anterior: [actualizado](../../../../docs/decisions/archivo/contrato-primeros-7-endpoints-retirado.md) con un aviso de que la version previa no corresponde a nada desplegado.
 
 **`mongo-init.js` solo creaba la primera base.** Usaba `target._domain`, y un nombre con guion bajo colisiona con las propiedades internas del objeto `db` de mongosh, asi que lanzaba tras la primera iteracion. Con `getCollection('_domain')` crea las tres.
 

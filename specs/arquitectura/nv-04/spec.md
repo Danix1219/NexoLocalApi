@@ -83,10 +83,10 @@ Fuera: funcionalidades ajenas y despliegue no encargado.
 
 | Operación integrada | Nuevo dueño de incremento |
 |---|---|
-| EP-006 | [este spec](../este spec/spec.md) |
-| EP-009 | [este spec](../este spec/spec.md) |
-| EP-010 | [este spec](../este spec/spec.md) |
-| EP-011 | [este spec](../este spec/spec.md) |
+| EP-006 | [este spec](spec.md) |
+| EP-009 | [este spec](spec.md) |
+| EP-010 | [este spec](spec.md) |
+| EP-011 | [este spec](spec.md) |
 
 Los FR/AC heredados de esta fase comprueban integración con esas capacidades; sus tareas EP y casos de uso se ejecutan únicamente en la spec primaria del inventario. El propietario S01–S08 no cambia.
 

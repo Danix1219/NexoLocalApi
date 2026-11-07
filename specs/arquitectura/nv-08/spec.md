@@ -71,20 +71,20 @@ Fuera: funcionalidades ajenas y despliegue no encargado.
 
 | Operación integrada | Nuevo dueño de incremento |
 |---|---|
-| EP-036 | [este spec](../este spec/spec.md) |
-| EP-037 | [este spec](../este spec/spec.md) |
-| EP-038 | [este spec](../este spec/spec.md) |
-| EP-039 | [este spec](../este spec/spec.md) |
-| EP-040 | [este spec](../este spec/spec.md) |
-| EP-041 | [este spec](../este spec/spec.md) |
-| EP-042 | [este spec](../este spec/spec.md) |
-| EP-043 | [este spec](../este spec/spec.md) |
-| EP-044 | [este spec](../este spec/spec.md) |
-| EP-045 | [este spec](../este spec/spec.md) |
-| EP-046 | [este spec](../este spec/spec.md) |
-| EP-093 | [este spec](../este spec/spec.md) |
-| EP-094 | [este spec](../este spec/spec.md) |
-| EP-095 | [este spec](../este spec/spec.md) |
+| EP-036 | [este spec](spec.md) |
+| EP-037 | [este spec](spec.md) |
+| EP-038 | [este spec](spec.md) |
+| EP-039 | [este spec](spec.md) |
+| EP-040 | [este spec](spec.md) |
+| EP-041 | [este spec](spec.md) |
+| EP-042 | [este spec](spec.md) |
+| EP-043 | [este spec](spec.md) |
+| EP-044 | [este spec](spec.md) |
+| EP-045 | [este spec](spec.md) |
+| EP-046 | [este spec](spec.md) |
+| EP-093 | [este spec](spec.md) |
+| EP-094 | [este spec](spec.md) |
+| EP-095 | [este spec](spec.md) |
 
 Los FR/AC heredados de esta fase comprueban integración con esas capacidades; sus tareas EP y casos de uso se ejecutan únicamente en la spec primaria del inventario. El propietario S01–S08 no cambia.
 

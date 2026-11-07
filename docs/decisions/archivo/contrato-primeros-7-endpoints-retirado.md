@@ -12,7 +12,7 @@
 
 Para el equipo movil. Describe lo que esta implementado y comprobado hoy, no el catalogo completo.
 
-Version: 0.5.0 | Fecha: 2026-11-05 | Especificaciones: [specs/endpoints/](../../specs/endpoints/) | Catalogo autoritativo: [inventario.json](inventario.json)
+Version: 0.5.0 | Fecha: 2026-11-05 | Especificaciones: [specs/endpoints/](../../../specs/endpoints/) | Catalogo autoritativo: [inventario.json](../../contracts/inventario.json)
 
 ## 1. Antes de empezar
 
@@ -209,5 +209,5 @@ Mostrar `detail` al usuario solo cuando el codigo es `400`. En `401` y `409` el 
 2. **Una sola URL base.** Ya no hay gateway ni un host por dominio: es una API modular y todo cuelga del mismo host, separado por prefijo de dominio. Aun asi, tengan la URL base en configuracion: lo que cambia al desplegar es el host, no las rutas.
 3. **El token de acceso es opaco**, no JWT. No hay claims que leer en el cliente: el estado de la sesion se consulta con `GET /v1/identity/me`. Pasar a JWT es una decision de contrato aun no tomada y cambiaria esta parte.
 4. **No guardar tokens en almacenamiento sin cifrar.** El refresh vale 30 dias y, si se filtra, su reuso revoca la sesion de la persona.
-5. Lo que **no** existe aun: perfiles de prestador, busqueda, solicitudes, pedidos, mensajeria, notificaciones y listado de sesiones. Estan en el [inventario](inventario.json) con su spec, sin implementar.
-6. Este contrato describe lo implementado y comprobado contra base real; **no** es una aceptacion formal. El contrato formal por operacion sigue pendiente en las [fichas](fichas-operaciones.md).
+5. Lo que **no** existe aun: perfiles de prestador, busqueda, solicitudes, pedidos, mensajeria, notificaciones y listado de sesiones. Estan en el [inventario](../../contracts/inventario.json) con su spec, sin implementar.
+6. Este contrato describe lo implementado y comprobado contra base real; **no** es una aceptacion formal. El contrato formal por operacion sigue pendiente en las [fichas](../../contracts/fichas-operaciones.md).

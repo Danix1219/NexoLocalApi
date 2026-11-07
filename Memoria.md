@@ -215,13 +215,13 @@ A evitar: tratar `GET /health/ready` como operacion de negocio o consumirla desd
 
 | Spec de endpoint | Operaciones | Dueño | Capacidad origen |
 |---|---|---|---|
-| [ep-01](specs/endpoints/ep-01/spec.md) Pantalla principal | EP-030 `GET /feed` | S03 | nv-07 |
-| [ep-02](specs/endpoints/ep-02/spec.md) Registro con correo | EP-003 `POST /auth/register` | S01 | nv-04 |
-| [ep-03](specs/endpoints/ep-03/spec.md) Verificacion de correo | EP-001 `POST /auth/otp`, EP-002 `POST /auth/otp/verify` | S01 | nv-04 |
-| [ep-04](specs/endpoints/ep-04/spec.md) Inicio de sesion | EP-004 `POST /auth/login` | S01 | nv-04 |
-| [ep-05](specs/endpoints/ep-05/spec.md) Continuidad y cierre de sesion | EP-005 `POST /auth/refresh`, EP-007 `POST /auth/logout` | S01 | nv-04 |
-| [ep-06](specs/endpoints/ep-06/spec.md) Cuenta propia | EP-008 `GET /me` | S01 | nv-04 |
-| [ep-07](specs/endpoints/ep-07/spec.md) Recuperacion de contraseña | EP-006 `POST /auth/password-reset` | S01 | nv-16 |
+| `ep-01` (retirada) Pantalla principal | EP-030 `GET /feed` | S03 | nv-07 |
+| `ep-02` (retirada) Registro con correo | EP-003 `POST /auth/register` | S01 | nv-04 |
+| `ep-03` (retirada) Verificacion de correo | EP-001 `POST /auth/otp`, EP-002 `POST /auth/otp/verify` | S01 | nv-04 |
+| `ep-04` (retirada) Inicio de sesion | EP-004 `POST /auth/login` | S01 | nv-04 |
+| `ep-05` (retirada) Continuidad y cierre de sesion | EP-005 `POST /auth/refresh`, EP-007 `POST /auth/logout` | S01 | nv-04 |
+| `ep-06` (retirada) Cuenta propia | EP-008 `GET /me` | S01 | nv-04 |
+| `ep-07` (retirada) Recuperacion de contraseña | EP-006 `POST /auth/password-reset` | S01 | nv-16 |
 
 Orden de construccion: ep-03 → ep-02 → ep-04 → ep-05 → ep-06 → ep-07. ep-01 es independiente y no exige sesion.
 

@@ -30,3 +30,6 @@ infra/terraform/.terraform/
 crash.log
 crash.*.log
 .terraform.lock.hcl
+
+# Perfiles de publicacion de Visual Studio: llevan la suscripcion y el grupo de recursos.
+src/Host/Nexo.Host/Properties/PublishProfiles/

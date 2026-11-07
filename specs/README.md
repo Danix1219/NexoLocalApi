@@ -35,21 +35,19 @@ Estado de todos: Borrador documental. Las primeras fases conservan gobierno/fund
 | [nv-24](arquitectura/nv-24/spec.md) | Administración de confianza | [plan](arquitectura/nv-24/plan.md), [tareas](arquitectura/nv-24/task.md), [gates](arquitectura/nv-24/checklists/gates.md) |
 | [nv-25](arquitectura/nv-25/spec.md) | Consentimiento y políticas de contacto | [plan](arquitectura/nv-25/plan.md), [tareas](arquitectura/nv-25/task.md), [gates](arquitectura/nv-25/checklists/gates.md) |
 
-## Endpoints — primeros 7 del usuario que solicita servicio
+## Endpoints
 
-Identificador de cuenta: **correo electrónico** (no teléfono). Las rutas `/auth/otp*` se conservan del inventario; el canal cambia a correo. Decisión de contrato en el [registro](../docs/decisions/registro.md).
+Las fichas de operacion viven en [`endpoints/`](endpoints/), una carpeta por area y un archivo
+por operacion HTTP. Identificador de cuenta: **correo electronico**, no telefono.
 
-| Spec | Operaciones | Dueño | Capacidad origen | Flujo |
-|---|---|---|---|---|
-| [ep-01](endpoints/ep-01/spec.md) Pantalla principal | EP-030 `GET /feed` | S03 | [nv-07](arquitectura/nv-07/spec.md) | [plan](endpoints/ep-01/plan.md), [tareas](endpoints/ep-01/task.md), [gates](endpoints/ep-01/checklists/gates.md) |
-| [ep-02](endpoints/ep-02/spec.md) Registro con correo | EP-003 `POST /auth/register` | S01 | [nv-04](arquitectura/nv-04/spec.md) | [plan](endpoints/ep-02/plan.md), [tareas](endpoints/ep-02/task.md), [gates](endpoints/ep-02/checklists/gates.md) |
-| [ep-03](endpoints/ep-03/spec.md) Verificación de correo | EP-001 `POST /auth/otp`, EP-002 `POST /auth/otp/verify` | S01 | [nv-04](arquitectura/nv-04/spec.md) | [plan](endpoints/ep-03/plan.md), [tareas](endpoints/ep-03/task.md), [gates](endpoints/ep-03/checklists/gates.md) |
-| [ep-04](endpoints/ep-04/spec.md) Inicio de sesión | EP-004 `POST /auth/login` | S01 | [nv-04](arquitectura/nv-04/spec.md) | [plan](endpoints/ep-04/plan.md), [tareas](endpoints/ep-04/task.md), [gates](endpoints/ep-04/checklists/gates.md) |
-| [ep-05](endpoints/ep-05/spec.md) Continuidad y cierre de sesión | EP-005 `POST /auth/refresh`, EP-007 `POST /auth/logout` | S01 | [nv-04](arquitectura/nv-04/spec.md) | [plan](endpoints/ep-05/plan.md), [tareas](endpoints/ep-05/task.md), [gates](endpoints/ep-05/checklists/gates.md) |
-| [ep-06](endpoints/ep-06/spec.md) Cuenta propia | EP-008 `GET /me` | S01 | [nv-04](arquitectura/nv-04/spec.md) | [plan](endpoints/ep-06/plan.md), [tareas](endpoints/ep-06/task.md), [gates](endpoints/ep-06/checklists/gates.md) |
-| [ep-07](endpoints/ep-07/spec.md) Recuperación de contraseña | EP-006 `POST /auth/password-reset` | S01 | [nv-16](arquitectura/nv-16/spec.md) | [plan](endpoints/ep-07/plan.md), [tareas](endpoints/ep-07/task.md), [gates](endpoints/ep-07/checklists/gates.md) |
+| Area | Estado |
+|---|---|
+| [00-convenciones](endpoints/00-convenciones/) | Implementada: errores RFC 9457, cursor, idempotencia, cuotas |
+| [01-auth](endpoints/01-auth/) | Implementada: 8 fichas sobre 7 rutas |
+| `02-cuenta` a `15-pantallas` | Definidas, sin implementar |
 
-Orden de construcción: ep-03 → ep-02 → ep-04 → ep-05 → ep-06 → ep-07; ep-01 es independiente y no exige sesión.
+Las specs `ep-01` a `ep-07` se retiraron el 2026-11-06: describian operaciones mal elegidas.
+El motivo esta en el [registro de decisiones](../docs/decisions/registro.md).
 
 ## Dependencias por historia y por cierre
 

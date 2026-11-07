@@ -1,0 +1,79 @@
+name: CI
+
+# Canalizacion de producto: estilo, dependencias, compilacion y pruebas.
+#
+# Existe aparte de `sdd.yml` porque aquel valida la documentacion y solo arrastra el build
+# como dependencia; quien mira la lista de checks de un PR no deberia tener que saberlo.
+# Estos son los nombres que se exigen en la proteccion de rama (ver docs/ci-cd.md).
+
+on:
+  pull_request:
+    branches: [develop, main, 'release/**']
+    types: [opened, synchronize, reopened, ready_for_review]
+  push:
+    branches: [develop]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  estilo:
+    name: CI / estilo
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+
+      - name: Install pinned .NET SDK
+        uses: actions/setup-dotnet@26b0ec14cb23fa6904739307f278c14f94c95bf1 # v5 verified from official repository
+        with:
+          global-json-file: global.json
+
+      # Formato y convenciones de `.editorconfig`. No reformatea: falla y senala el archivo,
+      # para que el arreglo quede en el commit de quien lo rompio y no en uno de la CI.
+      - name: Formato y convenciones
+        run: dotnet format src/Nexo.sln --verify-no-changes --verbosity diagnostic
+
+  dependencias:
+    name: CI / dependencias
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+
+      - name: Install pinned .NET SDK
+        uses: actions/setup-dotnet@26b0ec14cb23fa6904739307f278c14f94c95bf1 # v5 verified from official repository
+        with:
+          global-json-file: global.json
+
+      - name: Restore solution
+        run: dotnet restore src/Nexo.sln
+
+      # `dotnet list` siempre sale con 0, tambien cuando encuentra algo: hay que leer la salida.
+      # Incluye las transitivas porque asi llego la ultima: Snappier dentro de MongoDB.Driver.
+      - name: Paquetes con vulnerabilidades conocidas
+        run: |
+          set -euo pipefail
+          dotnet list src/Nexo.sln package --vulnerable --include-transitive > vulnerables.txt
+          cat vulnerables.txt
+          if grep -qiE '(Low|Moderate|High|Critical)' vulnerables.txt; then
+            echo "::error::Hay paquetes con vulnerabilidades conocidas; revisar la salida."
+            exit 1
+          fi
+
+  # Compilacion, fronteras entre dominios y pruebas. Reutiliza el mismo workflow que usan
+  # `sdd.yml` y el despliegue, para que los tres comprueben exactamente lo mismo.
+  build:
+    name: CI / build y pruebas
+    uses: ./.github/workflows/backend-base.yml
