@@ -36,13 +36,15 @@ deja de ser el mismo candidato, y reutilizar el número hace imposible saber qu�
 
 | | Valor |
 |---|---|
-| Archivo | `VERSION` → `0.3.0-rc.1` |
+| Archivo | `VERSION` → `0.3.0` |
 | Rama | `release/0.3.0-rc.1` |
-| Etiqueta | `api-v0.3.0-rc.1`, creada por el despliegue |
+| Etiqueta | `api-v0.3.0`, creada por el despliegue |
 | OpenAPI | `info.version` del documento |
-| Ensamblado | `InformationalVersion` = `0.3.0-rc.1+<sha corto>` |
+| Ensamblado | `InformationalVersion` = `0.3.0+<sha corto>` |
 
-El nombre de la rama y `VERSION` **tienen que coincidir**. Lo comprueba
+`VERSION` lleva la **versión que se entrega**; el sufijo `-rc.N` vive solo en el nombre de la
+rama, porque cuenta las vueltas de la estabilización y no forma parte de lo que se publica. Lo
+que **tiene que coincidir** es el núcleo `X.Y.Z` de los dos. Lo comprueba
 [`.ci/check-version.py`](../.ci/check-version.py) en la etapa `2 · Compilación y estilo` de la
 canalización, y solo lo exige en ramas `release/*`: en una rama de trabajo la versión de entrega
 todavía no está decidida.
@@ -64,9 +66,10 @@ siendo limpio.
 1. En una rama de trabajo, editar `VERSION`.
 2. Anotar el cambio en `Memoria.md` con su motivo.
 3. Integrar a `develop`.
-4. Crear `release/X.Y.Z-rc.N` desde `develop`, con el nombre idéntico a `VERSION`.
+4. Crear `release/X.Y.Z-rc.N` desde `develop`, con el mismo `X.Y.Z` que `VERSION`.
 5. Promover a `main`. El despliegue pone la etiqueta.
 6. Reintegrar `main` a `develop`.
 
-Si durante la estabilización entra un `fix/*` en la rama de release, **sube el `rc`**: cambian
-`VERSION` y el nombre de la rama a la vez, o el validador lo rechaza.
+Si durante la estabilización entra un `fix/*` en la rama de release, **sube el `rc`** creando
+`release/X.Y.Z-rc.(N+1)`. `VERSION` no cambia: la versión que se entrega es la misma, lo que
+cambia es cuántas vueltas costó llegar a ella.

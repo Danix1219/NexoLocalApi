@@ -60,6 +60,18 @@ class CoherenciaConLaRama(unittest.TestCase):
     def test_rama_release_que_coincide(self):
         self.assertIn("0.2.0-rc.1", validate("0.2.0-rc.1", "release/0.2.0-rc.1"))
 
+    def test_rama_con_candidato_y_version_limpia(self):
+        # El sufijo -rc.N cuenta las vueltas de la entrega, no la version entregada.
+        self.assertIn("0.2.0", validate("0.2.0", "release/0.2.0-rc.1"))
+
+    def test_rama_con_candidato_y_nucleo_distinto(self):
+        with self.assertRaises(ValueError):
+            validate("0.2.0", "release/0.3.0-rc.1")
+
+    def test_rama_release_sin_version_valida(self):
+        with self.assertRaises(ValueError):
+            validate("0.2.0", "release/caliente")
+
     def test_rama_release_que_no_coincide(self):
         with self.assertRaises(ValueError):
             validate("0.3.0", "release/0.2.0-rc.1")
