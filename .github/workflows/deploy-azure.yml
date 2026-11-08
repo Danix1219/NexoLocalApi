@@ -7,22 +7,23 @@ name: Deploy Azure
 # Un solo proceso: el despachador de outbox corre dentro de la propia API. Con dos instancias
 # no hay envios duplicados: el outbox reclama cada mensaje con una actualizacion condicional.
 #
-# Sin secretos en el repositorio: la entrada a Azure es OIDC y la cadena de Mongo vive como
-# app setting del App Service, cargada una sola vez por runbook (specs/CI-CD/cd-01/spec.md).
+# La publicacion usa el perfil del sitio, guardado como secreto de GitHub. La cadena de Mongo y
+# el resto de la configuracion viven como app settings del App Service, cargadas una sola vez
+# por runbook (specs/CI-CD/cd-01/spec.md); nada de eso se versiona.
+#
+# DEUDA: el plan B1 y sus dos instancias ya no se declaran aqui. El perfil de publicacion solo
+# autoriza subir al sitio, no operar la suscripcion, de modo que `AC-010` deja de comprobarse
+# en cada despliegue y el plan depende de la configuracion del portal. Recuperarlo exige OIDC:
+# una aplicacion en Entra ID, una credencial federada y un permiso sobre el grupo de recursos.
 on:
   push:
     branches: [main]
   workflow_dispatch:
 permissions:
   contents: read
-  id-token: write
 concurrency:
   group: deploy-azure-${{ github.ref }}
   cancel-in-progress: false
-
-env:
-  PLAN_SKU: B1
-  PLAN_INSTANCES: 2
 
 jobs:
   base:
@@ -49,51 +50,35 @@ jobs:
       - name: Publish host
         run: dotnet publish src/Host/Nexo.Host --configuration Release --output publish
 
-      # Sin `azure/login`: la politica del repositorio solo admite acciones propias o de GitHub.
-      # El intercambio OIDC son tres llamadas y el runner ya trae `az`, asi que no hace falta
-      # ninguna accion de terceros. Sigue sin haber contrasena guardada en ningun sitio: GitHub
-      # emite un token de corta vida para esta ejecucion y Azure lo cambia por una sesion.
-      - name: Azure login (OIDC)
+      # Despliegue con el perfil de publicacion del sitio, el mismo que usa Visual Studio.
+      #
+      # No se usa OIDC porque exige registrar una aplicacion en Entra ID, una credencial federada
+      # y un permiso sobre el grupo de recursos; para este proyecto no compensa. El coste de
+      # elegir el perfil esta anotado abajo y en Memoria.md.
+      #
+      # El perfil lleva usuario y contrasena, asi que la contrasena se enmascara en cuanto se lee:
+      # sin eso, cualquier comando posterior que la imprimiera la dejaria en el registro publico.
+      - name: Desplegar con el perfil de publicacion
         env:
-          CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
-          TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
-          SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          PERFIL: ${{ secrets.AZURE_BACKAPP_PUBLISH_PROFILE }}
         run: |
           set -euo pipefail
-          token=$(curl -fsSL \
-            -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
-            "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=api://AzureADTokenExchange" | jq -r '.value')
-          # Oculta el token en el registro aunque algun comando posterior lo imprima.
-          echo "::add-mask::$token"
-          az login --service-principal \
-            --username "$CLIENT_ID" --tenant "$TENANT_ID" --federated-token "$token" --output none
-          az account set --subscription "$SUBSCRIPTION_ID"
+          if [ -z "${PERFIL:-}" ]; then
+            echo "::error::Falta el secreto AZURE_BACKAPP_PUBLISH_PROFILE."
+            exit 1
+          fi
 
-      # Un plan, un sku B1, dos instancias. Declarado aqui para que el despliegue sea reproducible
-      # y no dependa de un ajuste manual en el portal (NFR-004, AC-010).
-      - name: Enforce plan B1 with two instances
-        run: |
-          set -euo pipefail
-          az appservice plan update \
-            --name "${{ vars.AZURE_PLAN_NAME }}" \
-            --resource-group "${{ vars.AZURE_RESOURCE_GROUP }}" \
-            --sku "${PLAN_SKU}" \
-            --number-of-workers "${PLAN_INSTANCES}"
-          az webapp config set \
-            --name "${{ vars.AZURE_WEBAPP_NAME }}" \
-            --resource-group "${{ vars.AZURE_RESOURCE_GROUP }}" \
-            --always-on true
+          printf %s "$PERFIL" > perfil.xml
+          usuario=$(python3 -c "import xml.etree.ElementTree as ET;p=[x for x in ET.parse('perfil.xml').getroot().iter('publishProfile') if x.get('publishMethod')=='MSDeploy'][0];print(p.get('userName'))")
+          clave=$(python3 -c "import xml.etree.ElementTree as ET;p=[x for x in ET.parse('perfil.xml').getroot().iter('publishProfile') if x.get('publishMethod')=='MSDeploy'][0];print(p.get('userPWD'))")
+          host=$(python3 -c "import xml.etree.ElementTree as ET;p=[x for x in ET.parse('perfil.xml').getroot().iter('publishProfile') if x.get('publishMethod')=='MSDeploy'][0];print(p.get('publishUrl'))" | cut -d: -f1)
+          rm -f perfil.xml
 
-      # Sin `azure/webapps-deploy`, por el mismo motivo. `az webapp deploy` hace lo mismo:
-      # sube el zip y reinicia el sitio.
-      - name: Deploy to App Service
-        run: |
-          set -euo pipefail
+          # Antes que nada: si algun comando imprimiera la clave, ya esta tapada.
+          echo "::add-mask::$clave"
+
           (cd publish && zip -qr ../publish.zip .)
-          az webapp deploy \
-            --name "${{ vars.AZURE_WEBAPP_NAME }}" \
-            --resource-group "${{ vars.AZURE_RESOURCE_GROUP }}" \
-            --src-path publish.zip --type zip --async false
+          curl -fsS -X POST --retry 3 -u "$usuario:$clave" -H "Content-Type: application/zip" --data-binary @publish.zip "https://$host/api/zipdeploy"
 
       - name: Verify readiness on both instances
         run: |
