@@ -1,0 +1,94 @@
+name: Deploy Azure
+
+# nv-00 T-015 / NFR-004: UNA API modular en UN App Service plan B1 con DOS instancias.
+# Sustituye el despliegue anterior de Container Apps por servicio (un plan por servicio costaba
+# ~208 USD/mes contra 100 USD de credito; esta forma cuesta ~26 USD/mes, enmienda E-001 y D-1).
+#
+# Un solo proceso: el despachador de outbox corre dentro de la propia API. Con dos instancias
+# no hay envios duplicados: el outbox reclama cada mensaje con una actualizacion condicional.
+#
+# Sin secretos en el repositorio: la entrada a Azure es OIDC y la cadena de Mongo vive como
+# app setting del App Service, cargada una sola vez por runbook (specs/CI-CD/cd-01/spec.md).
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+  id-token: write
+concurrency:
+  group: deploy-azure-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  PLAN_SKU: B1
+  PLAN_INSTANCES: 2
+
+jobs:
+  base:
+    name: Backend / build
+    uses: ./.github/workflows/backend-base.yml
+
+  deploy:
+    name: Deploy API (B1 x2)
+    needs: base
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    environment: produccion
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+
+      - name: Install pinned .NET SDK
+        uses: actions/setup-dotnet@26b0ec14cb23fa6904739307f278c14f94c95bf1 # v5 verified from official repository
+        with:
+          global-json-file: global.json
+
+      - name: Publish host
+        run: dotnet publish src/Host/Nexo.Host --configuration Release --output publish
+
+      - name: Azure login (OIDC)
+        uses: azure/login@a65d910e8af852a8061c627c456678983e180302 # v2.2.0
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      # Un plan, un sku B1, dos instancias. Declarado aqui para que el despliegue sea reproducible
+      # y no dependa de un ajuste manual en el portal (NFR-004, AC-010).
+      - name: Enforce plan B1 with two instances
+        run: |
+          set -euo pipefail
+          az appservice plan update \
+            --name "${{ vars.AZURE_PLAN_NAME }}" \
+            --resource-group "${{ vars.AZURE_RESOURCE_GROUP }}" \
+            --sku "${PLAN_SKU}" \
+            --number-of-workers "${PLAN_INSTANCES}"
+          az webapp config set \
+            --name "${{ vars.AZURE_WEBAPP_NAME }}" \
+            --resource-group "${{ vars.AZURE_RESOURCE_GROUP }}" \
+            --always-on true
+
+      - name: Deploy to App Service
+        uses: azure/webapps-deploy@de617f46172a906d0617bb0e50d81e9e3aec24c8 # v3.0.1
+        with:
+          app-name: ${{ vars.AZURE_WEBAPP_NAME }}
+          package: publish
+
+      - name: Verify readiness on both instances
+        run: |
+          set -euo pipefail
+          host="${{ vars.AZURE_WEBAPP_NAME }}.azurewebsites.net"
+          ok=0
+          # Varias peticiones para que el balanceador reparta entre las dos instancias:
+          # una sola respuesta 200 no prueba que ambas esten sanas (NFR-003).
+          for _ in $(seq 1 30); do
+            code=$(curl -s -o /dev/null -w '%{http_code}' "https://$host/health/ready" || true)
+            if [ "$code" = "200" ]; then ok=$((ok + 1)); fi
+            if [ "$ok" -ge 6 ]; then echo "DEPLOY-OK https://$host"; exit 0; fi
+            sleep 10
+          done
+          echo "No se alcanzaron 6 respuestas 200 en /health/ready; revisar el log del App Service." >&2
+          exit 1

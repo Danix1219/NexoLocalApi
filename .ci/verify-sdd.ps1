@@ -1,4 +1,4 @@
-#Requires -Version 5.1
+﻿#Requires -Version 5.1
 param([Parameter(Mandatory = $true)][string]$WorkspaceRoot)
 $ErrorActionPreference = 'Stop'
 $repoRoot = Split-Path -Parent $PSScriptRoot
@@ -34,9 +34,10 @@ if ($manifests.Count -gt 0) {
     $productConfigPath = Join-Path $PSScriptRoot 'product-ci.json'
     if (-not (Test-Path -LiteralPath $productConfigPath)) { throw 'Product manifest detected without explicit product CI configuration.' }
     $productConfig = Get-Content -LiteralPath $productConfigPath -Raw -Encoding UTF8 | ConvertFrom-Json
-    if ($productConfig.solution -ne 'nexolocal.Api.slnx' -or $manifests.Count -ne $productConfig.expectedProjects -or @($manifests | Where-Object Name -eq 'pubspec.yaml').Count -gt 0) { throw 'Unexpected product manifests: review the backend scaffold CI policy.' }
+    if (-not $productConfig.solution -or -not (Test-Path -LiteralPath (Join-Path $repoRoot $productConfig.solution)) -or $manifests.Count -ne $productConfig.expectedProjects -or @($manifests | Where-Object Name -eq 'pubspec.yaml').Count -gt 0) { throw 'Unexpected product manifests: review the backend scaffold CI policy.' }
     $productWorkflow = Get-Content -LiteralPath (Join-Path $repoRoot $productConfig.workflow) -Raw -Encoding UTF8
-    foreach ($command in @('dotnet restore nexolocal.Api.slnx','dotnet build nexolocal.Api.slnx','scripts/check_architecture.py','scripts/Test-ScaffoldHosts.ps1')) {
+    if (-not $productConfig.requiredCommands) { throw 'Product CI configuration must declare requiredCommands.' }
+    foreach ($command in $productConfig.requiredCommands) {
         if (-not $productWorkflow.Contains($command)) { throw "Product CI missing command: $command" }
     }
     $sddWorkflow = Get-Content -LiteralPath (Join-Path $repoRoot '.github/workflows/sdd.yml') -Raw -Encoding UTF8
@@ -49,9 +50,9 @@ try {
     if ($LASTEXITCODE -ne 0) { throw 'SDD structure/link validation failed.' }
 } finally { Pop-Location }
 $isApi = Test-Path -LiteralPath (Join-Path $repoRoot '.specify/memory/constitution.md')
-$pattern = if ($isApi) { '^nv-\d{2}$' } else { '^\d{3}-[a-z0-9-]+$' }
+$pattern = if ($isApi) { '^(?:nv|ep)-\d{2}$' } else { '^\d{3}-[a-z0-9-]+$' }
 $count = 0
-foreach ($dir in Get-ChildItem -LiteralPath (Join-Path $repoRoot 'specs') -Directory | Where-Object { $_.Name -match $pattern }) {
+foreach ($dir in Get-ChildItem -LiteralPath (Join-Path $repoRoot 'specs') -Directory -Recurse | Where-Object { $_.Name -match $pattern }) {
     $count++
     $taskName = if ($isApi) { 'task.md' } else { 'tasks.md' }
     $checkName = if ($isApi) { 'checklists/gates.md' } else { 'checklist.md' }

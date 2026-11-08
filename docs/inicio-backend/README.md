@@ -1,6 +1,9 @@
 # Arranque de nv-00: constitucion y gobierno
 
-Preparado el 2026-11-03. Spec objetivo: [nv-00](../../specs/nv-00/spec.md); [plan](../../specs/nv-00/plan.md), [tareas](../../specs/nv-00/task.md), [checklist](../../specs/nv-00/checklists/gates.md). La primera spec backend es de gobierno; la primera funcional de identidad es nv-04, despues de entradas de nv-01..03. Este paquete no implementa un endpoint ni mueve la plantilla.
+> **Documento historico.** Registra la evidencia del scaffold de 33 proyectos con G01 Gateway y S01-S08, retirado por la **enmienda E-001** el 2026-11-06. Nada de esa estructura existe ya en disco. Se conserva como evidencia ejecutada. **Estado vigente:** [estructura-backend.md](../estructura-backend.md).
+
+
+Preparado el 2026-11-03. Spec objetivo: [nv-00](../../specs/arquitectura/nv-00/spec.md); [plan](../../specs/arquitectura/nv-00/plan.md), [tareas](../../specs/arquitectura/nv-00/task.md), [checklist](../../specs/arquitectura/nv-00/checklists/gates.md). La primera spec backend es de gobierno; la primera funcional de identidad es nv-04, despues de entradas de nv-01..03. Este paquete no implementa un endpoint ni mueve la plantilla.
 
 Estado: **preparacion local disponible; Ready formal y cierre pendientes de revision/ratificacion humana**. No se crean estados alternativos para fingir Ready. Las tareas permanecen sin marcar; artefacto preparado no significa criterio aceptado.
 

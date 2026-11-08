@@ -1,0 +1,10 @@
+# Copiar a terraform.tfvars (ignorado por git) y rellenar. NO versionar el archivo real.
+# Alternativa preferida en CI: exportar TF_VAR_mongo_connection_string y TF_VAR_redis_connection_string.
+
+prefijo  = "nexolocal"
+region   = "centralus"
+acr_name = "acrnexolocal"
+
+# Secretos: dejarlos fuera del archivo y pasarlos por variable de entorno.
+# mongo_connection_string = "mongodb+srv://..."
+# redis_connection_string = "...redis.cache.windows.net:6380,ssl=True,password=..."

@@ -1,12 +1,15 @@
 # S05 — Mensajeria
 
+> **Mapa de dominios, no unidad desplegable.** Tras la **enmienda E-001**, este servicio se implementa en el modulo **Engagement** de la API modular por dominios, con datos en `nexo_engagement`. Comparte host y se despliega en una app de App Service con **2 instancias**. El contenido funcional de abajo sigue vigente; lo que cambia es donde vive. Ver [estructura-backend.md](../../estructura-backend.md).
+
+
 Diseño de implementacion propuesto, 2026-11-03. Base física revisada: 3 proyectos, sin negocio ni almacenamiento configurado. Esta ficha no instala patrones/proveedores ni convierte la base en producto aprobado. [Politicas comunes](../politicas-comunes.md) y [mapa general](../README.md).
 
 ## Limite y dueño
 
 Ruta: `services/messaging/`. conversations, messages y blocks. Historial/secuencia durables por conversacion; identificador estable de mensaje del cliente; contexto preservado por mensaje. [Datos autoritativos](../../modelo-datos.md).
 
-Specs de referencia: [nv-11](../../../specs/nv-11/spec.md). La matriz de requisitos/tareas de cada spec conserva el alcance y dependencias.
+Specs de referencia: [nv-11](../../../specs/arquitectura/nv-11/spec.md). La matriz de requisitos/tareas de cada spec conserva el alcance y dependencias.
 
 ## Estructura del propietario
 
@@ -48,14 +51,14 @@ Flujo: HTTP/WS → validar actor/miembro/estado y moderacion → commit mensaje 
 
 | ID | Metodo/ruta del catalogo | Spec primaria |
 |---|---|---|
-| EP-066 | `POST /conversations` | [nv-11](../../../specs/nv-11/spec.md) |
-| EP-067 | `GET /me/conversations` | [nv-11](../../../specs/nv-11/spec.md) |
-| EP-068 | `GET /conversations/{id}/messages` | [nv-11](../../../specs/nv-11/spec.md) |
-| EP-069 | `POST /conversations/{id}/messages` | [nv-11](../../../specs/nv-11/spec.md) |
-| EP-070 | `PUT /conversations/{id}/read` | [nv-11](../../../specs/nv-11/spec.md) |
-| EP-071 | `PUT /conversations/{id}/block` | [nv-11](../../../specs/nv-11/spec.md) |
-| EP-072 | `DELETE /conversations/{id}/block` | [nv-11](../../../specs/nv-11/spec.md) |
-| EP-074 | `WS /ws/v1/chat` | [nv-11](../../../specs/nv-11/spec.md) |
+| EP-066 | `POST /conversations` | [nv-11](../../../specs/arquitectura/nv-11/spec.md) |
+| EP-067 | `GET /me/conversations` | [nv-11](../../../specs/arquitectura/nv-11/spec.md) |
+| EP-068 | `GET /conversations/{id}/messages` | [nv-11](../../../specs/arquitectura/nv-11/spec.md) |
+| EP-069 | `POST /conversations/{id}/messages` | [nv-11](../../../specs/arquitectura/nv-11/spec.md) |
+| EP-070 | `PUT /conversations/{id}/read` | [nv-11](../../../specs/arquitectura/nv-11/spec.md) |
+| EP-071 | `PUT /conversations/{id}/block` | [nv-11](../../../specs/arquitectura/nv-11/spec.md) |
+| EP-072 | `DELETE /conversations/{id}/block` | [nv-11](../../../specs/arquitectura/nv-11/spec.md) |
+| EP-074 | `WS /ws/v1/chat` | [nv-11](../../../specs/arquitectura/nv-11/spec.md) |
 
 ## Criterios antes de implementar/aceptar
 

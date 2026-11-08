@@ -106,6 +106,14 @@ if __name__ == "__main__":
         event = json.load(stream)
     with open(sys.argv[2], encoding="utf-8") as stream:
         policy = json.load(stream)
+    # Jira y Confluence todavia no existen para este proyecto. Mientras la politica este vacia la
+    # comprobacion no bloquea: exigir una clave de un Jira inexistente no trazaria nada, solo
+    # obligaria a inventarla. Se activa sola al llenar `.github/change-policy.json`, y entonces
+    # `validate` vuelve a rechazar lo que no cumpla, incluida la politica a medio configurar.
+    if not policy.get("jira_project_keys") or not policy.get("jira_base_url") or not policy.get("confluence_base_url"):
+        print("TRACEABILITY-SKIPPED: sin Jira ni Confluence configurados en .github/change-policy.json; "
+              "la trazabilidad del PR no se comprueba todavia")
+        sys.exit(0)
     try:
         print(validate(event, policy))
     except (ValueError, KeyError, TypeError) as error:

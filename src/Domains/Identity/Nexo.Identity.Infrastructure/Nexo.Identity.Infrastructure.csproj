@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <PackageReference Include="OpenIddict" />
+    <PackageReference Include="OpenIddict.MongoDb" />
+    <PackageReference Include="OpenIddict.Server.AspNetCore" />
+    <PackageReference Include="OpenIddict.Validation.AspNetCore" />
+    <PackageReference Include="Konscious.Security.Cryptography.Argon2" />
+    <PackageReference Include="MailKit" />
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="MongoDB.Driver" />
+    <PackageReference Include="StackExchange.Redis" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="../Nexo.Identity.Application/Nexo.Identity.Application.csproj" />
+    <ProjectReference Include="../Nexo.Identity.Domain/Nexo.Identity.Domain.csproj" />
+    <ProjectReference Include="../../../BuildingBlocks/Nexo.Common/Nexo.Common.csproj" />
+    <ProjectReference Include="../../../BuildingBlocks/Nexo.Outbox/Nexo.Outbox.csproj" />
+  </ItemGroup>
+</Project>

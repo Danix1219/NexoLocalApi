@@ -1,12 +1,15 @@
 # S08 — Proyeccion de relaciones
 
+> **Mapa de dominios, no unidad desplegable.** Tras la **enmienda E-001**, este servicio se implementa en el modulo **Discovery** de la API modular por dominios, con datos en `nexo_discovery`. Comparte host y se despliega en una app de App Service con **2 instancias**. El contenido funcional de abajo sigue vigente; lo que cambia es donde vive. Ver [estructura-backend.md](../../estructura-backend.md).
+
+
 Diseño de implementacion propuesto, 2026-11-03. Opcional/condicionado; ningun proyecto, grafo o motor creado. Esta ficha no instala patrones/proveedores ni convierte la base en producto aprobado. [Politicas comunes](../politicas-comunes.md) y [mapa general](../README.md).
 
 ## Limite y dueño
 
 Ruta: `services/relations/`. Proyeccion derivada de relaciones publicas, versiones/tombstones y estado de reconstruccion. No posee la cuenta, el pedido, permisos ni direccion/telefono. [Datos autoritativos](../../modelo-datos.md).
 
-Specs de referencia: [nv-15](../../../specs/nv-15/spec.md). La matriz de requisitos/tareas de cada spec conserva el alcance y dependencias.
+Specs de referencia: [nv-15](../../../specs/arquitectura/README.md). La matriz de requisitos/tareas de cada spec conserva el alcance y dependencias.
 
 ## Estructura del propietario
 
@@ -48,7 +51,7 @@ Flujo: Hecho publico compatible → dedupe/version → proyeccion → consulta c
 
 | ID | Metodo/ruta del catalogo | Spec primaria |
 |---|---|---|
-| EP-098 | `POST /graphql/social/v1` | [nv-15](../../../specs/nv-15/spec.md) |
+| EP-098 | `POST /graphql/social/v1` | [nv-15](../../../specs/arquitectura/README.md) |
 
 ## Criterios antes de implementar/aceptar
 

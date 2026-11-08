@@ -1,5 +1,8 @@
 # Informe historico de base fisica: propuesta sustituida
 
+> **Documento historico.** Describe la estructura de ocho microservicios que la **enmienda E-001** retiro el 2026-11-06. Ya no refleja lo que hay en disco: no existen `nexolocal.Api.slnx`, `services/` ni los hosts por servicio. Se conserva como evidencia del trabajo ejecutado y de por que se cambio. **Estado vigente:** [estructura-backend.md](../estructura-backend.md) y [mapa de specs](../../specs/arquitectura/README.md).
+
+
 **Este informe conserva la fase anterior y sus resultados. El usuario rechazo la solucion paralela y corrigio la estructura. No seguir sus rutas/comandos como estado vigente.** Usar [correccion actual](correccion-base-microservicios.md) y [mapa vigente](../estructura-backend.md).
 
 Fecha: 2026-11-03. Encargo del usuario: **crear carpetas y proyectos base, sin logica de negocio**. La base se creo en la ubicacion solicitada `C:/Users/kevin/source/repos/nexolocal.Api`. No es una aplicacion funcional de identidad, una release ni una ratificacion de proveedores.

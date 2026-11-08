@@ -3,7 +3,7 @@
 Rector: [.specify/memory/constitution.md](.specify/memory/constitution.md). Este archivo dice cómo trabajar; la constitución qué reglas respetar.
 
 ## 1. Forma de trabajo
-Leer constitución, este archivo, Memoria y la spec objetivo. Seguir `specs/nv-XX/spec.md → plan.md → task.md → checklists/gates.md`. El encargo posterior del 2026-11-03 permite carpetas y proyectos base .NET en nexolocal.Api, sin logica de negocio. Conservar limites de cada fase; no crear funcionalidad, dependencias de proveedores o nube fuera de encargo.
+Leer constitución, este archivo, Memoria y la spec objetivo. Seguir `specs/arquitectura/nv-XX/spec.md → plan.md → task.md → checklists/gates.md`. El encargo posterior del 2026-11-03 permite carpetas y proyectos base .NET en nexolocal.Api, sin logica de negocio. Conservar limites de cada fase; no crear funcionalidad, dependencias de proveedores o nube fuera de encargo.
 
 ## 2. Memoria y cierre
 Actualizar Memoria al cerrar fase: Estado/Decisiones/Deuda/A evitar. Conciliar spec/plan/tareas/checklist con archivos y resultados reales. No firmar sin revisor humano identificado.

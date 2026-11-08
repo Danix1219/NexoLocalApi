@@ -1,4 +1,7 @@
-# Arquitectura por microservicio
+# Arquitectura por dominio
+
+> **Mapa de dominios, no de despliegue.** La **enmienda E-001** sustituyo los ocho microservicios por una API REST modular por dominios: un host, tres modulos (`Identity`, `Discovery`, `Engagement`) mas `Screens`, y una app con **2 instancias**. Los identificadores `S01`-`S08` de las fichas de abajo se conservan como mapa de dominios y su contenido funcional sigue vigente. Estructura real: [estructura-backend.md](../estructura-backend.md).
+
 
 La arquitectura interna se elige por responsabilidad y complejidad. La [selección revisada, alternativas y criterios de eficiencia](seleccion-arquitecturas.md) define el estado vigente y sustituye la plantilla de cuatro capas para todos.
 

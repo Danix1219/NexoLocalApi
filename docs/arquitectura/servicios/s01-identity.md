@@ -1,12 +1,15 @@
 # S01 — Identidad y sesion
 
+> **Mapa de dominios, no unidad desplegable.** Tras la **enmienda E-001**, este servicio se implementa en el modulo **Identity** de la API modular por dominios, con datos en `nexo_identity`. Comparte host y se despliega en una app de App Service con **2 instancias**. El contenido funcional de abajo sigue vigente; lo que cambia es donde vive. Ver [estructura-backend.md](../../estructura-backend.md).
+
+
 Diseño de implementacion propuesto, 2026-11-03. Cuatro proyectos existentes; Api vacia y sin negocio/proveedores. Esta ficha no instala patrones/proveedores ni convierte la base en producto aprobado. [Politicas comunes](../politicas-comunes.md) y [mapa general](../README.md).
 
 ## Limite y dueño
 
 Ruta: `services/identity/`. accounts, sessions, otp_challenges y deletions. Cuenta, familia de sesion y desafio de verificacion son limites a refinar, sin agregado global de usuario/perfil/pedido. [Datos autoritativos](../../modelo-datos.md).
 
-Specs de referencia: [nv-04](../../../specs/nv-04/spec.md), [nv-12](../../../specs/nv-12/spec.md), [nv-16](../../../specs/nv-16/spec.md). La matriz de requisitos/tareas de cada spec conserva el alcance y dependencias.
+Specs de referencia: [nv-04](../../../specs/arquitectura/nv-04/spec.md), [nv-12](../../../specs/arquitectura/nv-12/spec.md), [nv-16](../../../specs/arquitectura/nv-04/spec.md). La matriz de requisitos/tareas de cada spec conserva el alcance y dependencias.
 
 ## Estructura del propietario
 
@@ -50,21 +53,21 @@ Flujo: G01 → S01.Api → caso → regla/puerto → commit local → resultado.
 
 | ID | Metodo/ruta del catalogo | Spec primaria |
 |---|---|---|
-| EP-001 | `POST /auth/otp` | [nv-04](../../../specs/nv-04/spec.md) |
-| EP-002 | `POST /auth/otp/verify` | [nv-04](../../../specs/nv-04/spec.md) |
-| EP-003 | `POST /auth/register` | [nv-04](../../../specs/nv-04/spec.md) |
-| EP-004 | `POST /auth/login` | [nv-04](../../../specs/nv-04/spec.md) |
-| EP-005 | `POST /auth/refresh` | [nv-04](../../../specs/nv-04/spec.md) |
-| EP-006 | `POST /auth/password-reset` | [nv-16](../../../specs/nv-16/spec.md) |
-| EP-007 | `POST /auth/logout` | [nv-04](../../../specs/nv-04/spec.md) |
-| EP-008 | `GET /me` | [nv-04](../../../specs/nv-04/spec.md) |
-| EP-009 | `PATCH /me` | [nv-16](../../../specs/nv-16/spec.md) |
-| EP-010 | `GET /me/sessions` | [nv-16](../../../specs/nv-16/spec.md) |
-| EP-011 | `DELETE /me/sessions/{sid}` | [nv-16](../../../specs/nv-16/spec.md) |
-| EP-012 | `POST /me/deletion` | [nv-12](../../../specs/nv-12/spec.md) |
-| EP-013 | `GET /me/deletion/{id}` | [nv-12](../../../specs/nv-12/spec.md) |
-| EP-073 | `POST /realtime/ticket` | [nv-04](../../../specs/nv-04/spec.md) |
-| EP-101 | `POST /internal/accounts/visibility-batch` | [nv-04](../../../specs/nv-04/spec.md) |
+| EP-001 | `POST /auth/otp` | [nv-04](../../../specs/arquitectura/nv-04/spec.md) |
+| EP-002 | `POST /auth/otp/verify` | [nv-04](../../../specs/arquitectura/nv-04/spec.md) |
+| EP-003 | `POST /auth/register` | [nv-04](../../../specs/arquitectura/nv-04/spec.md) |
+| EP-004 | `POST /auth/login` | [nv-04](../../../specs/arquitectura/nv-04/spec.md) |
+| EP-005 | `POST /auth/refresh` | [nv-04](../../../specs/arquitectura/nv-04/spec.md) |
+| EP-006 | `POST /auth/password-reset` | [nv-16](../../../specs/arquitectura/nv-04/spec.md) |
+| EP-007 | `POST /auth/logout` | [nv-04](../../../specs/arquitectura/nv-04/spec.md) |
+| EP-008 | `GET /me` | [nv-04](../../../specs/arquitectura/nv-04/spec.md) |
+| EP-009 | `PATCH /me` | [nv-16](../../../specs/arquitectura/nv-04/spec.md) |
+| EP-010 | `GET /me/sessions` | [nv-16](../../../specs/arquitectura/nv-04/spec.md) |
+| EP-011 | `DELETE /me/sessions/{sid}` | [nv-16](../../../specs/arquitectura/nv-04/spec.md) |
+| EP-012 | `POST /me/deletion` | [nv-12](../../../specs/arquitectura/nv-12/spec.md) |
+| EP-013 | `GET /me/deletion/{id}` | [nv-12](../../../specs/arquitectura/nv-12/spec.md) |
+| EP-073 | `POST /realtime/ticket` | [nv-04](../../../specs/arquitectura/nv-04/spec.md) |
+| EP-101 | `POST /internal/accounts/visibility-batch` | [nv-04](../../../specs/arquitectura/nv-04/spec.md) |
 
 ## Criterios antes de implementar/aceptar
 
