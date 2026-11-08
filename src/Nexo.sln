@@ -73,6 +73,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Nexo.Identity.Unit", "..\te
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Nexo.Integration", "..\tests\Nexo.Integration\Nexo.Integration.csproj", "{AACBF8CD-8FF6-4CC3-865C-9835AC2B7D9F}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Nexo.Seguridad.Tests", "..\tests\Nexo.Seguridad.Tests\Nexo.Seguridad.Tests.csproj", "{B2567D0B-01A4-4F35-8044-FEEF9FAA3292}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -419,6 +421,18 @@ Global
 		{AACBF8CD-8FF6-4CC3-865C-9835AC2B7D9F}.Release|x64.Build.0 = Release|Any CPU
 		{AACBF8CD-8FF6-4CC3-865C-9835AC2B7D9F}.Release|x86.ActiveCfg = Release|Any CPU
 		{AACBF8CD-8FF6-4CC3-865C-9835AC2B7D9F}.Release|x86.Build.0 = Release|Any CPU
+		{B2567D0B-01A4-4F35-8044-FEEF9FAA3292}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B2567D0B-01A4-4F35-8044-FEEF9FAA3292}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B2567D0B-01A4-4F35-8044-FEEF9FAA3292}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{B2567D0B-01A4-4F35-8044-FEEF9FAA3292}.Debug|x64.Build.0 = Debug|Any CPU
+		{B2567D0B-01A4-4F35-8044-FEEF9FAA3292}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{B2567D0B-01A4-4F35-8044-FEEF9FAA3292}.Debug|x86.Build.0 = Debug|Any CPU
+		{B2567D0B-01A4-4F35-8044-FEEF9FAA3292}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B2567D0B-01A4-4F35-8044-FEEF9FAA3292}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B2567D0B-01A4-4F35-8044-FEEF9FAA3292}.Release|x64.ActiveCfg = Release|Any CPU
+		{B2567D0B-01A4-4F35-8044-FEEF9FAA3292}.Release|x64.Build.0 = Release|Any CPU
+		{B2567D0B-01A4-4F35-8044-FEEF9FAA3292}.Release|x86.ActiveCfg = Release|Any CPU
+		{B2567D0B-01A4-4F35-8044-FEEF9FAA3292}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

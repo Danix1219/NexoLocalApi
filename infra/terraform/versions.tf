@@ -11,6 +11,11 @@ terraform {
       version = "~> 4.14"
     }
   }
+
+  # Estado remoto en Azure Storage. Va vacio a proposito: los valores llegan por
+  # `-backend-config` desde el workflow, de modo que aqui no se versiona ningun nombre de
+  # recurso. Sin estado compartido, `apply` y `destroy` en ejecuciones distintas no se verian.
+  backend "azurerm" {}
 }
 
 provider "azurerm" {
