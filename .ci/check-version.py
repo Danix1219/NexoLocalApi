@@ -30,12 +30,18 @@ def validate(texto, rama):
 
     if rama:
         release = RAMA_RELEASE.fullmatch(rama)
-        if release and release.group("version") != version:
-            # El nombre de la rama es lo que lee el equipo y lo que acaba en la etiqueta;
-            # si no coincide con VERSION, se despliega una version distinta de la anunciada.
-            raise ValueError(
-                f"La rama dice {release.group('version')} y VERSION dice {version}: deben coincidir"
-            )
+        if release:
+            # Se comparan los nucleos X.Y.Z: la rama lleva el sufijo del candidato
+            # (`-rc.N`), que cuenta las vueltas de la entrega, no la version entregada.
+            # Si los nucleos no coinciden se desplegaria algo distinto de lo anunciado.
+            nombrada = SEMVER.fullmatch(release.group("version"))
+            if nombrada is None:
+                raise ValueError(f"La rama no nombra una version SemVer: {rama}")
+            if nombrada.group("nucleo") != encontrado.group("nucleo"):
+                raise ValueError(
+                    f"La rama dice {nombrada.group('nucleo')} y VERSION dice "
+                    f"{encontrado.group('nucleo')}: deben coincidir"
+                )
 
     return f"VERSION-OK: {version} (formato y rama; no acredita despliegue)"
 
