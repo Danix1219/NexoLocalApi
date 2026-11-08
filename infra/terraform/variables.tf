@@ -27,18 +27,41 @@ variable "redis_connection_string" {
   sensitive   = true
 }
 
-variable "acr_name" {
-  description = "Nombre del Azure Container Registry que publica la imagen del host."
-  type        = string
-}
-
+# El requisito 15 pide al menos 2 instancias. La cuota de Azure for Students limita las VMs B1 a
+# 1 y no admite solicitudes de aumento, de modo que la validacion no puede exigir 2: haria
+# imposible ejecutar `apply` y el ciclo crear/eliminar quedaria sin demostrar. La desviacion
+# esta declarada en Memoria.md y en docs/infraestructura.md.
 variable "instancias" {
-  description = "Instancias del plan. El requisito 15 exige al menos 2."
+  description = "Instancias del plan. El requisito 15 pide 2; la cuota de estudiante permite 1."
   type        = number
   default     = 2
 
   validation {
-    condition     = var.instancias >= 2
-    error_message = "El requisito 15 exige al menos 2 instancias: no se permite bajar de 2."
+    condition     = var.instancias >= 1
+    error_message = "El plan necesita al menos una instancia."
   }
+}
+
+variable "sku" {
+  description = "Nivel del plan. F1 es gratuito y no consume cuota de VMs B1."
+  type        = string
+  default     = "B1"
+
+  validation {
+    condition     = contains(["F1", "B1", "B2", "S1"], var.sku)
+    error_message = "Niveles admitidos: F1, B1, B2 o S1."
+  }
+}
+
+variable "habilitar_cdn" {
+  # Front Door y la cuenta de medios cuestan; el entorno efimero debe salir gratis.
+  description = "Crea Front Door y el almacenamiento de imagenes."
+  type        = bool
+  default     = false
+}
+
+variable "habilitar_colas" {
+  description = "Crea la cuenta de almacenamiento con las colas del outbox."
+  type        = bool
+  default     = false
 }

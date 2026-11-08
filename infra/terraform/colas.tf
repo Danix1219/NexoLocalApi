@@ -6,6 +6,7 @@
 # ---------------------------------------------------------------------------
 
 resource "azurerm_storage_account" "colas" {
+  count               = var.habilitar_colas ? 1 : 0
   name                = "st${var.prefijo}colas"
   location            = azurerm_resource_group.principal.location
   resource_group_name = azurerm_resource_group.principal.name
@@ -25,12 +26,14 @@ resource "azurerm_storage_account" "colas" {
 }
 
 resource "azurerm_storage_queue" "outbox" {
+  count              = var.habilitar_colas ? 1 : 0
   name               = "outbox"
-  storage_account_id = azurerm_storage_account.colas.id
+  storage_account_id = azurerm_storage_account.colas[0].id
 }
 
 # Mensajes que agotaron sus reintentos: se revisan a mano, no se pierden.
 resource "azurerm_storage_queue" "outbox_fallidos" {
+  count              = var.habilitar_colas ? 1 : 0
   name               = "outbox-fallidos"
-  storage_account_id = azurerm_storage_account.colas.id
+  storage_account_id = azurerm_storage_account.colas[0].id
 }

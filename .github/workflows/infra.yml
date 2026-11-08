@@ -1,0 +1,157 @@
+name: Infraestructura
+
+# Requisito 15: crear la infraestructura y eliminarla deben ser un paso del proceso, no una
+# sesion manual en el portal.
+#
+# Crea un entorno EFIMERO, separado de produccion: plan F1, que es gratuito y no consume la cuota
+# de VMs B1 que la suscripcion de estudiante limita a una. Produccion no se toca desde aqui.
+#
+# Solo se dispara a mano: crear y destruir infraestructura no debe ocurrir por un merge.
+
+on:
+  workflow_dispatch:
+    inputs:
+      accion:
+        description: Que hacer con la infraestructura
+        required: true
+        type: choice
+        options: [plan, apply, destroy]
+        default: plan
+      confirmacion:
+        description: Para destruir, escribir exactamente "destruir"
+        required: false
+        type: string
+      prefijo:
+        description: Prefijo de los recursos; cambia el nombre del grupo y del sitio
+        required: false
+        type: string
+        default: nexoefimero
+
+permissions:
+  contents: read
+  id-token: write
+
+# Nunca dos a la vez sobre el mismo estado, y sin cancelar a medias: un `apply` interrumpido
+# deja recursos creados que el estado no conoce.
+concurrency:
+  group: infraestructura
+  cancel-in-progress: false
+
+jobs:
+  terraform:
+    name: Terraform · ${{ inputs.accion }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    environment: infraestructura
+    steps:
+      # Antes de autenticar siquiera: destruir por un clic distraido es el accidente que esta
+      # confirmacion evita.
+      - name: Comprobar la confirmacion
+        if: inputs.accion == 'destroy'
+        run: |
+          set -euo pipefail
+          if [ "${{ inputs.confirmacion }}" != "destruir" ]; then
+            echo "::error::Para destruir hay que escribir exactamente 'destruir' en la confirmacion."
+            exit 1
+          fi
+
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+
+      # Sin `hashicorp/setup-terraform`: la politica del repositorio solo admite acciones propias
+      # o de GitHub. Version y huella clavadas; una descarga alterada no pasa de aqui.
+      - name: Instalar Terraform
+        env:
+          TF_VERSION: 1.9.8
+          TF_SHA256: 186e0145f5e5f2eb97cbd785bc78f21bae4ef15119349f6ad4fa535b83b10df8
+        run: |
+          set -euo pipefail
+          archivo="terraform_${TF_VERSION}_linux_amd64.zip"
+          curl -fsSL --retry 3 -o "$RUNNER_TEMP/$archivo" \
+            "https://releases.hashicorp.com/terraform/${TF_VERSION}/${archivo}"
+          echo "${TF_SHA256}  $RUNNER_TEMP/$archivo" | sha256sum -c -
+          unzip -q -o "$RUNNER_TEMP/$archivo" -d "$RUNNER_TEMP"
+          sudo install -m 0755 "$RUNNER_TEMP/terraform" /usr/local/bin/terraform
+          terraform version
+
+      # OIDC a mano, sin `azure/login`. No hay ninguna contrasena guardada: GitHub emite un token
+      # de minutos para esta ejecucion y Azure lo cambia por una sesion.
+      - name: Azure login (OIDC)
+        env:
+          CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+          SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+        run: |
+          set -euo pipefail
+          if [ -z "${CLIENT_ID:-}" ] || [ -z "${TENANT_ID:-}" ] || [ -z "${SUBSCRIPTION_ID:-}" ]; then
+            echo "::error::Faltan AZURE_CLIENT_ID, AZURE_TENANT_ID o AZURE_SUBSCRIPTION_ID. Ver docs/infraestructura.md."
+            exit 1
+          fi
+          token=$(curl -fsSL \
+            -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
+            "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=api://AzureADTokenExchange" | jq -r '.value')
+          echo "::add-mask::$token"
+          az login --service-principal \
+            --username "$CLIENT_ID" --tenant "$TENANT_ID" --federated-token "$token" --output none
+          az account set --subscription "$SUBSCRIPTION_ID"
+          # Terraform usa la misma sesion de `az`, sin credenciales propias.
+          echo "ARM_USE_AZURECLI_AUTH=true" >> "$GITHUB_ENV"
+          echo "ARM_SUBSCRIPTION_ID=$SUBSCRIPTION_ID" >> "$GITHUB_ENV"
+
+      - name: Inicializar con el estado remoto
+        run: |
+          set -euo pipefail
+          terraform -chdir=infra/terraform init -input=false \
+            -backend-config="resource_group_name=${{ vars.TFSTATE_RESOURCE_GROUP }}" \
+            -backend-config="storage_account_name=${{ vars.TFSTATE_STORAGE_ACCOUNT }}" \
+            -backend-config="container_name=tfstate" \
+            -backend-config="key=${{ inputs.prefijo }}.tfstate" \
+            -backend-config="use_azuread_auth=true"
+
+      - name: Ejecutar
+        id: ejecutar
+        env:
+          TF_VAR_mongo_connection_string: ${{ secrets.MONGO_CONNECTION_STRING }}
+          TF_VAR_redis_connection_string: ${{ secrets.REDIS_CONNECTION_STRING }}
+          TF_VAR_prefijo: ${{ inputs.prefijo }}
+          # F1 es gratuito y no consume cuota de VMs B1, que es lo que impide dos instancias en
+          # produccion. El entorno efimero existe para demostrar el ciclo, no para dar servicio.
+          TF_VAR_sku: F1
+          TF_VAR_instancias: 1
+        run: |
+          set -euo pipefail
+          cd infra/terraform
+          case "${{ inputs.accion }}" in
+            plan)
+              terraform plan -input=false -no-color | tee salida.txt
+              ;;
+            apply)
+              terraform apply -input=false -auto-approve -no-color | tee salida.txt
+              echo "URL_API=$(terraform output -raw url_api)" >> "$GITHUB_ENV"
+              ;;
+            destroy)
+              terraform destroy -input=false -auto-approve -no-color | tee salida.txt
+              ;;
+          esac
+
+      - name: Resumen
+        if: always()
+        run: |
+          set -euo pipefail
+          {
+            echo "## Infraestructura · ${{ inputs.accion }}"
+            echo
+            echo "| | |"
+            echo "|---|---|"
+            echo "| Prefijo | \`${{ inputs.prefijo }}\` |"
+            echo "| Nivel del plan | \`F1\` (gratuito) |"
+            echo "| Instancias | 1 |"
+            if [ -n "${URL_API:-}" ]; then
+              echo "| URL | ${URL_API} |"
+            fi
+            echo
+            echo "Entorno **efimero**, separado de produccion. El requisito 15 pide dos instancias;"
+            echo "la cuota de Azure for Students limita las VMs B1 a una y no admite aumentos."
+          } >> "$GITHUB_STEP_SUMMARY"
