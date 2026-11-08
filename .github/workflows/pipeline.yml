@@ -76,6 +76,12 @@ jobs:
       - name: Formato y convenciones
         run: dotnet format "$SOLUCION" --verify-no-changes --verbosity diagnostic
 
+      # `VERSION` es la unica fuente de la version: de ahi salen la rama de entrega, la etiqueta
+      # y lo que publica la API. Si la rama dijera otra cosa, se desplegaria una version distinta
+      # de la anunciada.
+      - name: Version
+        run: python3 -B .ci/check-version.py "$GITHUB_EVENT_PATH"
+
   dependencias:
     name: 3 · Dependencias (NuGet)
     needs: compilacion
@@ -249,10 +255,38 @@ jobs:
         if: always()
         run: python3 -B .ci/resumen-pruebas.py resultados >> "$GITHUB_STEP_SUMMARY"
 
+  pruebas-seguridad:
+    name: 4 · Pruebas de seguridad
+    needs: compilacion
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+
+      - name: Install pinned .NET SDK
+        uses: actions/setup-dotnet@26b0ec14cb23fa6904739307f278c14f94c95bf1 # v5 verified from official repository
+        with:
+          global-json-file: global.json
+
+      # Guardas de regresion sobre protecciones ya implementadas: enumeracion de cuentas, bloqueo
+      # por intentos, lista negra de `jti`, reuso de refresh y fugas en las respuestas. No son
+      # funcionalidad: son lo que avisa si una de esas protecciones se pierde al cambiar el codigo.
+      - name: Pruebas de seguridad
+        run: >
+          dotnet test tests/Nexo.Seguridad.Tests --configuration Release
+          --logger "trx;LogFileName=seguridad.trx" --results-directory resultados
+
+      - name: Resumen
+        if: always()
+        run: python3 -B .ci/resumen-pruebas.py resultados >> "$GITHUB_STEP_SUMMARY"
+
   puerta-de-calidad:
     name: 5 · Puerta de calidad
     if: always()
-    needs: [secretos, compilacion, dependencias, infraestructura, arquitectura, pruebas-unitarias, pruebas-integracion]
+    needs: [secretos, compilacion, dependencias, infraestructura, arquitectura, pruebas-unitarias, pruebas-integracion, pruebas-seguridad]
     runs-on: ubuntu-24.04
     timeout-minutes: 5
     steps:

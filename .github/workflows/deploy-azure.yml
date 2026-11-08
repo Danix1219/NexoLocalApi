@@ -20,7 +20,7 @@ on:
     branches: [main]
   workflow_dispatch:
 permissions:
-  contents: read
+  contents: write
 concurrency:
   group: deploy-azure-${{ github.ref }}
   cancel-in-progress: false
@@ -47,8 +47,17 @@ jobs:
         with:
           global-json-file: global.json
 
+      # La version se sella en el ensamblado y la API la publica en `info.version` del documento
+      # OpenAPI, de modo que se puede comprobar que version esta viva sin entrar al portal.
+      # El SHA va en `InformationalVersion` y no en la version del paquete: distingue dos
+      # despliegues de la misma version sin ensuciar el numero que lee una persona.
       - name: Publish host
-        run: dotnet publish src/Host/Nexo.Host --configuration Release --output publish
+        run: |
+          set -euo pipefail
+          version=$(tr -d '[:space:]' < VERSION)
+          echo "NEXO_VERSION=$version" >> "$GITHUB_ENV"
+          dotnet publish src/Host/Nexo.Host --configuration Release --output publish \
+            -p:Version="$version" -p:InformationalVersion="$version+${GITHUB_SHA::7}"
 
       # Despliegue con el perfil de publicacion del sitio, el mismo que usa Visual Studio.
       #
@@ -104,3 +113,42 @@ jobs:
           done
           echo "No se alcanzaron 6 respuestas 200 en $APP_URL/health/ready; revisar el log del App Service." >&2
           exit 1
+
+      # La etiqueta se crea solo si el sitio respondio: etiquetar antes dejaria marcada como
+      # entregada una version que no llego a levantar.
+      # Se usa la API y no `git push` porque el checkout no conserva credenciales.
+      - name: Etiquetar la version entregada
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          etiqueta="api-v${NEXO_VERSION}"
+          codigo=$(curl -sS -o respuesta.json -w '%{http_code}' -X POST \
+            -H "Authorization: Bearer $GH_TOKEN" \
+            -H "Accept: application/vnd.github+json" \
+            "https://api.github.com/repos/${GITHUB_REPOSITORY}/git/refs" \
+            -d "{\"ref\":\"refs/tags/${etiqueta}\",\"sha\":\"${GITHUB_SHA}\"}")
+
+          if [ "$codigo" = "201" ]; then
+            estado="creada"
+          elif [ "$codigo" = "422" ]; then
+            # Ya existe: una repromocion de la misma version no es un error.
+            estado="ya existia"
+          else
+            echo "::error::No se pudo crear la etiqueta ${etiqueta} (HTTP ${codigo})."
+            cat respuesta.json
+            exit 1
+          fi
+
+          {
+            echo "## Despliegue"
+            echo
+            echo "| | |"
+            echo "|---|---|"
+            echo "| Version | \`${NEXO_VERSION}\` |"
+            echo "| Etiqueta | \`${etiqueta}\` (${estado}) |"
+            echo "| Commit | \`${GITHUB_SHA::7}\` |"
+            echo "| URL | ${APP_URL} |"
+            echo
+            echo "Comprobar la version viva en \`${APP_URL}/openapi/v1.json\`, campo \`info.version\`."
+          } >> "$GITHUB_STEP_SUMMARY"

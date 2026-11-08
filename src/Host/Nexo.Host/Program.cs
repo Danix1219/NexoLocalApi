@@ -40,7 +40,14 @@ static async Task RunApiAsync(string[] args)
     builder.Services.AddAuthorization();
 
     // OpenAPI del framework (.NET 10), sin Swashbuckle. Se publica solo fuera de produccion.
-    builder.Services.AddOpenApi();
+    // La version sellada en el ensamblado viaja al documento, de modo que se puede comprobar que
+    // version esta viva pidiendo `/openapi/v1.json`, sin entrar al portal ni a los registros.
+    builder.Services.AddOpenApi(opciones => opciones.AddDocumentTransformer((documento, _, _) =>
+    {
+        documento.Info.Title = "Nexo Local API";
+        documento.Info.Version = Nexo.Host.VersionDelHost.Actual;
+        return Task.CompletedTask;
+    }));
 
     builder.Services.AddResponseCompression(options =>
     {
