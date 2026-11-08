@@ -6,6 +6,7 @@
 # ---------------------------------------------------------------------------
 
 resource "azurerm_storage_account" "medios" {
+  count               = var.habilitar_cdn ? 1 : 0
   name                = "st${var.prefijo}medios"
   location            = azurerm_resource_group.principal.location
   resource_group_name = azurerm_resource_group.principal.name
@@ -24,12 +25,14 @@ resource "azurerm_storage_account" "medios" {
 }
 
 resource "azurerm_storage_container" "imagenes" {
+  count                 = var.habilitar_cdn ? 1 : 0
   name                  = "imagenes"
-  storage_account_id    = azurerm_storage_account.medios.id
+  storage_account_id    = azurerm_storage_account.medios[0].id
   container_access_type = "private"
 }
 
 resource "azurerm_cdn_frontdoor_profile" "principal" {
+  count               = var.habilitar_cdn ? 1 : 0
   name                = "afd-${var.prefijo}"
   resource_group_name = azurerm_resource_group.principal.name
   sku_name            = "Standard_AzureFrontDoor"
@@ -37,14 +40,16 @@ resource "azurerm_cdn_frontdoor_profile" "principal" {
 }
 
 resource "azurerm_cdn_frontdoor_endpoint" "medios" {
+  count                    = var.habilitar_cdn ? 1 : 0
   name                     = "fde-${var.prefijo}-medios"
-  cdn_frontdoor_profile_id = azurerm_cdn_frontdoor_profile.principal.id
+  cdn_frontdoor_profile_id = azurerm_cdn_frontdoor_profile.principal[0].id
   tags                     = local.etiquetas
 }
 
 resource "azurerm_cdn_frontdoor_origin_group" "medios" {
+  count                    = var.habilitar_cdn ? 1 : 0
   name                     = "og-medios"
-  cdn_frontdoor_profile_id = azurerm_cdn_frontdoor_profile.principal.id
+  cdn_frontdoor_profile_id = azurerm_cdn_frontdoor_profile.principal[0].id
 
   load_balancing {
     sample_size                 = 4
@@ -60,11 +65,12 @@ resource "azurerm_cdn_frontdoor_origin_group" "medios" {
 }
 
 resource "azurerm_cdn_frontdoor_origin" "medios" {
+  count                         = var.habilitar_cdn ? 1 : 0
   name                          = "origen-blob"
-  cdn_frontdoor_origin_group_id = azurerm_cdn_frontdoor_origin_group.medios.id
+  cdn_frontdoor_origin_group_id = azurerm_cdn_frontdoor_origin_group.medios[0].id
 
-  host_name                      = azurerm_storage_account.medios.primary_blob_host
-  origin_host_header             = azurerm_storage_account.medios.primary_blob_host
+  host_name                      = azurerm_storage_account.medios[0].primary_blob_host
+  origin_host_header             = azurerm_storage_account.medios[0].primary_blob_host
   http_port                      = 80
   https_port                     = 443
   priority                       = 1
@@ -74,10 +80,11 @@ resource "azurerm_cdn_frontdoor_origin" "medios" {
 }
 
 resource "azurerm_cdn_frontdoor_route" "medios" {
+  count                         = var.habilitar_cdn ? 1 : 0
   name                          = "ruta-imagenes"
-  cdn_frontdoor_endpoint_id     = azurerm_cdn_frontdoor_endpoint.medios.id
-  cdn_frontdoor_origin_group_id = azurerm_cdn_frontdoor_origin_group.medios.id
-  cdn_frontdoor_origin_ids      = [azurerm_cdn_frontdoor_origin.medios.id]
+  cdn_frontdoor_endpoint_id     = azurerm_cdn_frontdoor_endpoint.medios[0].id
+  cdn_frontdoor_origin_group_id = azurerm_cdn_frontdoor_origin_group.medios[0].id
+  cdn_frontdoor_origin_ids      = [azurerm_cdn_frontdoor_origin.medios[0].id]
 
   supported_protocols    = ["Https"]
   patterns_to_match      = ["/imagenes/*"]

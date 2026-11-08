@@ -18,6 +18,7 @@
 | `pipeline.yml` | PR a `develop`, `main` o `release/**`; push a `develop` | Formato, vulnerabilidades, Terraform, compilación, fronteras de arquitectura y las 41 pruebas |
 | `sdd.yml` | Cualquier push y cualquier PR | Documentación SDD: estructura, enlaces y trazabilidad. Arrastra el build como dependencia |
 | `pr-governance.yml` | PR a `main`, `develop` o `release/**` | Trazabilidad del PR y dirección de rama |
+| `infra.yml` | Solo a mano | Crea y elimina el entorno efímero con Terraform. Ver [infraestructura.md](infraestructura.md) |
 | `deploy-azure.yml` | Push a `main` | Publica en App Service con OIDC |
 
 `pipeline.yml` existe aparte de `sdd.yml` a propósito. El build real ya corría, pero escondido como
@@ -36,6 +37,7 @@ completo de una corrida en vez de una caja unica con todo dentro.
       |-- 3 · Infraestructura (Terraform)
       |-- 4 · Fronteras de arquitectura
       |-- 4 · Pruebas unitarias
+      |-- 4 · Pruebas de seguridad
       |-- 4 · Pruebas de integracion
                    `-- 5 · Puerta de calidad
 ```
@@ -49,6 +51,7 @@ completo de una corrida en vez de una caja unica con todo dentro.
 | 4 · Fronteras de arquitectura | NetArchTest, con su caso negativo | si |
 | 4 · Pruebas unitarias | Las cuatro suites sin infraestructura | si |
 | 4 · Pruebas de integracion | Mongo y Redis reales por Testcontainers | si |
+| 4 · Pruebas de seguridad | Enumeracion, fuerza bruta, revocacion y fugas en respuestas | si |
 | 5 · Puerta de calidad | Que ninguna etapa anterior quedara sin aprobar | si |
 
 La puerta final existe porque un `needs` cancelado o saltado **no es un aprobado**: sin ella, una

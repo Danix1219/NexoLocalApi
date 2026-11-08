@@ -329,3 +329,47 @@ SMTP real. Sigue sin devolver tokens `POST /v1/identity/accounts` y no hay prueb
 
 A evitar: dar por hecho que el correo sale en local sin mirar el log del despachador; el endpoint
 responde 202 aunque el envio falle despues, que es justamente el proposito de la cola.
+
+## Versionado, infraestructura efimera y pruebas de seguridad (2026-11-08)
+
+Estado: se cierran tres requisitos de los lineamientos que estaban pedidos con todas las letras y
+sin implementar. 53 pruebas en verde con el `.env` apartado (16 unitarias, 7 de arquitectura, 12
+de seguridad, 18 de integracion), 58 de gobierno, gitleaks sin hallazgos, `verify-sdd.ps1`
+completo, Terraform valido y actionlint limpio.
+
+**Lineamiento 11.** `VERSION` en la raiz es la unica fuente. `.ci/check-version.py` exige SemVer
+y, en ramas `release/*`, que el nombre de la rama coincida; con 19 pruebas propias. El despliegue
+sella la version en el ensamblado con el SHA corto, crea la etiqueta `api-vX.Y.Z` **solo si el
+sitio respondio** y la publica en `info.version` del documento OpenAPI. Se descarto un
+`GET /version`: seria una operacion nueva y exigiria su ficha en `specs/endpoints/`.
+
+**Lineamiento 15.** El Terraform no describia nada de lo que estaba corriendo: declaraba otro
+grupo, una app por contenedor desde un ACR inexistente y un plan de dos instancias. Pasa a
+describir un **entorno efimero** en plan F1, que no consume la cuota de VMs B1 y es gratuito, con
+CDN y colas tras banderas apagadas. El workflow `infra.yml` ofrece `plan`, `apply` y `destroy`,
+este ultimo exigiendo escribir `destruir` antes incluso de autenticar.
+
+**Lineamiento 7.** `tests/Nexo.Seguridad.Tests` anade doce guardas de regresion sobre protecciones
+ya implementadas: enumeracion de cuentas por los tres caminos, bloqueo tras cinco intentos, lista
+negra de `jti`, revocacion de la familia al reusar un refresh, y que ni contrasena, ni hash, ni
+codigo salgan en ninguna respuesta. Las pruebas crean cuentas reales leyendo el codigo del outbox,
+que es donde lo deja el endpoint; que no viaje en la respuesta es justo lo que una comprueba.
+
+Decisiones con su coste:
+
+- **La validacion de `instancias` baja de 2 a 1.** Prohibir bajar de 2 hacia imposible ejecutar
+  `apply` con la cuota de estudiante, y entonces el ciclo crear/eliminar no se podia demostrar en
+  absoluto. El valor por omision sigue siendo 2 y la salida `instancias_del_plan` expone la
+  desviacion en cada ejecucion.
+- **El entorno es efimero y gratuito, no un reflejo de produccion.** Reflejar produccion exigiria
+  importar recursos creados a mano y un `destroy` borraria el sitio vivo.
+- **Terraform despliega por codigo, no por contenedor.** Se eliminan el ACR y su asignacion de rol:
+  menos coste, menos configuracion y se parece a como publica el workflow real.
+
+Deuda: dos instancias siguen bloqueadas por la cuota; Redis sigue en Upstash y no en Azure; no hay
+cache a nivel Mongo; el CDN existe en codigo pero sin subida de imagenes implementada; `AC-010`
+sigue sin verificarse en cada despliegue. El entorno efimero crea el sitio vacio: publicar codigo
+en el exigiria su propio perfil.
+
+A evitar: dar por cumplido el requisito de dos instancias porque el codigo lo soporte. Lo soporta
+y hay una prueba que lo acredita, pero en Azure corre una sola.
