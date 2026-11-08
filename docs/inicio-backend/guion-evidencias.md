@@ -1,5 +1,8 @@
 # Guion de evidencias previas y evaluacion de nv-00
 
+> **Documento historico.** Registra la evidencia del scaffold de 33 proyectos con G01 Gateway y S01-S08, retirado por la **enmienda E-001** el 2026-11-06. Nada de esa estructura existe ya en disco. Se conserva como evidencia ejecutada. **Estado vigente:** [estructura-backend.md](../estructura-backend.md).
+
+
 Este guion prepara las tareas existentes; no acredita que se hayan realizado. No hay respuestas de entrevistas, participantes, consentimientos o aprobaciones fabricados. Su custodia final debe evitar PII/secretos en repositorios publicos.
 
 ## Entrevistas (T-451)

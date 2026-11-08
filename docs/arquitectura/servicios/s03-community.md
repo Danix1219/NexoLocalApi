@@ -1,12 +1,15 @@
 # S03 — Comunidad y reputacion
 
+> **Mapa de dominios, no unidad desplegable.** Tras la **enmienda E-001**, este servicio se implementa en el modulo **Discovery** de la API modular por dominios, con datos en `nexo_discovery`. Comparte host y se despliega en una app de App Service con **2 instancias**. El contenido funcional de abajo sigue vigente; lo que cambia es donde vive. Ver [estructura-backend.md](../../estructura-backend.md).
+
+
 Diseño de implementacion propuesto, 2026-11-03. Base física revisada: 3 proyectos, sin negocio ni almacenamiento configurado. Esta ficha no instala patrones/proveedores ni convierte la base en producto aprobado. [Politicas comunes](../politicas-comunes.md) y [mapa general](../README.md).
 
 ## Limite y dueño
 
 Ruta: `services/community/`. posts, reviews, reactions, saved y metrics. Separar experiencia declarada de opinion vinculada a pedido; nunca inventar historial o estrellas verificadas. [Datos autoritativos](../../modelo-datos.md).
 
-Specs de referencia: [nv-07](../../../specs/arquitectura/nv-07/spec.md), [nv-08](../../../specs/arquitectura/nv-08/spec.md), [nv-18](../../../specs/arquitectura/nv-18/spec.md), [nv-19](../../../specs/arquitectura/nv-19/spec.md). La matriz de requisitos/tareas de cada spec conserva el alcance y dependencias.
+Specs de referencia: [nv-07](../../../specs/arquitectura/nv-07/spec.md), [nv-08](../../../specs/arquitectura/nv-08/spec.md), [nv-18](../../../specs/arquitectura/nv-08/spec.md), [nv-19](../../../specs/arquitectura/nv-08/spec.md). La matriz de requisitos/tareas de cada spec conserva el alcance y dependencias.
 
 ## Estructura del propietario
 
@@ -54,19 +57,19 @@ Flujo: Solicitud → autorizacion/eligibilidad → moderacion necesaria → comm
 | EP-033 | `GET /posts/{id}` | [nv-08](../../../specs/arquitectura/nv-08/spec.md) |
 | EP-034 | `PATCH /posts/{id}` | [nv-08](../../../specs/arquitectura/nv-08/spec.md) |
 | EP-035 | `DELETE /posts/{id}` | [nv-08](../../../specs/arquitectura/nv-08/spec.md) |
-| EP-036 | `PUT /reactions/{type}/{id}` | [nv-18](../../../specs/arquitectura/nv-18/spec.md) |
-| EP-037 | `DELETE /reactions/{type}/{id}` | [nv-18](../../../specs/arquitectura/nv-18/spec.md) |
-| EP-038 | `GET /me/saved` | [nv-18](../../../specs/arquitectura/nv-18/spec.md) |
-| EP-039 | `PUT /me/saved/{type}/{id}` | [nv-18](../../../specs/arquitectura/nv-18/spec.md) |
-| EP-040 | `DELETE /me/saved/{type}/{id}` | [nv-18](../../../specs/arquitectura/nv-18/spec.md) |
-| EP-041 | `POST /reviews` | [nv-19](../../../specs/arquitectura/nv-19/spec.md) |
-| EP-042 | `GET /providers/{id}/reviews` | [nv-19](../../../specs/arquitectura/nv-19/spec.md) |
-| EP-043 | `PATCH /reviews/{id}` | [nv-19](../../../specs/arquitectura/nv-19/spec.md) |
-| EP-044 | `DELETE /reviews/{id}` | [nv-19](../../../specs/arquitectura/nv-19/spec.md) |
-| EP-045 | `POST /interactions` | [nv-18](../../../specs/arquitectura/nv-18/spec.md) |
-| EP-046 | `GET /me/provider/metrics` | [nv-18](../../../specs/arquitectura/nv-18/spec.md) |
-| EP-094 | `GET /me/reviews` | [nv-19](../../../specs/arquitectura/nv-19/spec.md) |
-| EP-095 | `GET /reviews/{id}` | [nv-19](../../../specs/arquitectura/nv-19/spec.md) |
+| EP-036 | `PUT /reactions/{type}/{id}` | [nv-18](../../../specs/arquitectura/nv-08/spec.md) |
+| EP-037 | `DELETE /reactions/{type}/{id}` | [nv-18](../../../specs/arquitectura/nv-08/spec.md) |
+| EP-038 | `GET /me/saved` | [nv-18](../../../specs/arquitectura/nv-08/spec.md) |
+| EP-039 | `PUT /me/saved/{type}/{id}` | [nv-18](../../../specs/arquitectura/nv-08/spec.md) |
+| EP-040 | `DELETE /me/saved/{type}/{id}` | [nv-18](../../../specs/arquitectura/nv-08/spec.md) |
+| EP-041 | `POST /reviews` | [nv-19](../../../specs/arquitectura/nv-08/spec.md) |
+| EP-042 | `GET /providers/{id}/reviews` | [nv-19](../../../specs/arquitectura/nv-08/spec.md) |
+| EP-043 | `PATCH /reviews/{id}` | [nv-19](../../../specs/arquitectura/nv-08/spec.md) |
+| EP-044 | `DELETE /reviews/{id}` | [nv-19](../../../specs/arquitectura/nv-08/spec.md) |
+| EP-045 | `POST /interactions` | [nv-18](../../../specs/arquitectura/nv-08/spec.md) |
+| EP-046 | `GET /me/provider/metrics` | [nv-18](../../../specs/arquitectura/nv-08/spec.md) |
+| EP-094 | `GET /me/reviews` | [nv-19](../../../specs/arquitectura/nv-08/spec.md) |
+| EP-095 | `GET /reviews/{id}` | [nv-19](../../../specs/arquitectura/nv-08/spec.md) |
 
 ## Criterios antes de implementar/aceptar
 

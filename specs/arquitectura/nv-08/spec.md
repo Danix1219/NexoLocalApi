@@ -1,6 +1,8 @@
 # NV-08 — Trabajos, experiencias, menciones y guardados
 
-Versión: 0.4.1 | Fecha: 2026-11-02 | Rama prevista: `nv-08`
+Versión: 0.5.0 | Fecha: 2026-11-06 | Rama prevista: `nv-08`
+
+> **Alineación E-001.** Este incremento se implementa en **Discovery** (trabajos y guardados) y **Engagement** (experiencias y menciones) de la API modular por dominios, con datos en **`nexo_discovery`** y **`nexo_engagement`**. No es un servicio desplegable independiente: comparte host, se despliega en una app de App Service con **2 instancias**, y el estado compartido vive en **Redis**. Los identificadores `S01`–`S08` se conservan como **mapa de dominios**. Ver [mapa de specs](../README.md) y [constitución §4](../../../.specify/memory/constitution.md).
 
 ## 1. Objetivo
 
@@ -18,8 +20,8 @@ Requisitos Móvil v2: 04, 07, 09, 14, 16. Componentes: M14, M15, M16, M20. Halla
 
 Dependencias: nv-06, nv-05; elegibilidad de opinión vinculada depende de nv-10, no la comunidad declarada.
 
-- FR-001: Prestador publica trabajo/fotos; integra recomendaciones y guardados de nv-18.
-- FR-002: Integrar experiencias/menciones/reputación desde nv-19; no implementar un segundo caso de uso de opiniones.
+- FR-001: Prestador publica trabajo/fotos; integra recomendaciones y guardados de este spec.
+- FR-002: Integrar experiencias/menciones/reputación desde este spec; no implementar un segundo caso de uso de opiniones.
 
 - NFR-001: autorización, aislamiento, privacidad y manejo de errores según constitución.
 - NFR-002: trazabilidad y evidencia real; no declarar integraciones reales con dobles.
@@ -69,20 +71,20 @@ Fuera: funcionalidades ajenas y despliegue no encargado.
 
 | Operación integrada | Nuevo dueño de incremento |
 |---|---|
-| EP-036 | [nv-18](../nv-18/spec.md) |
-| EP-037 | [nv-18](../nv-18/spec.md) |
-| EP-038 | [nv-18](../nv-18/spec.md) |
-| EP-039 | [nv-18](../nv-18/spec.md) |
-| EP-040 | [nv-18](../nv-18/spec.md) |
-| EP-041 | [nv-19](../nv-19/spec.md) |
-| EP-042 | [nv-19](../nv-19/spec.md) |
-| EP-043 | [nv-19](../nv-19/spec.md) |
-| EP-044 | [nv-19](../nv-19/spec.md) |
-| EP-045 | [nv-18](../nv-18/spec.md) |
-| EP-046 | [nv-18](../nv-18/spec.md) |
-| EP-093 | [nv-19](../nv-19/spec.md) |
-| EP-094 | [nv-19](../nv-19/spec.md) |
-| EP-095 | [nv-19](../nv-19/spec.md) |
+| EP-036 | [este spec](spec.md) |
+| EP-037 | [este spec](spec.md) |
+| EP-038 | [este spec](spec.md) |
+| EP-039 | [este spec](spec.md) |
+| EP-040 | [este spec](spec.md) |
+| EP-041 | [este spec](spec.md) |
+| EP-042 | [este spec](spec.md) |
+| EP-043 | [este spec](spec.md) |
+| EP-044 | [este spec](spec.md) |
+| EP-045 | [este spec](spec.md) |
+| EP-046 | [este spec](spec.md) |
+| EP-093 | [este spec](spec.md) |
+| EP-094 | [este spec](spec.md) |
+| EP-095 | [este spec](spec.md) |
 
 Los FR/AC heredados de esta fase comprueban integración con esas capacidades; sus tareas EP y casos de uso se ejecutan únicamente en la spec primaria del inventario. El propietario S01–S08 no cambia.
 
@@ -169,8 +171,8 @@ Cobertura de diseño, no ejecución aprobada. Contratos formales, decisiones y e
 
 Dueño de este incremento: S03 Community. [Mapa backend](../../../docs/estructura-backend.md) y [orden SDD](../../../docs/orden-desarrollo-backend.md) concretan la propuesta; no ratifican proveedores ni crean proyectos. Las rutas siguientes son objetivo hasta ejecutarse.
 
-- FR-950: Antes de Ready, concretar archivos/rutas, dueño, referencias y pruebas del alcance: publicaciones y coordinacion con nv-18/nv-19; opinion vinculada espera pedidos. Ubicacion objetivo: services/community/src/ y services/community/tests/.
-- NFR-950: Separar preparacion documental de ejecucion; respetar capas y datos por propietario, conservar Git/SDD y exigir CI de producto al introducir codigo. Jira/Confluence pospuestos no se inventan; ningun endpoint, estado Ready o aceptacion se deriva de una carpeta.
+- FR-950: Antes de Ready, concretar archivos/rutas, dueño, referencias y pruebas del alcance: publicaciones y coordinacion con este spec/este spec; opinion vinculada espera pedidos. Ubicacion objetivo: src/Domains/community/ y services/community/tests/.
+- NFR-950: Separar preparacion documental de ejecucion; respetar capas y datos por propietario, conservar Git/SDD y exigir CI de producto al introducir codigo. Ningun endpoint, estado Ready o aceptacion se deriva de una carpeta.
 
 - [ ] AC-950 → FR-950/NFR-950: Plan contiene rutas actuales/objetivo, decisiones previas, dependencia de entrada, historia seleccionada, suites/evidencia y dueño; matriz de tareas cubre el cambio y Ready espera esa preparacion. Si una ruta no aplica, justificar con superficie/autoridad, sin crear un proyecto artificial. Verificacion de producto queda pendiente hasta ejecutarse.
 

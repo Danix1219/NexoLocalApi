@@ -215,13 +215,13 @@ A evitar: tratar `GET /health/ready` como operacion de negocio o consumirla desd
 
 | Spec de endpoint | Operaciones | Dueño | Capacidad origen |
 |---|---|---|---|
-| [ep-01](specs/endpoints/ep-01/spec.md) Pantalla principal | EP-030 `GET /feed` | S03 | nv-07 |
-| [ep-02](specs/endpoints/ep-02/spec.md) Registro con correo | EP-003 `POST /auth/register` | S01 | nv-04 |
-| [ep-03](specs/endpoints/ep-03/spec.md) Verificacion de correo | EP-001 `POST /auth/otp`, EP-002 `POST /auth/otp/verify` | S01 | nv-04 |
-| [ep-04](specs/endpoints/ep-04/spec.md) Inicio de sesion | EP-004 `POST /auth/login` | S01 | nv-04 |
-| [ep-05](specs/endpoints/ep-05/spec.md) Continuidad y cierre de sesion | EP-005 `POST /auth/refresh`, EP-007 `POST /auth/logout` | S01 | nv-04 |
-| [ep-06](specs/endpoints/ep-06/spec.md) Cuenta propia | EP-008 `GET /me` | S01 | nv-04 |
-| [ep-07](specs/endpoints/ep-07/spec.md) Recuperacion de contraseña | EP-006 `POST /auth/password-reset` | S01 | nv-16 |
+| `ep-01` (retirada) Pantalla principal | EP-030 `GET /feed` | S03 | nv-07 |
+| `ep-02` (retirada) Registro con correo | EP-003 `POST /auth/register` | S01 | nv-04 |
+| `ep-03` (retirada) Verificacion de correo | EP-001 `POST /auth/otp`, EP-002 `POST /auth/otp/verify` | S01 | nv-04 |
+| `ep-04` (retirada) Inicio de sesion | EP-004 `POST /auth/login` | S01 | nv-04 |
+| `ep-05` (retirada) Continuidad y cierre de sesion | EP-005 `POST /auth/refresh`, EP-007 `POST /auth/logout` | S01 | nv-04 |
+| `ep-06` (retirada) Cuenta propia | EP-008 `GET /me` | S01 | nv-04 |
+| `ep-07` (retirada) Recuperacion de contraseña | EP-006 `POST /auth/password-reset` | S01 | nv-16 |
 
 Orden de construccion: ep-03 → ep-02 → ep-04 → ep-05 → ep-06 → ep-07. ep-01 es independiente y no exige sesion.
 
@@ -255,3 +255,77 @@ Decisiones: se instalo el SDK **10.0.403** y `global.json` pasa de `10.0.302` a 
 Deuda: Visual Studio 17.14 no compila `net10.0` (NETSDK1209, exige 18.0+). Hoy se compila y ejecuta por CLI; si el equipo necesita compilar dentro de la IDE hay que decidir entre actualizar Visual Studio o bajar el objetivo, y eso toca D01. La version exacta del SDK sigue sin ratificar: `global.json` refleja lo instalado en este equipo, no un acuerdo de equipo.
 
 A evitar: suponer que el resto del equipo puede abrir la solucion en VS 17; dar por ratificado el runtime porque `global.json` ya apunte a una version instalada.
+
+## nv-00 ejecutada: una API modular sustituye a los microservicios (2026-11-06)
+
+Rama: `feature/Johann-arquitectura`, reconstruida sobre `develop`. La rama anterior no se perdio: se habia mergeado en los PR #7 y #9 y se borro despues, que es el flujo acordado.
+
+Estado: la arquitectura de nv-00 queda construible y los restos de microservicios estan retirados.
+
+- **Solucion**: `src/Nexo.sln` con 28 proyectos (20 en `src/`, 8 en `tests/`). Tres dominios de cinco capas (`Identity`, `Discovery`, `Engagement`), `Screens`, los bloques `Nexo.Common` y `Nexo.Outbox`, y un unico `Nexo.Host`. `dotnet build` → **0 errores, 0 advertencias**.
+- **Dos roles, un binario**: `NEXO_ROLE=api` escucha y responde `/health/live` 200; `NEXO_ROLE=worker` corre sin abrir ningun puerto. Verificado por PID.
+- **Degradacion**: con Mongo y Redis caidos, `/health/ready` responde **503**, no 200 por omision.
+- **Retirado** con `git rm`, historial conservado: `services/` completo (8 carpetas, 23 `.csproj`), `nexolocal.Api/`, `nexolocal.Api.slnx`, `scripts/check_architecture.py` y `scripts/Test-ScaffoldHosts.ps1`. `architecture-selection.json` archivado. El codigo util no se perdio: Identity vive en `src/Domains/Identity`, el feed de community en `Discovery`, `MongoOptions` y el limitador de Johann en `Nexo.Common`.
+- **Entorno local**: `docker-compose.yml` con MongoDB en replica, Redis y Azurite, mas `scripts/mongo-init.js` que crea las tres bases de forma idempotente.
+- **Despliegue**: `deploy-azure.yml` pasa de un contenedor por servicio a un plan B1 con dos instancias y el worker como WebJob continuo en el mismo plan.
+- **Pruebas**: 59 unitarias en verde (Common 16, Identity 29, Architecture 7, Discovery 7), incluido el caso negativo de fronteras con `Nexo.Fixtures.BadDiscovery`.
+- **Secretos**: escaneo de los 299 archivos rastreados, 0 hallazgos.
+
+Decisiones ratificadas por esta spec: **D-1** una API modular en lugar de 8 microservicios (~26 USD/mes contra ~208), **D-2** sin grafo, MongoDB con `$graphLookup`, **D-3** tres motores NoSQL y un solo despliegue. Detalle, inventario y calculo de costo en el [registro](docs/decisions/registro.md).
+
+Defecto encontrado y corregido al verificar: los bootstraps de indices de Identity y Discovery esperaban el timeout de Mongo dentro de `StartAsync`, lo que retrasaba ~30 s que el host escuchara. Ahora corren en segundo plano; el host responde a los 12 s.
+
+Deuda abierta: **AC-005, AC-006 y AC-007 positivo siguen sin evidencia** porque Docker Desktop no estaba levantado, y las 11 pruebas de `Nexo.Integration` fallan por eso, no por el codigo. El limite de conexiones del cluster M0 sigue sin confirmar en el panel, asi que `maxPoolSize = 40` es provisional. El costo de ~26 USD cubre solo el computo: el Redis hospedado añadiria del orden de 16 USD y aun no esta elegido. `Nexo.Engagement.Unit` sigue vacio. La enmienda **E-001 sigue siendo propuesta**: nada de esto esta aprobado hasta que Johann la revise y firme.
+
+A evitar: marcar los AC pendientes como cumplidos sin levantar Docker; tratar los ~26 USD como costo total del sistema; dar por aprobada E-001 porque el codigo ya exista.
+
+## nv-00: los 10 AC con evidencia ejecutada (2026-11-06)
+
+Con Docker levantado se cerraron los tres criterios que faltaban. **70 de 70 pruebas en verde**: Common 16, Identity 29, Architecture 7, Discovery 7, Integration 11.
+
+- **AC-005**: una escritura de un dominio no aparece en la base de otro, contra MongoDB real. Las tres bases las crea `scripts/mongo-init.js` de forma idempotente.
+- **AC-006**: un `jti` revocado en la instancia A es rechazado por la B, contra Redis real; con el contador de rate limit compartido y la idempotencia de un reintento que cae en la otra instancia.
+- **AC-007**: readiness responde 200 con el entorno arriba y **503** con Redis caido; liveness sigue en 200 en ambos casos.
+
+Documentacion de la API repuesta: OpenAPI nativo de .NET 10 mas Scalar en `/scalar/v1`, solo fuera de produccion. **Sin CORS a proposito**: la app es nativa y CORS solo lo aplica un navegador; al aparecer Flutter Web o la landing se añade una lista de origenes, nunca `AllowAnyOrigin`.
+
+Tres defectos mas encontrados al verificar y corregidos: el feed de Discovery estaba en `/api/v1/feed` en vez de `/v1/discovery/feed`, contra la seccion 3 de la spec; el contrato entregado al equipo movil citaba las rutas de la arquitectura anterior y quedo desfasado por completo; y `mongo-init.js` solo creaba la primera base porque `target._domain` choca con las propiedades internas de mongosh.
+
+Deuda que queda: el OpenAPI documenta las rutas pero **no las respuestas**: solo `200 OK` sin cuerpo, sin 400, 401, 409 ni 429 y sin esquema. Para que el equipo movil genere su cliente desde ahi hacen falta los `Produces<T>` en los nueve endpoints; es trabajo fuera de nv-00. Siguen pendientes el limite de conexiones real de M0, la eleccion del Redis hospedado y su costo, y `Nexo.Engagement.Unit` vacio.
+
+**E-001 sigue siendo propuesta.** Los diez AC tienen evidencia ejecutada, pero ninguna casilla de tarea se marca y nadie firma hasta que Johann revise la enmienda.
+
+## Retirada de las operaciones de negocio (2026-11-06)
+
+Estado: el backend queda **sin endpoints de negocio**. El usuario determino que las operaciones publicadas no eran las correctas, asi que se retiraron el dominio Identity, el feed de Discovery, los endpoints sin implementacion de Engagement y sus 36 pruebas. La **arquitectura de nv-00 sigue intacta**: 28 proyectos, cinco capas por dominio, los cuatro grupos de ruta listos, bloques comunes, Redis, tres bases y sondas. `dotnet build` en 0/0 y 34 pruebas en verde (Common 16, Architecture 7, Integration 11).
+
+Decisiones: la retirada **contradice FR-008 y deja AC-008 sin objeto**, y asi queda escrito en gates.md y en el [registro](docs/decisions/registro.md). No se marca como cumplido lo que se anulo. El contrato del equipo movil se archivo con un aviso de no implementar contra el, porque describia operaciones que ya no existen.
+
+Deuda: definir **que operaciones van primero** antes de volver a escribir codigo; ese fue el error que se esta deshaciendo. Las specs `ep-01` a `ep-07` siguen en el repositorio describiendo lo retirado y quedan obsoletas hasta rehacerse. El inventario de operaciones tampoco se ha revisado contra esta decision.
+
+A evitar: reimplementar los mismos endpoints a partir de las specs `ep-*` sin antes acordar el conjunto correcto; dar por buena una operacion porque exista su ficha en el inventario.
+
+## Correo por MailKit y host unificado (2026-11-06)
+
+Estado: el codigo de verificacion **se envia de verdad**. `SmtpEmailSender` (MailKit) y
+`IdentityOutboxHandler` convierten `identity.email_code_requested` en un correo; probado contra
+Mailtrap sandbox: `POST /v1/identity/email/verification` devuelve 202 y el outbox queda en
+0 pendientes y 3 procesados. `dotnet build` en 0/0.
+
+Decisiones: **se retiro la separacion `NEXO_ROLE=api|worker`**. El host es un solo proceso que
+atiende HTTP y despacha el outbox. Motivo del usuario: no hay forma comoda de arrancar dos
+instancias del mismo proyecto desde Visual Studio, porque `launchSettings.json` pisa la variable
+de entorno con la del perfil. Con dos instancias en el plan no hay envios duplicados: el reclamo
+del outbox es un `UpdateOne` condicional que comprueba `ModifiedCount == 1`.
+
+Tambien se descarta el mensaje cuyo codigo ya vencio: un fallo de SMTP se reintentaba cada cinco
+segundos sin tope ni espera creciente, de modo que un correo inutil consumia cuota para siempre.
+
+Deuda: **esto contradice nv-00**, que describe los dos roles como decision gobernada
+(`spec.md`, `plan.md`, `task.md`, `gates.md`, la constitucion y `estructura-backend.md`).
+Corresponde una enmienda; no se redacto. El costo aceptado es que un envio SMTP lento ocupa el
+proceso que atiende peticiones. Mailtrap sandbox **no entrega** correos: para produccion falta un
+SMTP real. Sigue sin devolver tokens `POST /v1/identity/accounts` y no hay pruebas de 01-auth.
+
+A evitar: dar por hecho que el correo sale en local sin mirar el log del despachador; el endpoint
+responde 202 aunque el envio falle despues, que es justamente el proposito de la cola.

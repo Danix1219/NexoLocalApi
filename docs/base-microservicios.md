@@ -1,5 +1,8 @@
 # Base física revisada por responsabilidad
 
+> **Documento historico.** Describe la estructura de ocho microservicios que la **enmienda E-001** retiro el 2026-11-06. Ya no refleja lo que hay en disco: no existen `nexolocal.Api.slnx`, `services/` ni los hosts por servicio. Se conserva como evidencia del trabajo ejecutado y de por que se cambio. **Estado vigente:** [estructura-backend.md](estructura-backend.md) y [mapa de specs](../specs/arquitectura/README.md).
+
+
 La solución original `nexolocal.Api.slnx` conserva G01 y contiene 28 proyectos, nueve hosts HTTP y un Worker. El usuario pidió revisar la arquitectura interna según el caso de uso; ya no se imponen cuatro capas a todos los servicios.
 
 | Servicio | Arquitectura | Proyectos |

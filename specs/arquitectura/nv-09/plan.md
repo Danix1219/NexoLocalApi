@@ -59,7 +59,7 @@ FR-712 → T-712 → AC-712: Tres precios, seis fotos portafolio/cuatro por trab
 
 ## Rutas, propietario y orden verificable 0.4.1
 
-Dueño: S04 Orders. Rutas objetivo: `services/orders/src/ y services/orders/tests/` (no creadas por este plan). Alcance propio: solicitudes y coordinacion de intereses con nv-20. Leer [mapa de carpetas](../../../docs/estructura-backend.md) y [secuencia SDD](../../../docs/orden-desarrollo-backend.md).
+Dueño: S04 Orders. Rutas objetivo: `src/Domains/orders/ y services/orders/tests/` (no creadas por este plan). Alcance propio: solicitudes y coordinacion de intereses con este spec. Leer [mapa de carpetas](../../../docs/estructura-backend.md) y [secuencia SDD](../../../docs/orden-desarrollo-backend.md).
 
 Actual: SDD/validadores en este checkout y plantilla Visual Studio separada, sin consolidacion ejecutada. Antes de Ready, T-950 concreta archivos existentes/objetivo y decisiones de la historia; T-001 depende de esa salida ademas del refinamiento. Preservar dependencias de negocio ya declaradas, contratos formales y autoridad API/app.
 

@@ -2,54 +2,109 @@
 
 Spec: [spec.md](spec.md). Plan: [plan.md](plan.md). Constitución: [rectora](../../../.specify/memory/constitution.md).
 
-Estado: documentación propuesta; todas las casillas pendientes. Preparación documental y ejecución futura son distintas. Un encargo posterior de implementación y Ready de la historia son necesarios antes de construir producto. IDs locales; al citar usar contexto/spec/T-ID.
+Estado: propuesta; todas las casillas pendientes. IDs locales; al citar usar contexto/spec/T-ID.
 
-## Fase A — Refinamiento y decisiones
+**Bloqueante de entrada**: la enmienda E-001 es propuesta. Ninguna tarea inicia sin la revisión de Johann. **T-011 además exige que sus cambios sin commitear estén guardados.**
 
-- [ ] T-006 →FR-090,NFR-090. Gobierno de fuentes, decisiones, responsables y versiones previas al desarrollo; Codex y Claude Code con traspaso secuencial. Artefacto de trabajo: [paquete de arranque](../../../docs/inicio-backend/README.md) y [evidencia](../../../docs/inicio-backend/evidencia-nv00.md); mantener limites de preparacion/aceptacion. Acepta: AC-090 tiene precondición, resultado, fuente, contraparte y evidencia esperada definidos; decisiones pertinentes D01–D08 registradas sin firmas ficticias. Depende de: fuentes y dependencias explícitas en spec; sin dependencia de construcción local.
-- [ ] T-020 →FR-100,NFR-100. Desglosar el escenario propio: Mantener registro de decisiones, excepciones y cambios de alcance con fuente, motivo, estado y persona revisora pendiente hasta asignación. Artefacto de trabajo: [registro](../../../docs/decisions/registro.md) y [flujo de cambios](../../../docs/inicio-backend/flujo-cambios.md); mantener limites de preparacion/aceptacion. Acepta: AC-100 documenta caso positivo, negativo, fallo/reintento y responsable de cada superficie; exclusiones identificadas. Depende de: T-006.
-- [ ] T-001 →FR-001,NFR-002,FR-950,NFR-950. Preparar Ready de una historia acotada. Acepta: AC-950 con rutas y orden explicitados; requisitos y AC seleccionados, contratos pertinentes formalizados antes de consumo, decisiones bloqueantes resueltas, revisión humana identificada y plan/tareas conciliados; sin declarar Ready por lint. Depende de: T-950, T-006, T-020 y entradas de la spec; no requiere completar todo el dominio.
+A diferencia de las versiones anteriores de este incremento, estas tareas **producen código** y sus criterios se verifican con comandos reales.
 
-## Fase B — Entregable y ejecución posterior
+---
 
-- [ ] T-002 →FR-001,NFR-003. Desarrollar el diseño verificable de fundamento y, solo si se encarga, su configuración ejecutable. Acepta: la historia seleccionada tiene archivos, versión, permisos y orden de cambio concretos; el estado documental no se presenta como aplicación creada. Depende de: T-001 y encargo correspondiente si hay ejecución de producto.
-- [ ] T-010 →FR-001,NFR-001,NFR-003. Atender el requisito propio: Mantener registro de decisiones, excepciones y cambios de alcance con fuente, motivo, estado y persona revisora pendiente hasta asignación. Acepta: AC-001, AC-002 verificados con evidencia del alcance aplicable, incluyendo rechazo/fallo y sin sustituir integración real por doble; en diseño queda procedimiento pendiente explícito. Depende de: T-002 y contrato/decisiones de esa historia.
-- [ ] T-021 →FR-100,NFR-100,NFR-003. Comprobar el escenario específico. Acepta: AC-100 — Ninguna decisión propuesta ni excepción puede figurar aceptada sin nombre/fecha reales; un cambio de alcance enlaza la spec y su impacto en contratos y app. Registrar resultado real o pendiente sin inventar ejecución. Depende de: T-020 y T-002; evidencia de producto solo tras implementación autorizada.
-- [ ] T-003 →FR-001,NFR-003,FR-951,NFR-950. Integrar frontera y datos reales de la historia. Acepta: AC-951 comprobados por sus tareas propietarias; AC-001, AC-002, AC-090, AC-100 cuentan con comprobación de consumidor/provider, almacenamiento o dispositivo según superficie; fundamentos pueden producir evidencia documental identificada sin afirmar integración. Depende de: T-951, T-010, T-021, T-402, T-405, T-406, T-411, T-412, T-418, T-451, T-452, T-453, T-454, T-455, T-456.
-- [ ] T-004 →NFR-001,NFR-100. Revisar privacidad, permisos, aislamiento, errores y fallos pertinentes. Acepta: AC-001, AC-002, AC-090, AC-100 incluyen escenarios negativos; autoridad por recurso/estado se comprueba en API y presentación/limpieza en app; ninguna PII o credencial en evidencia. Depende de: T-003.
-- [ ] T-007 →FR-090,NFR-090,NFR-002. Verificar el criterio transversal de la fase. Acepta: AC-090 — Reconstruir una tarea documental desde fuente hasta checklist y distinguir propuesta de ratificación. Distinguir revisión documental de ejecución futura. Depende de: T-004; preparación del escenario ya en T-006.
+## Fase 1 — Inventario antes de borrar
 
-## Fase C — Cierre y revisión
+- [ ] T-001 →FR-009. Inventariar lo que se retira antes de tocarlo: los 7 proyectos de servicio sin implementación, los `.csproj` asociados, `docs/architecture-selection.json` y las tecnologías descartadas. **Revisar aparte `services/community`** (3 archivos, 363 líneas): decidir qué migra a Discovery y qué se descarta. Acepta: AC-009. Depende de: revisión E-001.
+  - Criterio: `docs/decisions/registro.md` lista cada elemento con ruta, líneas y motivo. **Nada borrado todavía.**
 
-- [ ] T-005 →NFR-002,NFR-003. Conciliar documentos, ejecutar gates pertinentes y actualizar Memoria. Acepta: AC-001, AC-002, AC-090, AC-100 tienen resultado/evidencia o pendiente explícito; salida/exit, entorno, limitación y revisor reales registrados; sin aprobación automática. Depende de: T-004, T-007 y checklist del incremento.
+## Fase 2 — Solución y bloques comunes
 
-## Verificación disponible
+- [ ] T-002 →FR-001. Crear `src/Nexo.sln` y los proyectos vacíos de las 5 capas × 3 dominios + Screens + BuildingBlocks + Host + tests, con sus referencias entre proyectos. Acepta: AC-001. Depende de: T-001.
+  - Criterio: `dotnet build src/Nexo.sln` compila sin errores ni advertencias.
 
-Hoy: powershell -NoProfile -File scripts/check_sdd.ps1 desde la raíz correspondiente, más revisión de integridad de IDs y dependencias. Solo documental. Build/test/proveedores/Android no ejecutados por esta fase.
+- [ ] T-003 →FR-001. Fijar en `Directory.Build.props` el `TargetFramework net10.0`, nullable, warnings como errores y las versiones exactas del stack de constitución §3. Acepta: AC-001. Depende de: T-002.
+  - Criterio: ningún proyecto declara versión propia de paquete; el build falla ante una advertencia.
 
-## Funcionalidades y obligaciones verificables
+- [ ] T-004 →FR-003. Implementar `Nexo.Common`: `Result<T>`, `PagedResult<T>` con cursor `afterId` y `limit` máximo 50, `GeoPoint`, `ICurrentUser` y la extensión `AddCommon()`. Acepta: AC-001, AC-003. Depende de: T-002.
+  - Criterio: pruebas unitarias de `Result<T>` en éxito y fallo, y de `PagedResult<T>` rechazando `limit` mayor que 50.
 
-- [ ] T-402 →FR-402,NFR-002,NFR-003. Definir y atender R02 Evaluación interactiva y con prompts. Artefacto de trabajo: [guion interactivo](../../../docs/inicio-backend/guion-evidencias.md); mantener limites de preparacion/aceptacion. Acepta: AC-402: Reconstruir requisito/spec/tarea/contrato/prueba/evidencia y recorrido interactivo sin respuestas inventadas. API entrega su parte y enlaza evidencia móvil/web, sin administrar Flutter. Planear método de comprobación, entorno/responsable y evidencia; no aprobar mientras falten decisiones/contratos o ejecución real cuando corresponda. Evidencia real cuando corresponda; diseño solo no acredita aceptación. Depende de: T-002 y entradas/decisiones de la historia; trabajo documental previo no requiere código.
-- [ ] T-405 →FR-405,NFR-002,NFR-003. Definir y atender R05 SDD y DevSecOps. Acepta: AC-405: Aplicar constitución/spec/plan/tareas/checklist y controles de calidad desde cada incremento en ambos contextos. API entrega su parte y enlaza evidencia móvil/web, sin administrar Flutter. Planear método de comprobación, entorno/responsable y evidencia; no aprobar mientras falten decisiones/contratos o ejecución real cuando corresponda. Evidencia real cuando corresponda; diseño solo no acredita aceptación. Depende de: T-002 y entradas/decisiones de la historia; trabajo documental previo no requiere código.
-- [ ] T-406 →FR-406,NFR-002,NFR-003. Definir y atender R06 Desarrollo con agentes. Acepta: AC-406: Usar Codex/Claude Code con contexto, cambios acotados, bitácora de intervención real y revisión humana; las herramientas respetan la misma constitucion y autoridad de contratos. API entrega su parte y enlaza evidencia móvil/web, sin administrar Flutter. Planear método de comprobación, entorno/responsable y evidencia; no aprobar mientras falten decisiones/contratos o ejecución real cuando corresponda. Evidencia real cuando corresponda; diseño solo no acredita aceptación. Depende de: T-002 y entradas/decisiones de la historia; trabajo documental previo no requiere código.
-- [ ] T-411 →FR-411,NFR-002,NFR-003. Definir y atender R11 Matriz de versiones. Artefacto de trabajo: [matriz de versiones](../../../../docs_nexo/SDD_VERSIONES.md); mantener limites de preparacion/aceptacion. Acepta: AC-411: Definir antes del desarrollo versiones de servicios/API/contratos/eventos/datos/app/landing/infra y manifiesto por despliegue. API entrega su parte y enlaza evidencia móvil/web, sin administrar Flutter. Planear método de comprobación, entorno/responsable y evidencia; no aprobar mientras falten decisiones/contratos o ejecución real cuando corresponda. Evidencia real cuando corresponda; diseño solo no acredita aceptación. Depende de: T-002 y entradas/decisiones de la historia; trabajo documental previo no requiere código.
-- [ ] T-412 →FR-412,NFR-002,NFR-003. Definir y atender R12 MCP opcional. Acepta: AC-412: Si se adopta, registrar origen, versión, finalidad y permisos mínimos; ausencia de MCP no bloquea producto ni autoriza instalaciones. API entrega su parte y enlaza evidencia móvil/web, sin administrar Flutter. Planear método de comprobación, entorno/responsable y evidencia; no aprobar mientras falten decisiones/contratos o ejecución real cuando corresponda. Evidencia real cuando corresponda; diseño solo no acredita aceptación. Depende de: T-002 y entradas/decisiones de la historia; trabajo documental previo no requiere código.
-- [ ] T-418 →FR-418,NFR-002,NFR-003. Definir y atender R18 GitHub/coordinación. Acepta: AC-418: Cuenta GitHub única del proyecto y carpeta compartida; registrar accesos y responsables. Correo de proyecto recomendado, sin compartir secretos. API entrega su parte y enlaza evidencia móvil/web, sin administrar Flutter. Planear método de comprobación, entorno/responsable y evidencia; no aprobar mientras falten decisiones/contratos o ejecución real cuando corresponda. Evidencia real cuando corresponda; diseño solo no acredita aceptación. Depende de: T-002 y entradas/decisiones de la historia; trabajo documental previo no requiere código.
-- [ ] T-451 →FR-451,NFR-002,NFR-003. Definir y atender PRE1 Entrevistas. Artefacto de trabajo: [guion de entrevistas](../../../docs/inicio-backend/guion-evidencias.md); mantener limites de preparacion/aceptacion. Acepta: AC-451: Entrevistas reales con consentimiento, evidencia y síntesis; definir cambios de alcance sin inventar participantes. Fuente: lineamientos Móvil v2, página 4. Artefacto común no se duplica como dos entrevistas o dos hojas incompatibles. Evidencia real cuando corresponda; diseño solo no acredita aceptación. Depende de: T-002 y entradas/decisiones de la historia; trabajo documental previo no requiere código.
-- [ ] T-452 →FR-452,NFR-002,NFR-003. Definir y atender PRE2 Descripciones separadas. Acepta: AC-452: Descripción detallada en español del backend y móvil con funciones, actores y límites por contexto. Fuente: lineamientos Móvil v2, página 4. Artefacto común no se duplica como dos entrevistas o dos hojas incompatibles. Evidencia real cuando corresponda; diseño solo no acredita aceptación. Depende de: T-002 y entradas/decisiones de la historia; trabajo documental previo no requiere código.
-- [ ] T-453 →FR-453,NFR-002,NFR-003. Definir y atender PRE3 Componentes en hoja de cálculo. Acepta: AC-453: Conciliar 13 componentes backend y 27 móviles del libro, con responsabilidad, dependencia y aceptación. Fuente: lineamientos Móvil v2, página 4. Artefacto común no se duplica como dos entrevistas o dos hojas incompatibles. Evidencia real cuando corresponda; diseño solo no acredita aceptación. Depende de: T-002 y entradas/decisiones de la historia; trabajo documental previo no requiere código.
-- [ ] T-454 →FR-454,NFR-002,NFR-003. Definir y atender PRE4 CRUD y funciones por endpoint. Acepta: AC-454: Conciliar las 101 fichas: entradas/salidas/reglas, documentos NoSQL, llaves/índices y filtros/búsquedas, sin operación inventada por botón. Fuente: lineamientos Móvil v2, página 4. Artefacto común no se duplica como dos entrevistas o dos hojas incompatibles. Evidencia real cuando corresponda; diseño solo no acredita aceptación. Depende de: T-002 y entradas/decisiones de la historia; trabajo documental previo no requiere código.
-- [ ] T-455 →FR-455,NFR-002,NFR-003. Definir y atender PRE5 Referencias docentes. Artefacto de trabajo: [registro de revision docente pendiente](../../../docs/inicio-backend/guion-evidencias.md); mantener limites de preparacion/aceptacion. Acepta: AC-455: Registrar URLs/commit reales de proyectos docentes y comparación justificada; mientras falten, mantener pendiente sin simular revisión nueva. Fuente: lineamientos Móvil v2, página 4. Artefacto común no se duplica como dos entrevistas o dos hojas incompatibles. Evidencia real cuando corresponda; diseño solo no acredita aceptación. Depende de: T-002 y entradas/decisiones de la historia; trabajo documental previo no requiere código.
-- [ ] T-456 →FR-456,NFR-002,NFR-003. Definir y atender PRE6 Estructura SDD. Acepta: AC-456: Constituciones, secuencia docente, roles Codex/Claude, memoria, contratos/consumo y revisión humana definidos por contexto. Fuente: lineamientos Móvil v2, página 4. Artefacto común no se duplica como dos entrevistas o dos hojas incompatibles. Evidencia real cuando corresponda; diseño solo no acredita aceptación. Depende de: T-002 y entradas/decisiones de la historia; trabajo documental previo no requiere código.
+- [ ] T-005 →FR-003. Implementar `Nexo.Outbox`: `OutboxMessage`, `IOutboxRepository` sobre MongoDB, `IOutboxService` y `OutboxDispatcher` con sondeo de 5 s e idempotencia por `MessageId`. Acepta: AC-003. Depende de: T-004.
+  - Criterio: prueba unitaria que procesa el mismo `MessageId` dos veces y verifica **un solo efecto**.
 
-## Preparacion de rutas antes de Ready (0.4.1)
+## Fase 3 — Fronteras
 
-- [ ] T-950 →FR-950,NFR-950. Concretar dueño Gobierno, ubicacion objetivo specs/, docs/decisions/, .github/ y .specify/, archivos reales actuales y alcance: responsables, decisiones, revisiones y trazabilidad de cambios; sin mover codigo. Registrar decisiones, contratos, dependencias de entrada y suites por caso; enlazar el mapa sin fabricar scaffolding o comandos de proyectos inexistentes. Artefacto de trabajo: [archivos y puertas de inicio](../../../docs/inicio-backend/README.md); mantener limites de preparacion/aceptacion. Acepta: AC-950 queda refinado en plan y evidencia documental, con limites/pendientes y revisor identificable antes de Ready; no ejecuta producto ni resuelve proveedores por inferencia. Depende de: T-006, T-020.
+- [ ] T-006 →FR-004. Escribir las pruebas de arquitectura en `tests/Architecture` con NetArchTest: dirección de dependencias dentro de cada dominio y prohibición de referenciar capas internas de otro dominio. Acepta: AC-004. Depende de: T-002.
+  - Criterio: la prueba **falla** ante una referencia cruzada deliberada y **pasa** al dejar solo `*.Contracts`. Se verifica el caso negativo.
 
-- [ ] T-951 →FR-951,NFR-950. Activar gobierno de cambios con datos reales: Completar tarea Jira, pagina Confluence y politica real, publicar por develop→release→main y verificar check de metadatos antes de exigirlo en seis rulesets. Mientras el usuario posponga esos datos, registrar pendiente de publicacion sin bloquear el analisis local ni inventar enlaces. Acepta: AC-951 — Evidencia de PR/CI y lectura remota demuestra la activacion; antes de ello el estado permanece preparado, no activo. Depende de: T-002, T-950.
+> T-006 va **antes** del traslado de Identity, para que el movimiento quede validado por la prueba y no al revés.
 
-Orden aplicable: refinamiento y preparacion de rutas preceden Ready; construccion solo tras encargo/Ready, integracion espera las tareas propias adicionales, seguridad y cierre conservan sus dependencias. No esperar cierre completo de otra fase cuando solo se requiere su entrada concreta.
+## Fase 4 — Host, datos y estado compartido
 
-## Seleccion de arranque y limites de cierre
+- [ ] T-007 →FR-002. `Nexo.Host` con `Program.cs` de dos roles según `NEXO_ROLE`, montaje de los `MapGroup` por dominio, serialización con generadores, compresión Brotli/Gzip y las sondas `/health/live` y `/health/ready`. Acepta: AC-002, AC-007. Depende de: T-004.
+  - Criterio: con `NEXO_ROLE=api` responde `/health/live`; con `NEXO_ROLE=worker` procesa la cola y **no** expone HTTP.
 
-La preparacion del paquete es borrador revisable y no marca estas tareas completadas. Seleccion local: gobierno/rutas/evidencia disponible; no contrato HTTP, proyecto o nube. Ready sigue pendiente de revision real. El cierre global conserva entrevistas/referencias/ratificaciones y activacion cuando correspondan; los datos Jira/Confluence pospuestos no se sustituyen por ejemplos. Consultar [estado y evidencia por tarea](../../../docs/inicio-backend/evidencia-nv00.md).
+- [ ] T-008 →FR-005. Registrar las tres bases como `IMongoDatabase` con clave por dominio y `maxPoolSize` acotado. **Confirmar antes el límite de conexiones real en el panel de Atlas.**. Acepta: AC-005. Depende de: T-007.
+  - Criterio: cada dominio resuelve solo su base; una escritura cruzada en pruebas falla. `maxPoolSize` documentado con el límite verificado.
+
+- [ ] T-009 →FR-006,NFR-001,NFR-003. Integrar Redis para caché L2, lista de `jti` revocados, contadores exactos de rate limit, idempotencia y backplane. **Reutilizar `RedisRateLimiting.cs` de Johann** si ya está commiteado. Acepta: AC-006. Depende de: T-007.
+  - Criterio: con dos instancias locales, un token revocado en A es rechazado por B **en la petición siguiente**.
+
+- [ ] T-010 →FR-007. `docker-compose.yml` con MongoDB en réplica, Redis y emulador de colas, más el script de inicio de las tres bases. Acepta: AC-007. Depende de: T-008.
+  - Criterio: `docker compose up -d` y `/health/ready` responde 200; al detener Redis responde **503**, no 200.
+
+## Fase 5 — Traslado y retirada
+
+- [ ] T-011 →FR-008. Mover `services/identity` a `src/Domains/Identity` conservando su código y sus pruebas, y `services/identity/tests` a `tests/Identity.Unit`. Ajustar namespaces y referencias; **no reescribir lógica de dominio**. Acepta: AC-008. Depende de: T-006, **y de que Johann haya commiteado sus cambios**.
+  - Criterio: las pruebas existentes de Identity pasan sin modificar sus asertos; T-006 sigue en verde.
+
+- [ ] T-012 →FR-009,NFR-002. Retirar los 7 proyectos sin implementación y los `.csproj` sobrantes, archivar `architecture-selection.json` y registrar la decisión con el inventario de T-001. Acepta: AC-009. Depende de: T-011.
+  - Criterio: la solución no contiene los proyectos retirados; `dotnet build` sigue verde; el registro enumera cada retirada con su motivo.
+
+## Fase 6 — Seguridad, evidencia y despliegue
+
+- [ ] T-013 →NFR-001. Revisión de seguridad del fundamento: sin secretos en el repositorio, configuración por entorno, TLS, cabeceras y el checklist ASVS L2 de esta fase. Acepta: AC-006, AC-007. Depende de: T-009.
+  - Criterio: escaneo de secretos sin hallazgos; las entradas aplicables del checklist, resueltas.
+
+- [ ] T-014 →NFR-002. Cerrar evidencia del incremento: comandos ejecutados, versiones, entorno, resultados y revisor real en `checklists/gates.md` y en `Memoria.md`. Acepta: AC-009. Depende de: T-012, T-013.
+  - Criterio: cada AC enlaza su evidencia; ninguna casilla marcada sin ejecución.
+
+- [ ] T-015 →NFR-004. Reescribir `deploy-azure.yml` de Container Apps por servicio a **App Service plan B1 con dos instancias**, con el worker como WebJob continuo en el mismo plan, y documentar el cálculo de costo. Acepta: AC-010. Depende de: T-007.
+  - Criterio: el workflow declara un plan, una app y dos instancias; el cálculo (~26 USD/mes) consta en la evidencia. **Sin desplegar**: el despliegue requiere encargo aparte.
+
+---
+
+## Dependencias
+
+```
+E-001 (revisión Johann)
+   └── T-001
+        └── T-002 ── T-003
+             ├── T-004 ── T-005
+             │     └── T-007 ── T-008 ── T-010
+             │            ├── T-009 ── T-013
+             │            └── T-015
+             └── T-006
+                   └── T-011 (+ commit de Johann) ── T-012 ── T-014
+```
+
+Sin ciclos. T-014 cierra.
+
+## Cobertura
+
+| Tarea | Requisitos | Criterios |
+|---|---|---|
+| T-001 | FR-009 | AC-009 |
+| T-002 | FR-001 | AC-001 |
+| T-003 | FR-001 | AC-001 |
+| T-004 | FR-003 | AC-001, AC-003 |
+| T-005 | FR-003 | AC-003 |
+| T-006 | FR-004 | AC-004 |
+| T-007 | FR-002 | AC-002, AC-007 |
+| T-008 | FR-005 | AC-005 |
+| T-009 | FR-006, NFR-001, NFR-003 | AC-006 |
+| T-010 | FR-007 | AC-007 |
+| T-011 | FR-008 | AC-008 |
+| T-012 | FR-009, NFR-002 | AC-009 |
+| T-013 | NFR-001 | AC-006, AC-007 |
+| T-014 | NFR-002 | AC-009 |
+| T-015 | NFR-004 | AC-010 |
+
+Los 9 FR y los 4 NFR tienen tarea; los 10 AC tienen comprobación asignada.

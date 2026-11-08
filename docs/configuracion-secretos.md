@@ -1,50 +1,68 @@
-# Configuracion y secretos de base de datos
+# Configuracion y secretos
 
-Pertenece a [nv-01](../specs/arquitectura/nv-01/spec.md) (configuracion por servicio sin secretos) y a [nv-22](../specs/arquitectura/nv-22/spec.md) (operacion de datos). No ratifica proveedor: MongoDB/Atlas y Redis siguen abiertos en D01 del [registro de decisiones](decisions/registro.md).
+Pertenece a [nv-00](../specs/arquitectura/nv-00/spec.md) y a las [convenciones de endpoints](../specs/endpoints/00-convenciones/).
 
 ## Regla
 
-Ningun secreto se versiona. `appsettings.json` solo declara el nombre de la base. La cadena de conexion llega por almacen de secretos local en desarrollo y por variable de entorno en despliegue. Cada propietario usa su propia base: S01 no abre la base de S02.
+**Todo se configura por variables de entorno. Ningun secreto se versiona.** No hay cadenas de
+conexion ni llaves en `appsettings.json`: ese archivo solo lleva el nivel de registro y los hosts
+permitidos. Cada propietario usa su propia base: Identity no abre la base de Discovery.
 
-## Claves de configuracion
+## Un solo `.env` para desarrollo
 
-| Clave | Origen en desarrollo | Origen en despliegue | Versionada |
-|---|---|---|---|
-| `Mongo:Database` | `appsettings.json` del host | configuracion del entorno | si |
-| `Mongo:ConnectionString` | `dotnet user-secrets` | variable `Mongo__ConnectionString` | no |
+En la raiz del repositorio, copiado de [.env.example](../.env.example):
 
-## Hosts con conexion propia
-
-| Host | UserSecretsId | Base | Colecciones |
-|---|---|---|---|
-| S01 Identity | `nexolocal-identity` | `nexolocal_identity` | `accounts`, `sessions`, `otp_challenges`, `otp_proofs` |
-| S03 Community | `nexolocal-community` | `nexolocal_community` | `posts` |
-
-Cada host abre solo su base. Los otros siete repiten el patron cuando su historia lo encargue.
-
-## Desarrollo local (S01 Identity)
-
-```powershell
-cd services/identity/src/Api
-dotnet user-secrets init
-dotnet user-secrets set "Mongo:ConnectionString" "mongodb+srv://<usuario>:<password>@<cluster>.mongodb.net/?retryWrites=true&w=majority"
+```bash
+cp .env.example .env     # y rellenar los valores
 ```
 
-El `UserSecretsId` del host es `nexolocal-identity`; el archivo vive fuera del repositorio, en el perfil del usuario.
+`.env` esta en `.gitignore` y **nunca** se commitea. `.env.example` solo documenta los nombres.
 
-## Despliegue
+.NET no lee `.env` de forma nativa, asi que el host lo carga al arrancar
+([DotEnv.cs](../src/Host/Nexo.Host/DotEnv.cs)): busca el archivo desde el binario hacia arriba hasta
+la raiz, y **no sobrescribe** ninguna variable que ya exista en el entorno.
 
+## En Azure
+
+Las mismas variables se definen como **app settings** del App Service. Como el `.env` no pisa lo que
+ya existe en el entorno, en Azure mandan siempre los app settings del sitio y el archivo es
+irrelevante. No hace falta cambiar nada en el codigo entre un entorno y otro.
+
+El doble guion bajo es el separador de seccion de .NET: `Mongo__ConnectionString` equivale a
+`{ "Mongo": { "ConnectionString": ... } }`.
+
+## Variables
+
+| Variable | Para que | Secreta |
+|---|---|---|
+| `Mongo__ConnectionString` | Cluster de Atlas | **si** |
+| `Mongo__IdentityDatabase`, `Mongo__DiscoveryDatabase`, `Mongo__EngagementDatabase` | Una base por dominio | no |
+| `Mongo__MaxPoolSize` | Pool por instancia; las instancias del plan no deben agotar el cluster | no |
+| `Redis__ConnectionString` | Cache L2, lista negra de `jti`, cuotas exactas, idempotencia y backplane | **si** |
+| `Identity__CodeHmacKey` | Llave HMAC del codigo de verificacion del correo | **si** |
+| `Identity__SigningCertificateBase64` y su `Password` | Firma de los tokens | **si** |
+| `Identity__EncryptionCertificateBase64` y su `Password` | Cifrado de los tokens de refresco | **si** |
+| `Mail__Host`, `Mail__Port`, `Mail__User`, `Mail__Password` | SMTP de salida; MailKit. Sin `Host` el host no arranca | **si** (`Password`) |
+| `Mail__From`, `Mail__FromName` | Remitente de los codigos de verificacion | no |
+
+## Certificados de los tokens
+
+En **Development** se usan certificados de desarrollo si no hay variables. **Fuera de Development
+el arranque falla a proposito** si faltan: un certificado de desarrollo en produccion permitiria a
+cualquiera firmar tokens validos.
+
+```bash
+openssl req -x509 -newkey rsa:2048 -keyout k.pem -out c.pem -days 730 -nodes -subj "/CN=NexoLocal"
+openssl pkcs12 -export -out nexo.pfx -inkey k.pem -in c.pem -passout pass:CLAVE
+base64 -w0 nexo.pfx
 ```
-Mongo__Database=nexolocal_identity
-Mongo__ConnectionString=mongodb+srv://...
-```
-
-El doble guion bajo es el separador de seccion que usa la configuracion de .NET. En Atlas, restringir por lista de acceso de red y usar un usuario por servicio con permiso solo sobre su base.
 
 ## Comprobacion
 
-El host valida la configuracion al arrancar: si falta la cadena o no empieza por `mongodb://` o `mongodb+srv://`, el arranque falla con el motivo y sin imprimir el secreto. Con configuracion valida, `GET /health/ready` responde `Healthy` solo si el `ping` real al cluster responde. Es un endpoint de infraestructura: no figura en el [inventario de operaciones](contracts/inventario.json) y no se consume desde la app.
+El host valida al arrancar y dice **que** falta, sin imprimir ningun valor: cadena de Mongo ausente o
+con esquema invalido, base sin nombre, llave HMAC ausente. Con la configuracion correcta,
+`GET /health/ready` responde 200 solo si Mongo y Redis contestan; con una dependencia caida responde
+**503**, nunca 200 por omision.
 
-Para recorrer los endpoints de identidad contra un host en marcha: `python -B scripts/probe_endpoints.py <log del host>`. Lee el codigo de verificacion del registro porque en desarrollo no hay proveedor de correo.
-
-Codigo: [MongoOptions.cs](../services/identity/src/Infrastructure/Persistence/MongoOptions.cs) y [MongoRegistration.cs](../services/identity/src/Infrastructure/Persistence/MongoRegistration.cs). Para S03: [CommunityMongo.cs](../services/community/src/Adapters/Persistence/CommunityMongo.cs). Hoy solo S01 y S03 tienen conexion.
+Entorno local completo: `docker compose up -d` levanta MongoDB en replica, Redis y el emulador de
+colas, y [scripts/mongo-init.js](../scripts/mongo-init.js) crea las tres bases de forma idempotente.

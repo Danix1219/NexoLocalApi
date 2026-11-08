@@ -1,0 +1,10 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+  <PropertyGroup>
+    <OutputType>Library</OutputType>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../Nexo.Discovery.Application/Nexo.Discovery.Application.csproj" />
+    <ProjectReference Include="../Nexo.Discovery.Contracts/Nexo.Discovery.Contracts.csproj" />
+    <ProjectReference Include="../../../BuildingBlocks/Nexo.Common/Nexo.Common.csproj" />
+  </ItemGroup>
+</Project>

@@ -13,3 +13,16 @@ Versión: 0.1.0 | Fecha: 2026-11-05 | Spec: [spec.md](spec.md) | Plan: [plan.md]
 | CD-T07 | Secrets y variables de GitHub + environment `produccion` con revisores | §5.3, §5.4, §7.3 | captura de Settings | Pendiente — operador |
 | CD-T08 | Primer despliegue verificado y reversión probada | §6 | paso *Verify revision health* en verde | Pendiente |
 | CD-T09 | Añadir S02–S08 a la matriz cuando tengan operaciones desplegables | §2 no-alcance | — | Diferida |
+
+## Gates DevSecOps (habilitación posterior, gobierno en nv-03)
+
+Estas tareas no se ejecutan con cd-01: quedan definidas para que al abrir nv-03 el pipeline ya tenga sitio, herramienta y criterio de bloqueo (spec §5.6).
+
+| ID | Tarea | Dónde entra | Criterio de bloqueo | Estado |
+|---|---|---|---|---|
+| CD-T10 | `dependency-review-action` en el PR, sobre el grafo de NuGet | workflow de PR | High/Critical sin excepción registrada | Pendiente — nv-03 |
+| CD-T11 | CodeQL para C# en PR y ejecución semanal | `.github/workflows/security.yml` | alerta High/Critical | Pendiente — nv-03 |
+| CD-T12 | Trivy sobre la imagen construida, antes del `docker push` | job `deploy` de `deploy-azure.yml` | CVE High/Critical con parche | Pendiente — nv-03 |
+| CD-T13 | OWASP ZAP API scan contra la revisión desplegada | tras *Verify revision health* | alerta High; revertir tráfico | Pendiente — nv-03 |
+| CD-T14 | Registro de excepciones con motivo y caducidad | `docs/decisions/` | excepción sin fecha de caducidad | Pendiente — nv-03 |
+| CD-T15 | Activar los rulesets propuestos de `main`/`develop`/`release` | GitHub | — | Pendiente — operador |

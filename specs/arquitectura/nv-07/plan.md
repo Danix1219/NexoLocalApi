@@ -65,7 +65,7 @@ FR-708 → T-708 → AC-708: Precio menor solo se destaca con servicio, unidad, 
 
 ## Rutas, propietario y orden verificable 0.4.1
 
-Dueño: S02 Directory y composicion G01. Rutas objetivo: `services/directory/src/, nexolocal.Api/ y pruebas de contrato/recorrido` (no creadas por este plan). Alcance propio: busqueda de directorio primero; feed comunitario integra S03 despues de nv-08. Leer [mapa de carpetas](../../../docs/estructura-backend.md) y [secuencia SDD](../../../docs/orden-desarrollo-backend.md).
+Dueño: S02 Directory y composicion G01. Rutas objetivo: `src/Domains/directory/, nexolocal.Api/ y pruebas de contrato/recorrido` (no creadas por este plan). Alcance propio: busqueda de directorio primero; feed comunitario integra S03 despues de nv-08. Leer [mapa de carpetas](../../../docs/estructura-backend.md) y [secuencia SDD](../../../docs/orden-desarrollo-backend.md).
 
 Actual: SDD/validadores en este checkout y plantilla Visual Studio separada, sin consolidacion ejecutada. Antes de Ready, T-950 concreta archivos existentes/objetivo y decisiones de la historia; T-001 depende de esa salida ademas del refinamiento. Preservar dependencias de negocio ya declaradas, contratos formales y autoridad API/app.
 

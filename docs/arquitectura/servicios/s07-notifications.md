@@ -1,12 +1,15 @@
 # S07 — Notificaciones y dispositivos
 
+> **Mapa de dominios, no unidad desplegable.** Tras la **enmienda E-001**, este servicio se implementa en el modulo **Engagement** de la API modular por dominios, con datos en `nexo_engagement`. Comparte host y se despliega en una app de App Service con **2 instancias**. El contenido funcional de abajo sigue vigente; lo que cambia es donde vive. Ver [estructura-backend.md](../../estructura-backend.md).
+
+
 Diseño de implementacion propuesto, 2026-11-03. Base física revisada: 4 proyectos, sin negocio ni almacenamiento configurado. Esta ficha no instala patrones/proveedores ni convierte la base en producto aprobado. [Politicas comunes](../politicas-comunes.md) y [mapa general](../README.md).
 
 ## Limite y dueño
 
 Ruta: `services/notifications/`. devices, notifications y deliveries. Vinculo dispositivo/cuenta/sesion, identidad de entrega y registro de intentos; tokens fuera de eventos/logs publicos. [Datos autoritativos](../../modelo-datos.md).
 
-Specs de referencia: [nv-21](../../../specs/arquitectura/nv-21/spec.md). La matriz de requisitos/tareas de cada spec conserva el alcance y dependencias.
+Specs de referencia: [nv-21](../../../specs/arquitectura/nv-12/spec.md). La matriz de requisitos/tareas de cada spec conserva el alcance y dependencias.
 
 ## Estructura del propietario
 
@@ -50,10 +53,10 @@ Flujo: Evento → inbox/version → crear entrega → worker verifica cuenta/dis
 
 | ID | Metodo/ruta del catalogo | Spec primaria |
 |---|---|---|
-| EP-083 | `PUT /me/devices/{id}` | [nv-21](../../../specs/arquitectura/nv-21/spec.md) |
-| EP-084 | `DELETE /me/devices/{id}` | [nv-21](../../../specs/arquitectura/nv-21/spec.md) |
-| EP-085 | `GET /me/notifications` | [nv-21](../../../specs/arquitectura/nv-21/spec.md) |
-| EP-086 | `PUT /me/notifications/{id}/read` | [nv-21](../../../specs/arquitectura/nv-21/spec.md) |
+| EP-083 | `PUT /me/devices/{id}` | [nv-21](../../../specs/arquitectura/nv-12/spec.md) |
+| EP-084 | `DELETE /me/devices/{id}` | [nv-21](../../../specs/arquitectura/nv-12/spec.md) |
+| EP-085 | `GET /me/notifications` | [nv-21](../../../specs/arquitectura/nv-12/spec.md) |
+| EP-086 | `PUT /me/notifications/{id}/read` | [nv-21](../../../specs/arquitectura/nv-12/spec.md) |
 
 ## Criterios antes de implementar/aceptar
 

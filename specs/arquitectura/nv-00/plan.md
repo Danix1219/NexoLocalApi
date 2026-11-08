@@ -4,81 +4,175 @@ Spec: [spec.md](spec.md). Tareas: [task.md](task.md). Estado: diseño, sin imple
 
 ## 1. Contexto
 
-Gobierno de fuentes, decisiones, responsables y versiones previas al desarrollo; Codex y Claude Code con traspaso secuencial.
+Dejar construible la **API REST modular por dominios**: tres dominios de frontera estricta, un binario con dos roles, tres bases en un cluster M0 y dos instancias en un plan B1.
 
-Dependencias: Ninguna; inicia el gobierno.
+Dependencias: ninguna. Entrada: constitución §3, §4 y enmienda E-001.
 
 ## 2. Diseño técnico
 
-Sin datos de negocio: registrar fuente/versión, requisito, decisión y evidencia; ninguna firma automática.
+### Estructura objetivo
 
-Autoridad: [contratos](../../../docs/contracts/README.md). [Acuerdo API–app](../../../../docs_nexo/SDD_ALINEACION.md). Seleccionar solo operaciones de la historia; tipos, errores, permisos y eventos se formalizan antes de consumo. No abrir escrituras cruzadas entre bases.
+```
+src/
+├── Nexo.sln
+├── BuildingBlocks/
+│   ├── Nexo.Common/              # Result<T>, PagedResult<T>, GeoPoint, ICurrentUser
+│   └── Nexo.Outbox/              # OutboxMessage, IOutboxService, OutboxDispatcher
+├── Domains/
+│   ├── Identity/                 # ← conserva services/identity (FR-008)
+│   │   ├── Nexo.Identity.Contracts/
+│   │   ├── Nexo.Identity.Domain/
+│   │   ├── Nexo.Identity.Application/
+│   │   ├── Nexo.Identity.Infrastructure/
+│   │   └── Nexo.Identity.Endpoints/
+│   ├── Discovery/                # misma estructura de 5 capas
+│   ├── Engagement/               # misma estructura de 5 capas
+│   └── Screens/
+│       ├── Nexo.Screens.Application/
+│       └── Nexo.Screens.Endpoints/
+├── Host/
+│   └── Nexo.Host/                # Program.cs, appsettings, Dockerfile
+└── tests/
+    ├── Architecture/             # NetArchTest: fronteras entre dominios
+    ├── Identity.Unit/            # ← conserva services/identity/tests
+    ├── Discovery.Unit/
+    ├── Engagement.Unit/
+    └── Integration/              # Testcontainers: MongoDB + Redis
+```
 
-Archivos existentes a mantener: spec.md, plan.md, task.md, checklists/gates.md y docs vivos vinculados. Rutas de producto, esquemas ejecutables y herramientas por concretar al encargar implementación, sin crear scaffolding en esta fase.
+**Un solo `Nexo.Host`**, no uno por dominio. Cada `*.Endpoints` aporta su `MapGroup` y el host los monta:
+
+```csharp
+app.MapIdentityEndpoints();     // /v1/identity/*
+app.MapDiscoveryEndpoints();    // /v1/discovery/*
+app.MapEngagementEndpoints();   // /v1/engagement/*
+app.MapScreensEndpoints();      // /v1/screens/*
+```
+
+Así cada API de dominio es un proyecto propio con sus rutas y sus contratos, y el despliegue es uno. Extraer un dominio a su propio host más adelante es mover el proyecto y añadir un `Program.cs`: **no se reescribe lógica**.
+
+### Dos roles, un binario (FR-002)
+
+```csharp
+var role = builder.Configuration["NEXO_ROLE"] ?? "api";
+if (role == "worker")
+{
+    builder.Services.AddHostedService<OutboxDispatcher>();
+    builder.Services.AddHostedService<ImagePipeline>();
+}
+else
+{
+    // pipeline HTTP, endpoints, rate limiting, health
+}
+```
+
+En B1 el worker se publica como **WebJob continuo en el mismo plan**: sin costo adicional (NFR-004).
+
+### Arquitectura interna única (FR-001)
+
+`Contracts ← Domain ← Application ← Infrastructure ← Endpoints`, igual en los tres dominios. Sustituye las 8 arquitecturas distintas de `docs/architecture-selection.json`, que se archiva.
+
+| Capa | Contenido | No puede |
+|---|---|---|
+| `Contracts` | DTOs e interfaces que otros dominios consumen | depender de nada |
+| `Domain` | Agregados, value objects, eventos | referenciar infraestructura |
+| `Application` | Casos de uso y permisos, interfaces de repos | conocer MongoDB |
+| `Infrastructure` | MongoDB, Redis, colas, Blob, adaptadores externos | contener reglas de negocio |
+| `Endpoints` | Minimal APIs, un archivo por caso de uso | contener lógica |
+
+La hexagonal de Identity **ya es esta forma**; el traslado conserva su código (FR-008).
+
+### Datos (FR-005)
+
+Un cluster M0, tres bases. Cada dominio recibe **su propio `IMongoDatabase`** inyectado; no existe un cliente global que permita escribir en otra base por descuido.
+
+```csharp
+services.AddKeyedSingleton<IMongoDatabase>("identity",   (sp,_) => client.GetDatabase("nexo_identity"));
+services.AddKeyedSingleton<IMongoDatabase>("discovery",  (sp,_) => client.GetDatabase("nexo_discovery"));
+services.AddKeyedSingleton<IMongoDatabase>("engagement", (sp,_) => client.GetDatabase("nexo_engagement"));
+```
+
+`maxPoolSize = 40` por instancia (2 instancias + worker ≈ 120 conexiones), por debajo del límite del cluster. **Verificar el límite real en el panel de Atlas antes de fijarlo**: las fuentes públicas dan 100 y 500 sin coincidir.
+
+### Estado compartido entre instancias (FR-006, NFR-003)
+
+Lo que **no** puede vivir en memoria, porque hay dos instancias:
+
+| Estado | Dónde | Por qué |
+|---|---|---|
+| Revocación de sesión (`jti`) | Redis | Sin esto el logout no surte efecto en la otra instancia (requisito 10) |
+| Caché L2 | Redis | Requisito 9: caché a nivel backend |
+| Contadores exactos de rate limit | Redis | Límites de negocio por día deben ser exactos entre réplicas |
+| Backplane de tiempo real | Redis pub/sub | Emisor y receptor pueden estar en instancias distintas |
+| Idempotencia de POST | Redis | Un reintento puede caer en la otra instancia |
+
+Los límites por minuto (abuso) sí van en memoria por réplica: toleran ser aproximados y no dependen de Redis.
+
+### Qué se retira (FR-009)
+
+| Elemento | Estado actual |
+|---|---|
+| `services/directory`, `messaging`, `orders`, `relations`, `trust` | 1 archivo de 4–5 líneas cada uno |
+| `services/notifications` | 2 archivos, 10 líneas |
+| `services/community` | 3 archivos, 363 líneas → se revisa qué migra a Discovery |
+| ~20 de los 27 `.csproj` | Andamiaje sin contenido |
+| `docs/architecture-selection.json` | Se archiva: definía 8 arquitecturas |
+| `deploy-azure.yml` | Apunta a Container Apps por servicio; se reescribe para App Service |
+
+`services/identity` **no se borra: se mueve** con su historial.
 
 ## 3. Pipeline / orden de ejecución
 
-T-006 refinamiento específico precede a T-001 Ready; T-002/T-003 construcción e integración solo con encargo posterior; T-004 seguridad; T-007 comprueba AC-090; T-005 cierra evidencia. [Gates backend](../../../docs/roles-y-gates.md) desde la primera vertical, con comandos reales cuando haya proyecto.
+1. **T-001** inventario de lo retirado, antes de borrar nada.
+2. **T-002/T-003** solución y proyectos vacíos que compilan.
+3. **T-004/T-005** bloques comunes con sus pruebas.
+4. **T-006** prueba de fronteras: **antes** de mover Identity, para que el movimiento la valide.
+5. **T-007** host con los dos roles.
+6. **T-008/T-009** bases y Redis.
+7. **T-010** entorno local.
+8. **T-011** traslado de Identity, con sus pruebas en verde.
+9. **T-012** retirada de los 7 servicios y registro de decisión.
+10. **T-013/T-014/T-015** seguridad, evidencia y configuración de despliegue.
+
+[Gates backend](../../../docs/roles-y-gates.md) desde esta primera vertical, con comandos reales porque aquí **ya hay proyecto**.
 
 ## 4. Riesgos / Deuda
 
-Resolver decisiones D01–D08 pertinentes en el acuerdo común; no asumir proveedores, costo, versiones o aprobación de arquitectura. Reconstruir una tarea documental desde fuente hasta checklist y distinguir propuesta de ratificación.
+| Riesgo | Mitigación |
+|---|---|
+| **Cambios sin commitear de Johann** (`Program.cs`, `.csproj`, `RedisRateLimiting.cs` sin añadir) | **Bloqueante.** No iniciar T-011 hasta que estén commiteados; `RedisRateLimiting.cs` es trabajo aprovechable en FR-006 |
+| Límite de conexiones de M0 sin confirmar | Verificar en el panel antes de fijar `maxPoolSize` (T-008) |
+| La enmienda E-001 es propuesta, no ratificada | Revisión de Johann antes de Ready |
+| `services/community` tiene 363 líneas reales | Revisar qué migra a Discovery antes de borrar (T-001) |
+| B1 no tiene autoescalado | El requisito 15 pide *"al menos 2 instancias"*, no autoescalado. Escalado manual a 2 cumple |
+| Atlas M0 puede pausarse por inactividad | Mantener actividad antes del 2 de diciembre; el requisito de evaluación en vivo lo exige |
 
 ## 5. Verificación
 
-FR-090→T-006/T-007→AC-090. Cada FR/NFR restante conserva tareas del incremento y sus AC; refinar cobertura por historia antes de Ready. Hoy ejecutar scripts/check_sdd.ps1, que solo valida estructura. Pruebas futuras: casos positivos/negativos del propietario, contrato consumidor/provider, dependencia caída y reintento sin duplicación. Evidencia con versión/entorno/resultado y revisor real.
+Comandos reales desde T-002:
+
+```bash
+dotnet build src/Nexo.sln
+dotnet test src/Nexo.sln --filter "Category=Unit"
+docker compose up -d                                   # MongoDB réplica + Redis
+dotnet test src/Nexo.sln --filter "Category=Integration"
+dotnet run --project src/Host/Nexo.Host                 # NEXO_ROLE=api
+```
+
+Pruebas por tipo:
+
+| Tipo | Qué cubre |
+|---|---|
+| Unitaria | `Result<T>`, `PagedResult<T>`, idempotencia del despachador |
+| Arquitectura | Fronteras entre dominios, **caso positivo y negativo** (AC-004) |
+| Integración | Testcontainers con MongoDB y Redis; aislamiento de bases (AC-005) |
+| Dos instancias | Revocación propagada entre réplicas (AC-006) — con dos contenedores en local |
+| Degradación | `/health/ready` en 503 con Redis caído (AC-007) |
+
+Evidencia con versión, entorno, resultado y revisor real. Esta spec es la primera con comandos ejecutables: `scripts/check_sdd.ps1` ya no basta.
 
 ## Integridad constitucional y orden de tareas
 
-T-006/T-020 refinan FR-090/FR-100 y decisiones antes de T-001. T-002 prepara el cambio; T-010 y siguientes atienden cada FR principal; T-021 comprueba AC-100. T-003 integra, T-004 revisa seguridad, T-007 comprueba AC-090 y T-005 cierra. [Tareas](task.md) y tabla de trazabilidad en [spec](spec.md) son autoridad de IDs/dependencias; este orden prevalece sobre resúmenes anteriores.
+Cada FR tiene tarea y AC en la tabla de trazabilidad de [spec.md](spec.md), que es la autoridad de IDs. T-006 precede a T-011 porque la prueba de fronteras debe existir antes de mover código a ellas. T-001 precede a cualquier borrado. Ready depende de la revisión de Johann sobre E-001, no del código que esta spec habilita.
 
-AC-100: Ninguna decisión propuesta ni excepción puede figurar aceptada sin nombre/fecha reales; un cambio de alcance enlaza la spec y su impacto en contratos y app.
-
-Tipo de evidencia: documental hoy; al implementar, unitario con doble separado de contrato/integración real y, en móvil, dispositivo. Sin comandos de producto válidos mientras no existan proyectos.
-
-## Desglose de funciones y obligaciones
-
-| Fuente | Historia/tarea/criterio | Diseño y prueba |
-|---|---|---|
-| R02 Evaluación interactiva y con prompts | FR-402 → T-402 → AC-402 | Planear método de comprobación, entorno/responsable y evidencia; no aprobar mientras falten decisiones/contratos o ejecución real cuando corresponda. |
-| R05 SDD y DevSecOps | FR-405 → T-405 → AC-405 | Planear método de comprobación, entorno/responsable y evidencia; no aprobar mientras falten decisiones/contratos o ejecución real cuando corresponda. |
-| R06 Desarrollo con agentes | FR-406 → T-406 → AC-406 | Planear método de comprobación, entorno/responsable y evidencia; no aprobar mientras falten decisiones/contratos o ejecución real cuando corresponda. |
-| R11 Matriz de versiones | FR-411 → T-411 → AC-411 | Planear método de comprobación, entorno/responsable y evidencia; no aprobar mientras falten decisiones/contratos o ejecución real cuando corresponda. |
-| R12 MCP opcional | FR-412 → T-412 → AC-412 | Planear método de comprobación, entorno/responsable y evidencia; no aprobar mientras falten decisiones/contratos o ejecución real cuando corresponda. |
-| R18 GitHub/coordinación | FR-418 → T-418 → AC-418 | Planear método de comprobación, entorno/responsable y evidencia; no aprobar mientras falten decisiones/contratos o ejecución real cuando corresponda. |
-| PRE1 Entrevistas | FR-451 → T-451 → AC-451 | Fuente: lineamientos Móvil v2, página 4. Artefacto común no se duplica como dos entrevistas o dos hojas incompatibles. |
-| PRE2 Descripciones separadas | FR-452 → T-452 → AC-452 | Fuente: lineamientos Móvil v2, página 4. Artefacto común no se duplica como dos entrevistas o dos hojas incompatibles. |
-| PRE3 Componentes en hoja de cálculo | FR-453 → T-453 → AC-453 | Fuente: lineamientos Móvil v2, página 4. Artefacto común no se duplica como dos entrevistas o dos hojas incompatibles. |
-| PRE4 CRUD y funciones por endpoint | FR-454 → T-454 → AC-454 | Fuente: lineamientos Móvil v2, página 4. Artefacto común no se duplica como dos entrevistas o dos hojas incompatibles. |
-| PRE5 Referencias docentes | FR-455 → T-455 → AC-455 | Fuente: lineamientos Móvil v2, página 4. Artefacto común no se duplica como dos entrevistas o dos hojas incompatibles. |
-| PRE6 Estructura SDD | FR-456 → T-456 → AC-456 | Fuente: lineamientos Móvil v2, página 4. Artefacto común no se duplica como dos entrevistas o dos hojas incompatibles. |
-
-## Orden y frontera vigentes 0.4.0
-
-Cada operación/función/obligación desglosada tiene requisito, tarea y AC en la spec. T-003 espera también esas tareas, no solo el bloque base. La tarea concreta se refina con contrato/revisión, decisión bloqueante y rutas reales antes de ejecutar; no construir todas las historias de una fase de una vez. [Cobertura bilateral](../../../../docs_nexo/SDD_COBERTURA_FUNCIONAL.md) indica primario, integración, opcional o superficie excluida.
-
-## Rutas, propietario y orden verificable 0.4.1
-
-Dueño: Gobierno. Rutas objetivo: `specs/, docs/decisions/, .github/ y .specify/` (no creadas por este plan). Alcance propio: responsables, decisiones, revisiones y trazabilidad de cambios; sin mover codigo. Leer [mapa de carpetas](../../../docs/estructura-backend.md) y [secuencia SDD](../../../docs/orden-desarrollo-backend.md).
-
-Actual: SDD/validadores en este checkout y plantilla Visual Studio separada, sin consolidacion ejecutada. Antes de Ready, T-950 concreta archivos existentes/objetivo y decisiones de la historia; T-001 depende de esa salida ademas del refinamiento. Preservar dependencias de negocio ya declaradas, contratos formales y autoridad API/app.
-
-Durante implementacion, usar Domain→reglas, Application→casos/puertos, Infrastructure→adaptadores propios y Api→HTTP/composicion solo cuando corresponda a este propietario. No crear un servicio por spec; gobierno, contratos, infraestructura y expediente tienen artefactos propios, no Domain ficticio. La construccion concreta reutiliza fundamentos y verifica rutas/suites segun producto real.
-
-Validacion: AC-950 se revisa con lista de archivos/dueño/entrada/salida/suites, mediante T-950 y gate Ready. Es plan de comprobacion, no evidencia de ejecucion. Las tareas de integracion, seguridad y cierre mantienen evidencia por caso positivo/negativo/fallo.
-
-T-951 / FR-951 / AC-951: Activar gobierno de cambios con datos reales. Completar tarea Jira, pagina Confluence y politica real, publicar por develop→release→main y verificar check de metadatos antes de exigirlo en seis rulesets. Mientras el usuario posponga esos datos, registrar pendiente de publicacion sin bloquear el analisis local ni inventar enlaces. Orden local: T-002, T-950 → T-951 → T-003. Comprobacion esperada: Evidencia de PR/CI y lectura remota demuestra la activacion; antes de ello el estado permanece preparado, no activo.
-
-## Paquete ejecutable de preparacion documental nv-00 (0.4.2)
-
-Entrada principal: [inicio nv-00](../../../docs/inicio-backend/README.md). Archivos preparados actuales y de mantenimiento: docs/decisions/registro.md, docs/inicio-backend/README.md, flujo-cambios.md, evidencia-nv00.md, guion-evidencias.md e inventario-fuentes.json en esa carpeta; cuatro piezas de nv-00 y Memoria. No hay cambios de csproj o Docker en esta seleccion.
-
-T-006 contrasta alcance/fuentes y decide que falta; T-020 usa registro y flujo para diferenciar propuesta/ratificacion/excepcion; T-950 concreta estas rutas y la salida para fundacion. T-001 requiere revision humana real antes de Ready; contratos HTTP propios son N/A justificado solo para nv-00. Los documentos se pueden refinar antes de Ready y permanecen borradores.
-
-T-002/T-010 consolidan documentos de la seleccion cuando corresponda; tareas de obligaciones contrastan su evidencia por separado. T-003 conserva espera de activacion para el cierre GLOBAL, no impide el refinamiento documental o entregar entradas parciales no aceptadas a nv-01/nv-02. T-004 revisa privacidad/secretos y T-007/T-005 concilian evidencia/limites. T-951 no se ejecuta mientras el usuario posponga datos reales.
-
-Validacion local: lint, integridad y ocho pruebas del verificador desde la raiz segun README de arranque. Inventario de fuentes registra presencia/hash y alcance de lectura, no respuestas de entrevista ni revision del contenido binario. Resultado real se incorpora a evidencia/Memoria; no convertir PASS en ratificacion.
-
-## Perfiles de arquitectura aplicables
-
-Consultar [índice de propietarios](../../../docs/arquitectura/README.md) y las [políticas comunes](../../../docs/arquitectura/politicas-comunes.md) al concretar la preparación estructural de esta historia. Reutilizar el propietario y su contrato; no crear un servicio por spec. Distinguir diseño propuesto, base física y comprobación de producto.
+Tipo de evidencia: ejecutable desde T-002; documental solo para T-001, T-012 y T-015.
