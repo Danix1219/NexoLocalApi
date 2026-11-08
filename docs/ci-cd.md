@@ -15,16 +15,16 @@
 
 | Workflow | Se dispara con | Comprueba |
 |---|---|---|
-| `ci.yml` | PR a `develop`, `main` o `release/**`; push a `develop` | Formato, vulnerabilidades, Terraform, compilación, fronteras de arquitectura y las 41 pruebas |
+| `pipeline.yml` | PR a `develop`, `main` o `release/**`; push a `develop` | Formato, vulnerabilidades, Terraform, compilación, fronteras de arquitectura y las 41 pruebas |
 | `sdd.yml` | Cualquier push y cualquier PR | Documentación SDD: estructura, enlaces y trazabilidad. Arrastra el build como dependencia |
 | `pr-governance.yml` | PR a `main`, `develop` o `release/**` | Trazabilidad del PR y dirección de rama |
 | `deploy-azure.yml` | Push a `main` | Publica en App Service con OIDC |
 
-`ci.yml` existe aparte de `sdd.yml` a propósito. El build real ya corría, pero escondido como
+`pipeline.yml` existe aparte de `sdd.yml` a propósito. El build real ya corría, pero escondido como
 dependencia de un workflow llamado «SDD documentation»: quien mira la lista de checks de un PR no
 tiene por qué saber eso. Ahora los checks de producto se llaman por lo que son.
 
-### Etapas de `ci.yml`
+### Etapas de `pipeline.yml`
 
 Un trabajo por etapa, encadenados con `needs:`, para que la pestana Actions muestre el arbol
 completo de una corrida en vez de una caja unica con todo dentro.
@@ -156,7 +156,7 @@ revertilo. Una protección que nadie probó no es una protección.
 
 ## Limitación conocida
 
-En un PR a `develop`, el build corre **dos veces**: una desde `ci.yml` y otra desde `sdd.yml`, que
+En un PR a `develop`, el build corre **dos veces**: una desde `pipeline.yml` y otra desde `sdd.yml`, que
 lo arrastra como dependencia. No se quitó porque el verificador documental
 (`.ci/verify-sdd.ps1`) exige que `sdd.yml` dependa del workflow de producto, justamente para que la
 CI documental no pueda ponerse verde ignorando el código. Cuesta unos minutos de runner; quitarlo

@@ -195,15 +195,26 @@ jobs:
           global-json-file: global.json
 
       # Sin infraestructura: deben pasar en cualquier maquina y en segundos.
+      #
+      # Se descubren solas por el nombre de la carpeta. Con la lista escrita a mano, una suite
+      # nueva no se ejecutaba y nadie se enteraba: verde sin haber comprobado nada.
+      #
       # Uno por uno porque `dotnet test` solo acepta un proyecto, y sin cortar al primer fallo:
       # saber que fallan dos suites vale mas que enterarse de una y volver a empezar.
       - name: Pruebas unitarias
         run: |
           set -uo pipefail
+          proyectos=(tests/*.Unit)
+          if [ ! -d "${proyectos[0]}" ]; then
+            echo "::error::No se encontro ninguna suite en tests/*.Unit"
+            exit 1
+          fi
+          echo "Suites encontradas: ${proyectos[*]}"
           fallos=0
-          for dominio in Common Identity Discovery Engagement; do
-            dotnet test "tests/Nexo.${dominio}.Unit" --configuration Release \
-              --logger "trx;LogFileName=${dominio}.trx" --results-directory resultados || fallos=1
+          for proyecto in "${proyectos[@]}"; do
+            nombre=$(basename "$proyecto")
+            dotnet test "$proyecto" --configuration Release \
+              --logger "trx;LogFileName=${nombre}.trx" --results-directory resultados || fallos=1
           done
           exit "$fallos"
 
