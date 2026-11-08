@@ -72,6 +72,10 @@ jobs:
           usuario=$(python3 -c "import xml.etree.ElementTree as ET;p=[x for x in ET.parse('perfil.xml').getroot().iter('publishProfile') if x.get('publishMethod')=='MSDeploy'][0];print(p.get('userName'))")
           clave=$(python3 -c "import xml.etree.ElementTree as ET;p=[x for x in ET.parse('perfil.xml').getroot().iter('publishProfile') if x.get('publishMethod')=='MSDeploy'][0];print(p.get('userPWD'))")
           host=$(python3 -c "import xml.etree.ElementTree as ET;p=[x for x in ET.parse('perfil.xml').getroot().iter('publishProfile') if x.get('publishMethod')=='MSDeploy'][0];print(p.get('publishUrl'))" | cut -d: -f1)
+          # La URL publica sale del propio perfil. Componerla como "<nombre>.azurewebsites.net"
+          # ya no vale: Azure anade un sufijo unico al dominio por omision.
+          publica=$(python3 -c "import xml.etree.ElementTree as ET;p=[x for x in ET.parse('perfil.xml').getroot().iter('publishProfile') if x.get('publishMethod')=='MSDeploy'][0];print(p.get('destinationAppUrl'))")
+          echo "APP_URL=${publica%/}" >> "$GITHUB_ENV"
           rm -f perfil.xml
 
           # Antes que nada: si algun comando imprimiera la clave, ya esta tapada.
@@ -80,18 +84,23 @@ jobs:
           (cd publish && zip -qr ../publish.zip .)
           curl -fsS -X POST --retry 3 -u "$usuario:$clave" -H "Content-Type: application/zip" --data-binary @publish.zip "https://$host/api/zipdeploy"
 
-      - name: Verify readiness on both instances
+      # Repite la sonda porque una sola respuesta no prueba nada cuando hay varias
+      # instancias: el balanceador podria estar mandandolas todas a la misma.
+      - name: Verificar que el sitio responde
         run: |
           set -euo pipefail
-          host="${{ vars.AZURE_WEBAPP_NAME }}.azurewebsites.net"
+          if [ -z "${APP_URL:-}" ]; then
+            echo "::error::El perfil de publicacion no trae destinationAppUrl."
+            exit 1
+          fi
           ok=0
           # Varias peticiones para que el balanceador reparta entre las dos instancias:
           # una sola respuesta 200 no prueba que ambas esten sanas (NFR-003).
           for _ in $(seq 1 30); do
-            code=$(curl -s -o /dev/null -w '%{http_code}' "https://$host/health/ready" || true)
+            code=$(curl -s -o /dev/null -w '%{http_code}' "$APP_URL/health/ready" || true)
             if [ "$code" = "200" ]; then ok=$((ok + 1)); fi
-            if [ "$ok" -ge 6 ]; then echo "DEPLOY-OK https://$host"; exit 0; fi
+            if [ "$ok" -ge 6 ]; then echo "DEPLOY-OK $APP_URL"; exit 0; fi
             sleep 10
           done
-          echo "No se alcanzaron 6 respuestas 200 en /health/ready; revisar el log del App Service." >&2
+          echo "No se alcanzaron 6 respuestas 200 en $APP_URL/health/ready; revisar el log del App Service." >&2
           exit 1
