@@ -88,3 +88,35 @@ El usuario autoriza el scaffold de todos los propietarios, además de G01/S01. [
 ## Arquitectura interna revisada por responsabilidad
 
 Perfil S01: **hexagonal**; proyectos activos: Domain, Application, Infrastructure, Api. Sesiones, OTP y borrado requieren invariantes aisladas y proveedores reemplazables. Patrones: Rotación atómica, revocación durable, outbox y recuperación hacia adelante. La [selección por caso de uso](../../../docs/arquitectura/seleccion-arquitecturas.md) sustituye la plantilla común de cuatro capas donde no aplica. Refinamiento y comprobación de la tarea de perfil ya existente; no añade operaciones ni declara Ready.
+
+
+## Correccion de identidad antes de avanzar (2026-11-08)
+
+Entrada: confirmacion del usuario de Gmail por SMTP, sin SMS, conservando movil como contacto.
+Propietario: Identity, sobre los proyectos actuales; no crear capas ni proyectos.
+Archivos: AuthEndpoints.cs, DotEnv.cs, SeguridadDeIdentidadTests.cs; fichas 01-auth/02-cuenta y
+superficies que consumen la insignia en specs/endpoints. La configuracion sigue por Mail__*.
+No hay migracion de datos, envio real a usuarios ni despliegue. El SDK autorizado es 10.0.302.
+
+T-970 verifica FR-970/NFR-970 y AC-970 con las tres pruebas nuevas de SeguridadDeIdentidadTests,
+las regresiones de signup y recuperacion existentes, build Release, format, suite sin carga de .env,
+y validadores SDD. Mongo y Redis son contenedores de prueba; SMTP real queda fuera de esa evidencia.
+Para omitir el archivo personal incluso en carpetas padre: NEXO_DISABLE_DOTENV=1.
+El wrapper .ci/verify-sdd.ps1 necesita un workspace aislado con checkout API_NexoLocal y sus
+contextos; no renombrar el clon ni debilitar el control de la CI para ejecutarlo.
+Revisor humano pendiente; resultados y limites se registran en gates y Memoria, sin firmas.
+
+
+## Ejecución de cuenta local (2026-11-09)
+
+Alcance/contratos/archivos y rollback: [incremento ejecutable](../../endpoints/02-cuenta/implementacion.md).
+La carpeta 02-cuenta es un conjunto funcional, no nv-02. La autorización del usuario cubre
+construcción y pruebas; no firma aceptación humana ni integra por inferencia nv-05/nv-12.
+FR-981 a FR-988 y NFR-981 se comprueban con CuentaTests (HTTP/OAuth/Mongo/Redis reales),
+doble explícito de HTTP Content Safety y relay con entrega repetida. AC-981 a AC-988 siguen
+sin firma hasta revisión. Además ejecutar regresión completa, formato, SDD e integridad.
+No se altera launchSettings del usuario, no se lee .env en pruebas y no hay push/despliegue.
+
+
+## Incremento 2026-11-10 — correo y ubicación
+Correo de verificación con identidad visual, alternativa MIME y vencimiento local. Application/Infrastructure/Endpoints y capas existentes de pruebas; contrato incremental en specs/endpoints/04-descubrimiento/geocodificacion.md. T-990 acredita implementación, no cierre global.

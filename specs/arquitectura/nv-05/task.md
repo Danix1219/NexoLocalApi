@@ -52,3 +52,8 @@ Orden aplicable: refinamiento y preparacion de rutas preceden Ready; construccio
 ## Refinamiento del perfil de arquitectura
 
 - [ ] T-960 →FR-960,NFR-960. Refinar el [perfil S06](../../../docs/arquitectura/servicios/s06-trust.md) para la historia seleccionada, sin crear servicios vacíos. Acepta: AC-960 con patrón/motivo, invariantes, contrato, rutas, atomicidad, permisos y fallos comprobables; proveedores y revisión pendientes se registran sin inventarlos. Depende de: T-950.
+
+## Medios del grupo14
+- [ ] T-991 → FR-991,NFR-991. Implementar puertos/adaptadores/worker/endpoints y consumo móvil. Acepta: AC-991 con pruebas de bytes, rechazo/fallo externo, propiedad, cuota y lectura solo aprobada; registrar suites y límites. Depende de: infraestructura existente verificada; no exige construir chat/CDN globales. Aceptación humana pendiente.
+
+Ejecuci?n t?cnica de T-991 acreditada en implementaci?n y Memoria; la casilla documental espera revisi?n humana de esta fase, sin cambiarla a Ready autom?ticamente.

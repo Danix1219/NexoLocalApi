@@ -16,6 +16,12 @@ public static class DotEnv
     /// <summary>Busca el archivo desde el directorio dado hacia arriba y lo carga si aparece.</summary>
     public static string? Load(string startDirectory)
     {
+        // Permite reproducir CI sin renombrar archivos personales ni cargar secretos reales.
+        if (Environment.GetEnvironmentVariable("NEXO_DISABLE_DOTENV") == "1")
+        {
+            return null;
+        }
+
         var path = Find(startDirectory);
         if (path is null)
         {

@@ -1,4 +1,4 @@
-# Entorno local de nv-00 (FR-007): MongoDB en replica, Redis y emulador de colas.
+# Entorno local de nv-00 (FR-007): MongoDB en replica, Redis y emulador de blobs/colas.
 # Levantar con: docker compose up -d
 # La API arranca contra el sin configuracion adicional: appsettings.Development.json ya apunta aqui.
 
@@ -55,8 +55,9 @@ services:
   queues:
     image: mcr.microsoft.com/azure-storage/azurite:3.33.0
     container_name: nexo-queues
-    command: ["azurite-queue", "--queueHost", "0.0.0.0", "--queuePort", "10001", "--location", "/data"]
+    command: ["azurite", "--blobHost", "0.0.0.0", "--blobPort", "10000", "--queueHost", "0.0.0.0", "--queuePort", "10001", "--location", "/data"]
     ports:
+      - "10000:10000"
       - "10001:10001"
     volumes:
       - queue-data:/data

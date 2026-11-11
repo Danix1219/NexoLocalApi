@@ -23,6 +23,8 @@ public sealed class IdentityCollections
         Accounts = database.GetCollection<Account>(AccountsName);
         Devices = database.GetCollection<BsonDocument>(DevicesName);
         RevokedTokens = database.GetCollection<BsonDocument>(RevokedTokensName);
+        Uploads = database.GetCollection<BsonDocument>("uploads");
+        AuditEvents = database.GetCollection<BsonDocument>("audit_events");
     }
 
     public IMongoCollection<Account> Accounts { get; }
@@ -30,6 +32,8 @@ public sealed class IdentityCollections
     public IMongoCollection<BsonDocument> Devices { get; }
 
     public IMongoCollection<BsonDocument> RevokedTokens { get; }
+    public IMongoCollection<BsonDocument> Uploads { get; }
+    public IMongoCollection<BsonDocument> AuditEvents { get; }
 
     /// <summary>Indices y TTL, creacion idempotente: repetirlo no cambia nada.</summary>
     public async Task EnsureIndexesAsync(CancellationToken ct)
@@ -47,7 +51,10 @@ public sealed class IdentityCollections
                     new CreateIndexOptions { Name = "ux_devices_fcm", Unique = true }),
                 new CreateIndexModel<BsonDocument>(
                     Builders<BsonDocument>.IndexKeys.Ascending("accountId"),
-                    new CreateIndexOptions { Name = "ix_devices_account" })
+                    new CreateIndexOptions { Name = "ix_devices_account" }),
+                new CreateIndexModel<BsonDocument>(
+                    Builders<BsonDocument>.IndexKeys.Ascending("lastSeenAt"),
+                    new CreateIndexOptions { Name = "ttl_devices_last_seen", ExpireAfter = TimeSpan.FromDays(90) })
             ],
             cancellationToken: ct);
 
@@ -112,6 +119,8 @@ public sealed class MongoAccountRepository(IdentityCollections collections) : IA
             Builders<Account>.Update
                 .Set(account => account.PasswordHash, passwordHash)
                 .Set(account => account.PasswordChangedAt, changedAt)
+                .Inc(account => account.Revision, 1)
+                .Inc(account => account.AuthEpoch, 1)
                 .Set(account => account.UpdatedAt, changedAt),
             cancellationToken: ct);
 
@@ -120,28 +129,4 @@ public sealed class MongoAccountRepository(IdentityCollections collections) : IA
             account => account.Id == accountId,
             Builders<Account>.Update.Set(account => account.LastLoginAt, at),
             cancellationToken: ct);
-}
-
-/// <summary>Baja del dispositivo: tras cerrar sesion no deben seguir llegando notificaciones.</summary>
-public sealed class MongoDeviceRegistry(IdentityCollections collections) : IDeviceRegistry
-{
-    public Task RemoveAsync(Guid accountId, string? fcmToken, bool allDevices, CancellationToken ct)
-    {
-        if (allDevices)
-        {
-            return collections.Devices.DeleteManyAsync(
-                Builders<BsonDocument>.Filter.Eq("accountId", accountId), ct);
-        }
-
-        if (string.IsNullOrWhiteSpace(fcmToken))
-        {
-            return Task.CompletedTask;
-        }
-
-        return collections.Devices.DeleteOneAsync(
-            Builders<BsonDocument>.Filter.And(
-                Builders<BsonDocument>.Filter.Eq("accountId", accountId),
-                Builders<BsonDocument>.Filter.Eq("fcmToken", fcmToken)),
-            ct);
-    }
 }

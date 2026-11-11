@@ -12,7 +12,7 @@ public static class IdentityEndpointMapping
     /// </summary>
     public static IEndpointRouteBuilder MapIdentityEndpoints(this IEndpointRouteBuilder app)
     {
-        app.MapGroup("/v1/identity").WithTags("Identity").MapAuthEndpoints();
+        app.MapGroup("/v1/identity").WithTags("Identity").MapAuthEndpoints().MapAccountEndpoints();
         app.MapIdentityTokenEndpoint();
         return app;
     }

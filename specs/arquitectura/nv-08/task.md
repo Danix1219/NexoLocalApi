@@ -49,3 +49,6 @@ Orden aplicable: refinamiento y preparacion de rutas preceden Ready; construccio
 ## Refinamiento del perfil de arquitectura
 
 - [ ] T-960 →FR-960,NFR-960. Refinar el [perfil S03](../../../docs/arquitectura/servicios/s03-community.md) para la historia seleccionada, sin crear servicios vacíos. Acepta: AC-960 con patrón/motivo, invariantes, contrato, rutas, atomicidad, permisos y fallos comprobables; proveedores y revisión pendientes se registran sin inventarlos. Depende de: T-950.
+
+## Tarea de trabajos autorizada
+- [ ] T-991 →FR-991,FR-992,NFR-991. Implementar las cinco fichas de trabajos en Discovery con moderación cerrada, propiedad y publicación/recomendación/cuota atómicas. Acepta: AC-991/AC-992/AC-993 en WorkRulesTests, WorkPersistenceTests y WorkEndpointsTests de capas actuales. Depende de: T-002. Registrar evidencia y límites sin cerrar toda nv-08 ni firmar aprobación humana.

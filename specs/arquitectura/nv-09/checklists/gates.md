@@ -49,3 +49,20 @@
 - [ ] AC-950 / T-950: rutas actuales/objetivo, dueño, decisiones, dependencia de entrada, suites y evidencia definidos en plan; T-001 no pasa Ready sin esta preparacion. No marcar porque exista el mapa general.
 - [ ] Construccion usa solo el propietario habilitado y no accede a proyectos/bases ajenos; todo comando de producto apunta a una ruta existente y su resultado real.
 - [ ] CI documental y revision de diseño no equivalen a aceptacion funcional.
+
+## Incremento 06-solicitudes
+- [ ] T-991 / AC-991: validar reglas, JWT/contacto y moderación con evidencia local identificable.
+- [ ] T-991 / AC-992: transacciones, cuota, reintento y privacidad comprobados con Mongo replica set real.
+- [ ] T-991 / AC-993: contratos, iniciales, filtros/cursor, cierre, mapa y dependencia degradada comprobados.
+- [ ] Revisor humano identificado para aceptación; pruebas locales no acreditan Azure/Atlas/push ni cierre completo de nv-09.
+
+Consultar [registro de ejecución](../../../endpoints/06-solicitudes/implementacion.md).
+
+## Incremento 07-interes
+- [x] T-992 / AC-994: expresión idempotente, nota moderada, perfil, visibilidad/radio, propia/estado y seguridad JWT probados.
+- [x] T-992 / AC-995: retirada lógica/idempotente, pedido activo y eventos durables probados con Mongo replica set.
+- [x] T-992 / AC-996: dueño con 404 no distinguible, activos solamente, datos públicos, orden/cursor, `private, no-store` y dependencia degradada probados.
+- [ ] Consumidores de eventos, pedidos y conversaciones se validan al implementar 08/10; pruebas locales no acreditan push ni aceptación humana.
+- [ ] Revisión humana pendiente.
+
+Consultar [registro 07-interes](../../../endpoints/07-interes/implementacion.md).

@@ -1,11 +1,13 @@
 # Solicitudes para ti (oportunidades) · `GET /v1/discovery/requests/opportunities`
 
+> Implementación local: rige el [refinamiento del incremento](implementacion.md) para cuota, búsqueda, contratos y capacidades pendientes. Los ejemplos cloud y de pedidos representan el objetivo posterior.
+
 | Campo | Valor |
 |---|---|
 | Módulo | Discovery |
 | Quién | **Pr** (autenticado, con perfil) |
 | Pantalla de la maqueta | 7.5 Inicio — prestador "Oportunidades" y 7.7 Buscar — prestador · `proList()` |
-| Spec SDD | nv-06 |
+| Spec SDD | nv-09 (solicitudes; refinamiento local) |
 | Idempotente | Sí (lectura) |
 
 ## 1. Función
@@ -82,7 +84,7 @@ Authorization: Bearer <access_token>
 | `publicPoint` | Point | — | **Difuminado**, siempre |
 | `distanceText` | string | **30** | Aproximado (`kmTxt`) |
 | `iAmInterested` | bool | — | Si este prestador ya expresó interés |
-| `client.displayName` | string | **40** | **Iniciales o nombre de pila**, nunca el nombre completo |
+| `client.displayName` | string | Nombre de la cuenta | Nombre completo publicado por Identity para atribuir la solicitud |
 
 ### Lo que NO se devuelve nunca
 
@@ -90,7 +92,6 @@ Authorization: Bearer <access_token>
 |---|---|
 | `location` exacto | La dirección llega solo tras aceptar el pedido |
 | Teléfono del cliente | Constitución §III.6 |
-| Nombre completo del cliente | Antes de haber relación, basta con iniciales |
 | Correo del cliente | Nunca |
 
 ## 4. Errores
@@ -148,9 +149,15 @@ db.service_requests.aggregate([
 
 1. **El punto exacto se excluye en la proyección**, no en el DTO. La distancia se da aproximada:
    con la distancia exacta desde varios puntos se podría trilaterar el domicilio del cliente.
-2. El cliente aparece con **iniciales** hasta que exista una relación (pedido aceptado). Antes de eso,
-   el prestador no necesita su nombre completo para decidir si le interesa el trabajo.
+2. El cliente aparece con el nombre público de su cuenta y su avatar actual, como autor de la solicitud.
+   El correo, teléfono y ubicación exacta permanecen ocultos antes de aceptar el pedido.
 3. Las categorías se toman **del perfil**, no del parámetro, cuando `myServiceOnly` está activo.
 4. `clientId: { $ne: sub }` evita el caso absurdo de interesarse en la propia solicitud.
 5. Las solicitudes `closed` y `assigned` desaparecen de aquí: respetan la decisión del cliente de
    dejar de recibir ofertas.
+
+## Refinamiento de implementación local (2026-11-10)
+Aplican las [decisiones, límites y evidencia del incremento](implementacion.md), incluida cuota transaccional Mongo, búsqueda normalizada sin Atlas Search, resumen por contratos y bloqueo de imágenes/reseñas sin infraestructura o pedido autorizado. Esta nota concilia los ejemplos históricos; no acredita despliegue.
+
+
+Refinamiento 2026-11-10: la respuesta de lista incluye `description` completo (hasta 600 caracteres del contrato de creación) junto a `descriptionExcerpt` de hasta 200 para clientes antiguos. La app contrae la vista a tres líneas y ofrece Ver más/Ver menos. No cambia ubicación exacta ni datos privados.

@@ -19,7 +19,7 @@ namespace Nexo.Seguridad.Tests;
 /// </summary>
 public sealed class InfraDeSeguridad : IAsyncLifetime
 {
-    private readonly MongoDbContainer mongo = new MongoDbBuilder("mongo:7.0").Build();
+    private readonly MongoDbContainer mongo = new MongoDbBuilder("mongo:7.0").WithReplicaSet("rs0").Build();
 
     private readonly RedisContainer redis = new RedisBuilder("redis:7.2-alpine").Build();
 
@@ -55,6 +55,9 @@ public sealed class HostDeSeguridad(string mongo, string redis) : WebApplication
     protected override IHost CreateHost(IHostBuilder builder)
     {
         builder.UseEnvironment("Development");
+        // Each isolated test host represents a different client; Redis limits stay real.
+        // Without this, unrelated tests exhaust the shared "desconocida" IP bucket.
+        builder.ConfigureServices(services => services.AddSingleton<IStartupFilter, TestClientAddress>());
         builder.ConfigureHostConfiguration(c => c.AddInMemoryCollection(new Dictionary<string, string?>
         {
             ["Identity:CodeHmacKey"] = Config.ClaveHmac,
@@ -64,6 +67,8 @@ public sealed class HostDeSeguridad(string mongo, string redis) : WebApplication
             ["Mail:From"] = "pruebas@nexolocal.mx",
             ["Mongo:ConnectionString"] = mongo,
             ["Redis:ConnectionString"] = redis
+            ,
+            ["MediaStorage:ConnectionString"] = ""
         }));
         return base.CreateHost(builder);
     }
@@ -79,7 +84,7 @@ public static class Cuenta
 {
     public sealed record Sesion(string Correo, string AccessToken, string RefreshToken);
 
-    public static async Task<Sesion> CrearAsync(HostDeSeguridad host, HttpClient cliente, string correo)
+    public static async Task<Sesion> CrearAsync(WebApplicationFactory<Program> host, HttpClient cliente, string correo)
     {
         var enviado = await cliente.PostAsJsonAsync(
             "/v1/identity/email/verification", new { email = correo, purpose = "signup" });
@@ -146,7 +151,7 @@ public static class Cuenta
     /// El despachador sondea cada cinco segundos y puede haber consumido el mensaje antes de que
     /// la prueba mire, asi que se reintenta un rato en vez de fallar a la primera.
     /// </summary>
-    public static async Task<string> CodigoDelOutboxAsync(HostDeSeguridad host, string correo)
+    public static async Task<string> CodigoDelOutboxAsync(WebApplicationFactory<Program> host, string correo)
     {
         var baseDatos = host.Services.GetRequiredKeyedService<IMongoDatabase>(NexoDatabaseKeys.Identity);
         var outbox = baseDatos.GetCollection<BsonDocument>("outbox");

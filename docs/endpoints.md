@@ -1,6 +1,67 @@
-# Endpoints vivos — índice del diseño
+# Endpoints — estado real y línea base de diseño
 
-Fuente única: [inventario](contracts/inventario.json), revisión documental 0.4.0. Métodos/rutas/propietarios se conservan; spec primaria se desglosa. [Fichas](contracts/fichas-operaciones.md) y [cobertura bilateral](../../docs_nexo/SDD_COBERTURA_FUNCIONAL.md). Contratos formales pendientes, no APIs implementadas. REST /api/v1 salvo /internal,/health,/ws,/graphql.
+## Estado revisado el 2026-11-09
+
+Fuente de implementación: `IdentityEndpointMapping`, `AuthEndpoints`, `AccountEndpoints` y `TokenEndpoint` en
+`src/Domains/Identity/Nexo.Identity.Endpoints/`. Las fichas describen contratos; existir en una
+carpeta no acredita implementación. La revisión de código no prueba el despliegue remoto.
+
+| Método | Ruta registrada | Ficha vigente |
+|---|---|---|
+| POST | `/v1/identity/email/verification` | [Envío](../specs/endpoints/01-auth/post-email-verification.md) |
+| POST | `/v1/identity/email/verification/confirm` | [Confirmación](../specs/endpoints/01-auth/post-email-verification-confirm.md) |
+| POST | `/v1/identity/accounts` | [Registro](../specs/endpoints/01-auth/post-accounts.md) |
+| POST | `/connect/token` (`password` y `refresh_token`) | [Login](../specs/endpoints/01-auth/post-connect-token-password.md), [refresh](../specs/endpoints/01-auth/post-connect-token-refresh.md) |
+| POST | `/v1/identity/logout` | [Logout](../specs/endpoints/01-auth/post-logout.md) |
+| POST | `/v1/identity/password/forgot` | [Recuperación](../specs/endpoints/01-auth/post-password-forgot.md) |
+| POST | `/v1/identity/password/reset` | [Restablecimiento](../specs/endpoints/01-auth/post-password-reset.md) |
+| GET | `/v1/identity/me` | [Cuenta propia](../specs/endpoints/02-cuenta/get-me.md) |
+| PATCH | `/v1/identity/me` | [Edición](../specs/endpoints/02-cuenta/patch-me.md) |
+| POST | `/v1/identity/me/mode` | [Modo](../specs/endpoints/02-cuenta/post-me-mode.md) |
+| POST | `/v1/identity/me/phone` | [Contacto móvil declarado](../specs/endpoints/02-cuenta/post-me-phone.md) |
+| POST | `/v1/identity/devices` | [Registrar dispositivo](../specs/endpoints/02-cuenta/post-devices.md) |
+| DELETE | `/v1/identity/devices/{id}` | [Quitar dispositivo](../specs/endpoints/02-cuenta/delete-devices-id.md) |
+| POST | `/v1/identity/me/deletion` | [Solicitar baja local](../specs/endpoints/02-cuenta/post-me-deletion.md) |
+| DELETE | `/v1/identity/me/deletion` | [Cancelar baja local](../specs/endpoints/02-cuenta/delete-me-deletion.md) |
+
+Son quince combinaciones método/ruta y dieciséis operaciones al contar por separado los grants OAuth.
+`GET /health/live` y `GET /health/ready` son sondas técnicas. OpenAPI, Scalar y la redirección `/`
+se controlan con `Docs:Enabled` según el `Program.cs` actual, también en Production si está habilitado.
+
+Las ocho operaciones vigentes de `02-cuenta` ya tienen implementación local; ver
+[alcance y dependencias](../specs/endpoints/02-cuenta/implementacion.md). Discovery registra perfiles, comparación, ubicación/geocodificación y directorio público; Engagement y Screens conservan sus límites actuales.
+La antigua confirmación de teléfono se retiró del diseño: la verificación es por correo SMTP
+y el móvil sigue siendo contacto declarado. Ver [decisión vigente](decisions/registro.md).
+
+Límites encontrados: el flujo `changeEmail` emite un ticket, pero no hay operación que aplique
+el cambio; `password.changed` no tiene consumidor de aviso de correo/push; los demás eventos
+no prueban propagación a los otros dominios. Los avisos de baja/cancelación y auditoría local sí
+tienen consumidor. El outbox conserva códigos de correo en su payload,
+sin purga automática implementada. La suite local no acredita entrega real por Gmail ni Content Safety.
+La edición de nombre devuelve 503 si falta la configuración de Content Safety; las fotos requieren
+un registro propio de avatar aprobado por nv-05. La baja global/anónima y sus consumidores son nv-12.
+
+## Incremento Discovery: perfiles (2026-11-09)
+
+Además de `PUT /v1/discovery/me/location`, se registran las siguientes operaciones. Fuente: `ProviderEndpoints`, `ProviderService` y adaptadores de Discovery. [Evidencia y límites](../specs/endpoints/03-perfil-prestador/implementacion.md).
+
+| Método | Ruta | Autorización |
+|---|---|---|
+| POST | `/v1/discovery/providers` | Cuenta activa y correo confirmado; Idempotency-Key UUID |
+| GET | `/v1/discovery/providers/me` | Dueño por sub |
+| GET | `/v1/discovery/providers/{id}` | Público; cuenta activa y perfil publicado |
+| PATCH | `/v1/discovery/providers/me/{section}` | Dueño; basic/services/zone/hours/prices/terms/portfolio |
+| GET | `/v1/discovery/providers/compare` | Autenticado; exactamente dos UUID distintos |
+
+Publicación textual requiere Content Safety configurado; no hay aprobación automática si falta. Subidas: aprobadas, propias y de la finalidad correcta. No se crean Blob, CDN ni cuentas cloud. Las fichas de caché describen objetivos posteriores: este incremento usa no-store y ETag por respuesta pública. [Orden restante](estado-desarrollo-endpoints.md).
+
+## Línea base histórica de 101 EP
+
+Las rutas siguientes pertenecen al diseño anterior y no son una guía de consumo ni aliases
+registrados. Las rutas ejecutables se enumeran arriba; los demás contratos requieren conciliación
+por incremento antes de implementarlos. No generar clientes con `/auth/*` a partir de esta tabla.
+
+Fuente histórica: [inventario](contracts/inventario.json), revisión documental 0.4.0. [Fichas históricas](contracts/fichas-operaciones.md) y [cobertura bilateral](../../docs_nexo/SDD_COBERTURA_FUNCIONAL.md). Sus rutas y prefijos se conservan para trazabilidad, no como contratos ejecutables; la API actual usa `/v1/<dominio>` y `/connect/token`.
 
 | Método | Ruta | EP | Propietario | Spec primaria |
 |---|---|---|---|---|
@@ -105,3 +166,52 @@ Fuente única: [inventario](contracts/inventario.json), revisión documental 0.4
 | GET | `/catalog/report-reasons` | EP-099 | S06 | [nv-05](../specs/arquitectura/nv-05/spec.md) |
 | GET | `/internal/providers/{id}/contact-policy` | EP-100 | S02 | [nv-25](../specs/arquitectura/nv-10/spec.md) |
 | POST | `/internal/accounts/visibility-batch` | EP-101 | S01 | [nv-04](../specs/arquitectura/nv-04/spec.md) |
+
+## Directorio público — incremento 2026-11-10
+| Método | Ruta | Ficha |
+|---|---|---|
+| GET | `/v1/discovery/categories` | [Catálogo](../specs/endpoints/04-descubrimiento/get-categories.md) |
+| GET | `/v1/discovery/search/suggest` | [Sugerencias](../specs/endpoints/04-descubrimiento/get-search-suggest.md) |
+| GET | `/v1/discovery/search/providers` | [Búsqueda](../specs/endpoints/04-descubrimiento/get-search-providers.md) |
+| GET | `/v1/discovery/map/nearby` | [Mapa](../specs/endpoints/04-descubrimiento/get-map-nearby.md) |
+
+[Decisiones/evidencia](../specs/endpoints/04-descubrimiento/implementacion-directorio.md): solo mapa providers; requests devuelve 401/403 según permisos y 503 hasta habilitar solicitudes. Sin Atlas Search ni caché L2 de resultados activa.
+
+## Trabajos — incremento 2026-11-10
+| Método | Ruta | Ficha |
+|---|---|---|
+| POST | `/v1/discovery/works` | [Publicar](../specs/endpoints/05-trabajos/post-works.md) |
+| GET | `/v1/discovery/providers/{id}/works` | [Listar](../specs/endpoints/05-trabajos/get-providers-id-works.md) |
+| DELETE | `/v1/discovery/works/{id}` | [Borrar propio](../specs/endpoints/05-trabajos/delete-works-id.md) |
+| POST | `/v1/discovery/works/{id}/recommend` | [Recomendar](../specs/endpoints/05-trabajos/post-works-id-recommend.md) |
+| DELETE | `/v1/discovery/works/{id}/recommend` | [Retirar recomendación](../specs/endpoints/05-trabajos/delete-works-id-recommend.md) |
+
+[Alcance/evidencia](../specs/endpoints/05-trabajos/implementacion.md). Requiere Mongo replica set para escrituras transaccionales. Moderación real obligatoria; imágenes aún bloqueadas. Eventos durables no acreditan despacho/push/feed.
+
+## Incremento local 06-solicitudes
+Base `/v1/discovery`, JWT obligatorio:
+| Método | Ruta | Función |
+|---|---|---|
+| POST | /requests | Publicación moderada con Idempotency-Key |
+| GET | /requests/mine | Solicitudes propias y resumen real de intereses |
+| GET | /requests/opportunities | Oportunidades filtradas por perfil prestador |
+| POST | /requests/{id}/close | Cierre exclusivo del propietario |
+
+GET /map/nearby?kind=requests ahora consulta solicitudes reales. [Decisiones y evidencia](../specs/endpoints/06-solicitudes/implementacion.md).
+
+
+## Incremento 14 ? im?genes reales (2026-11-10)
+Reemplaza la limitaci?n hist?rica de im?genes de los incrementos 03/05/06. [Contrato y evidencia](../specs/endpoints/14-imagenes-cdn/implementacion.md).
+
+| M?todo | Ruta bajo /v1/discovery | Acceso |
+|---|---|---|
+| POST | /uploads | JWT, intenci?n y SAS de creaci?n |
+| POST | /uploads/{id}/complete | JWT, propietario |
+| GET | /uploads/{id} | JWT, estado propio |
+| DELETE | /uploads/{id} | JWT, retirada propia |
+| GET | /media/{id} | Aprobado y cuenta activa |
+| GET | /media/{id}/thumb | Aprobado y cuenta activa |
+| GET | /me/cover | JWT, portada personal |
+| PUT | /me/cover | JWT, cover aprobado propio |
+
+Avatar, portada profesional, trabajos y solicitudes se adjuntan usando los PATCH/POST existentes. La cola procesa bytes reales, modera y genera WebP. No se utiliza aprobaci?n simulada ni lectura an?nima de los contenedores.

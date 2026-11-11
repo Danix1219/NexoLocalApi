@@ -1,5 +1,8 @@
 # Crear la cuenta (registro) · `POST /v1/identity/accounts`
 
+Estado auditado 2026-11-08: alta y emisión de `account.created` implementadas. El consumidor de
+bienvenida/propagación todavía no está implementado; encolar el evento no acredita esos efectos.
+
 | Campo | Valor |
 |---|---|
 | Módulo | Identity |
@@ -163,8 +166,9 @@ Validator de la colección (`$jsonSchema`): `email` `maxLength 254` y patrón de
 
 ## 8. Seguridad y privacidad
 
-1. **La contraseña nunca se registra**: el DTO de entrada está marcado para que el logging
-   estructurado la omita, y el `detail` de los errores no la repite.
+1. **La contraseña no debe registrarse**: no habilitar logging de cuerpos HTTP ni del DTO de
+   entrada. El record actual no tiene un atributo de redacción; la protección exige mantener los
+   logs sin cuerpos ni secretos. El `detail` de los errores tampoco la repite.
 2. El `409 email.already_registered` solo es seguro **porque hay ticket**: quien pregunta ya probó
    que controla ese buzón, así que no es enumeración.
 3. La carrera de dos registros simultáneos la resuelve el **índice único**, no una comprobación

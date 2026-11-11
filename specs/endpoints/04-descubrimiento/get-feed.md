@@ -52,7 +52,7 @@ personal (`saved`, `recommended`), y la app muestra el gate de cuenta al interac
         "name": "Plomería del Centro",
         "photoUrl": "https://cdn.nexolocal.mx/av/9f3a1c7e.webp",
         "kind": "business",
-        "badges": ["phoneVerified"]
+        "badges": ["emailVerified"]
       },
       "category": "plomeria",
       "title": "Cambio de tubería en cocina",

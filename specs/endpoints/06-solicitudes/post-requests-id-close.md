@@ -1,11 +1,13 @@
 # Cerrar una solicitud · `POST /v1/discovery/requests/{id}/close`
 
+> Implementación local: rige el [refinamiento del incremento](implementacion.md) para cuota, búsqueda, contratos y capacidades pendientes. Los ejemplos cloud y de pedidos representan el objetivo posterior.
+
 | Campo | Valor |
 |---|---|
 | Módulo | Discovery |
 | Quién | **C** (autenticado, dueño de la solicitud) |
 | Pantalla de la maqueta | 7.4 "Mis solicitudes" → "Ya lo resolví" · `ACT.closereq` |
-| Spec SDD | nv-06 |
+| Spec SDD | nv-09 (solicitudes; refinamiento local) |
 | Idempotente | Sí |
 
 ## 1. Función
@@ -106,3 +108,6 @@ Escrituras derivadas:
 4. `outcome` es métrica interna y no se publica en ninguna respuesta ajena.
 5. Cerrar no borra: la solicitud queda en el historial del cliente y sostiene la calificación
    posterior.
+
+## Refinamiento de implementación local (2026-11-10)
+Aplican las [decisiones, límites y evidencia del incremento](implementacion.md), incluida cuota transaccional Mongo, búsqueda normalizada sin Atlas Search, resumen por contratos y bloqueo de imágenes/reseñas sin infraestructura o pedido autorizado. Esta nota concilia los ejemplos históricos; no acredita despliegue.

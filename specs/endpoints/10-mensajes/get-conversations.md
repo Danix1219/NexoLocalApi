@@ -42,7 +42,7 @@ Authorization: Bearer <access_token>
         "displayName": "Plomería del Centro",
         "photoUrl": "https://cdn.nexolocal.mx/av/9f3a1c7e.webp",
         "kind": "provider",
-        "badges": ["phoneVerified"]
+        "badges": ["emailVerified"]
       },
       "lastPreview": "Puedo pasar mañana a las 9",
       "lastMessageAt": "2026-11-05T19:30:00Z",

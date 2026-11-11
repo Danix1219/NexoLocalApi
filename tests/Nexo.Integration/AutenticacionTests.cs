@@ -28,7 +28,8 @@ public sealed class AutenticacionTests(InfraFixture infra)
                 ["Mail:Host"] = "localhost",
                 ["Mail:From"] = "pruebas@nexolocal.mx",
                 ["Mongo:ConnectionString"] = mongo,
-                ["Redis:ConnectionString"] = redis
+                ["Redis:ConnectionString"] = redis,
+                ["MediaStorage:ConnectionString"] = ""
             }));
             return base.CreateHost(builder);
         }
