@@ -59,9 +59,17 @@ public sealed class WorkService(IWorkStore store, IProviderStore profiles, IProv
             var days = Math.Max(0, (int)(now - w.CreatedAt).TotalDays);
             var item = new Dictionary<string, object?>
             {
-                ["workId"] = w.WorkId, ["category"] = w.Category, ["title"] = w.Title, ["text"] = w.Text, ["textExcerpt"] = w.Text[..Math.Min(300, w.Text.Length)],
-                ["images"] = w.Images, ["zoneLabel"] = w.ZoneLabel, ["recs"] = w.Recs, ["recsText"] = w.Recs == 1 ? "1 recomendación" : $"{w.Recs} recomendaciones",
-                ["tag"] = w.Tag, ["ago"] = days == 0 ? "hoy" : $"hace {days} " + (days == 1 ? "día" : "días")
+                ["workId"] = w.WorkId,
+                ["category"] = w.Category,
+                ["title"] = w.Title,
+                ["text"] = w.Text,
+                ["textExcerpt"] = w.Text[..Math.Min(300, w.Text.Length)],
+                ["images"] = w.Images,
+                ["zoneLabel"] = w.ZoneLabel,
+                ["recs"] = w.Recs,
+                ["recsText"] = w.Recs == 1 ? "1 recomendación" : $"{w.Recs} recomendaciones",
+                ["tag"] = w.Tag,
+                ["ago"] = days == 0 ? "hoy" : $"hace {days} " + (days == 1 ? "día" : "días")
             };
             if (viewer != null) { item["saved"] = page.Saved.Contains(w.WorkId); item["recommended"] = page.Recommended.Contains(w.WorkId); }
             return item;
@@ -90,8 +98,14 @@ public sealed class WorkService(IWorkStore store, IProviderStore profiles, IProv
             if (!Uri.TryCreate(resolved.Value!.Url, UriKind.Absolute, out var media) || !media.AbsolutePath.StartsWith("/v1/discovery/media/", StringComparison.Ordinal)) return Fail<Work>(NexoCodes.ServerDependencyUnavailable);
             images.Add(resolved.Value!);
         }
-        return await store.UpdateAsync(owner, id, current with { Title = title, Text = text, Tag = body.Tag,
-            Images = images.ToArray(), CheckedAt = clock.GetUtcNow().UtcDateTime }, ct);
+        return await store.UpdateAsync(owner, id, current with
+        {
+            Title = title,
+            Text = text,
+            Tag = body.Tag,
+            Images = images.ToArray(),
+            CheckedAt = clock.GetUtcNow().UtcDateTime
+        }, ct);
     }
     public async Task<Result<bool>> DeleteAsync(Guid owner, Guid id, CancellationToken ct)
     {

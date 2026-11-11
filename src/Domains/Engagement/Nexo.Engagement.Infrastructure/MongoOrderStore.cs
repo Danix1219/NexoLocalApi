@@ -158,17 +158,51 @@ public sealed class MongoOrderStore([FromKeyedServices(NexoDatabaseKeys.Engageme
         var prevHash = prev?.GetValue("hash", "").AsString ?? "";
         var material = $"{prevHash}|{version}|{type}|{actor:D}|{at.ToUniversalTime():O}|{data ?? ""}";
         var hash = Convert.ToHexString(System.Security.Cryptography.SHA256.HashData(System.Text.Encoding.UTF8.GetBytes(material)));
-        var row = new BsonDocument { ["_id"] = Id(Guid.CreateVersion7()), ["streamId"] = Id(id), ["version"] = version,
-            ["type"] = type, ["actorId"] = Id(actor), ["at"] = at.ToUniversalTime(), ["prevHash"] = prevHash, ["hash"] = hash, ["data"] = data == null ? BsonNull.Value : data };
+        var row = new BsonDocument
+        {
+            ["_id"] = Id(Guid.CreateVersion7()),
+            ["streamId"] = Id(id),
+            ["version"] = version,
+            ["type"] = type,
+            ["actorId"] = Id(actor),
+            ["at"] = at.ToUniversalTime(),
+            ["prevHash"] = prevHash,
+            ["hash"] = hash,
+            ["data"] = data == null ? BsonNull.Value : data
+        };
         await eventRows.InsertOneAsync(s, row, cancellationToken: ct);
     }
-    private Task Emit(IClientSessionHandle s, OrderDraft d, string type, CancellationToken ct) => outbox.InsertOneAsync(s, new OutboxMessage { MessageId = Guid.CreateVersion7(), Type = type,
-        Payload = JsonSerializer.Serialize(new { orderId = d.Id, clientId = d.ClientId, providerId = d.ProviderId, requestId = d.RequestId, placeZone = d.PlaceZone }), OccurredAt = new DateTimeOffset(DateTime.SpecifyKind(d.CreatedAt, DateTimeKind.Utc)) }, cancellationToken: ct);
-    private Task Emit(IClientSessionHandle s, OrderSnapshot o, string type, CancellationToken ct) => outbox.InsertOneAsync(s, new OutboxMessage { MessageId = Guid.CreateVersion7(), Type = type,
-        Payload = JsonSerializer.Serialize(new { orderId = o.Id, clientId = o.ClientId, providerId = o.ProviderId, requestId = o.RequestId }), OccurredAt = DateTimeOffset.UtcNow }, cancellationToken: ct);
-    private static BsonDocument Write(OrderDraft d) => new() { ["_id"] = Id(d.Id), ["clientId"] = Id(d.ClientId), ["providerId"] = Id(d.ProviderId), ["providerAccountId"] = Id(d.ProviderAccountId),
-        ["requestId"] = d.RequestId is { } request ? Id(request) : BsonNull.Value, ["origin"] = d.Origin, ["description"] = d.Description, ["category"] = "", ["attention"] = d.Attention,
-        ["placeZone"] = d.PlaceZone, ["addressCipher"] = d.AddressCipher == null ? BsonNull.Value : d.AddressCipher, ["status"] = "pending", ["version"] = 1, ["createdAt"] = d.CreatedAt };
+    private Task Emit(IClientSessionHandle s, OrderDraft d, string type, CancellationToken ct) => outbox.InsertOneAsync(s, new OutboxMessage
+    {
+        MessageId = Guid.CreateVersion7(),
+        Type = type,
+        Payload = JsonSerializer.Serialize(new { orderId = d.Id, clientId = d.ClientId, providerId = d.ProviderId, requestId = d.RequestId, placeZone = d.PlaceZone }),
+        OccurredAt = new DateTimeOffset(DateTime.SpecifyKind(d.CreatedAt, DateTimeKind.Utc))
+    }, cancellationToken: ct);
+    private Task Emit(IClientSessionHandle s, OrderSnapshot o, string type, CancellationToken ct) => outbox.InsertOneAsync(s, new OutboxMessage
+    {
+        MessageId = Guid.CreateVersion7(),
+        Type = type,
+        Payload = JsonSerializer.Serialize(new { orderId = o.Id, clientId = o.ClientId, providerId = o.ProviderId, requestId = o.RequestId }),
+        OccurredAt = DateTimeOffset.UtcNow
+    }, cancellationToken: ct);
+    private static BsonDocument Write(OrderDraft d) => new()
+    {
+        ["_id"] = Id(d.Id),
+        ["clientId"] = Id(d.ClientId),
+        ["providerId"] = Id(d.ProviderId),
+        ["providerAccountId"] = Id(d.ProviderAccountId),
+        ["requestId"] = d.RequestId is { } request ? Id(request) : BsonNull.Value,
+        ["origin"] = d.Origin,
+        ["description"] = d.Description,
+        ["category"] = "",
+        ["attention"] = d.Attention,
+        ["placeZone"] = d.PlaceZone,
+        ["addressCipher"] = d.AddressCipher == null ? BsonNull.Value : d.AddressCipher,
+        ["status"] = "pending",
+        ["version"] = 1,
+        ["createdAt"] = d.CreatedAt
+    };
     private static BsonDocument PointDoc(OrderPoint p) => new() { ["lat"] = p.Lat, ["lng"] = p.Lng };
     private static OrderSnapshot Read(BsonDocument d) => new(d["_id"].AsBsonBinaryData.ToGuid(), d["clientId"].AsBsonBinaryData.ToGuid(), d["providerId"].AsBsonBinaryData.ToGuid(),
         d.GetValue("requestId", BsonNull.Value).IsBsonNull ? null : d["requestId"].AsBsonBinaryData.ToGuid(), d.GetValue("origin", "direct").AsString, d.GetValue("category", "").AsString,

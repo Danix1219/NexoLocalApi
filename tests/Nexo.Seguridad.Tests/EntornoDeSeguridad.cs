@@ -67,7 +67,8 @@ public sealed class HostDeSeguridad(string mongo, string redis) : WebApplication
             ["Mail:From"] = "pruebas@nexolocal.mx",
             ["Mongo:ConnectionString"] = mongo,
             ["Redis:ConnectionString"] = redis
-            ,["MediaStorage:ConnectionString"] = ""
+            ,
+            ["MediaStorage:ConnectionString"] = ""
         }));
         return base.CreateHost(builder);
     }

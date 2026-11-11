@@ -47,8 +47,12 @@ public sealed class WorkRulesTests
             "Reparamos una tubería debajo del lavabo.", null, null, null, null,
             new(20.05, -99.34), "Zona", [], 3, now, now);
         var service = new WorkService(store, profiles, new Accounts(), safety, TimeProvider.System);
-        var result = await service.EditAsync(profiles.Value.AccountId, id, JsonSerializer.SerializeToElement(new {
-            title = "Trabajo corregido", text = "Reparamos la fuga y probamos la instalación.", tag = "Terminado", imageUploadIds = Array.Empty<Guid>()
+        var result = await service.EditAsync(profiles.Value.AccountId, id, JsonSerializer.SerializeToElement(new
+        {
+            title = "Trabajo corregido",
+            text = "Reparamos la fuga y probamos la instalación.",
+            tag = "Terminado",
+            imageUploadIds = Array.Empty<Guid>()
         }), default);
         Assert.True(result.IsSuccess); Assert.Equal("plomeria", result.Value!.Category);
         Assert.Equal(3, result.Value.Recs); Assert.Equal(1, store.Writes); Assert.Equal(1, safety.Calls);

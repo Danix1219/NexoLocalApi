@@ -70,11 +70,11 @@ public sealed class MongoFeedStore([FromKeyedServices(NexoDatabaseKeys.Discovery
             {
                 var ids = new BsonArray(values.Select(w => (BsonValue)Id(w.WorkId)));
                 var marks = await recommendations.Find(new BsonDocument
-                    { ["accountId"] = Id(account), ["workId"] = new BsonDocument("$in", ids) })
+                { ["accountId"] = Id(account), ["workId"] = new BsonDocument("$in", ids) })
                     .Project(new BsonDocument("workId", 1)).ToListAsync(ct);
                 foreach (var mark in marks) recommendedIds.Add(mark["workId"].AsBsonBinaryData.ToGuid());
                 var saves = await saved.Find(new BsonDocument
-                    { ["accountId"] = Id(account), ["kind"] = "work", ["targetId"] = new BsonDocument("$in", ids) })
+                { ["accountId"] = Id(account), ["kind"] = "work", ["targetId"] = new BsonDocument("$in", ids) })
                     .Project(new BsonDocument("targetId", 1)).ToListAsync(ct);
                 foreach (var mark in saves) savedIds.Add(mark["targetId"].AsBsonBinaryData.ToGuid());
             }

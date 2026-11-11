@@ -73,19 +73,37 @@ public sealed class InterestService(IInterestStore store, IInterestRequestAccess
         var page = all.Skip(start).Take(limit).ToArray();
         var items = page.Select(x => new
         {
-            providerId = x.Provider.ProviderId, x.Provider.Name, x.Provider.Kind, x.Provider.PhotoUrl, x.Provider.Categories,
-            x.Provider.ZoneLabel, x.Provider.AttentionText, x.Provider.DistanceText,
+            providerId = x.Provider.ProviderId,
+            x.Provider.Name,
+            x.Provider.Kind,
+            x.Provider.PhotoUrl,
+            x.Provider.Categories,
+            x.Provider.ZoneLabel,
+            x.Provider.AttentionText,
+            x.Provider.DistanceText,
             status = new { open = x.Provider.Open, text = x.Provider.StatusText },
-            rating = new { avg = x.Provider.Rating, count = x.Provider.RatingCount }, recs = x.Provider.Recs,
+            rating = new { avg = x.Provider.Rating, count = x.Provider.RatingCount },
+            recs = x.Provider.Recs,
             minPrice = x.Provider.MinPriceCents is { } cents ? new { fromCents = cents, text = $"Desde ${cents / 100m:0.##}" } : null,
             visit = new { mode = x.Provider.VisitMode, text = x.Provider.VisitMode == "free" ? "Visita sin costo" : "Visita según perfil" },
-            badges = x.Provider.EmailVerified ? new[] { "emailVerified" } : Array.Empty<string>(), note = x.Interest.Note,
-            interestedAt = x.Interest.CreatedAt, conversationId = x.Actions, orderStatus = x.Order,
+            badges = x.Provider.EmailVerified ? new[] { "emailVerified" } : Array.Empty<string>(),
+            note = x.Interest.Note,
+            interestedAt = x.Interest.CreatedAt,
+            conversationId = x.Actions,
+            orderStatus = x.Order,
             actions = new { canMessage = request.Contact is "chat" or "both", canOrder = x.CanOrder, canCompare = true }
         }).ToArray();
         var next = start + page.Length < all.Length && page.Length > 0 ? page[^1].Interest.ProviderId.ToString("D") : null;
-        return Result<object>.Success(new { requestId, requestTitle = request.Title, requestStatus = request.Status, items,
-            nextCursor = next, hasMore = next != null, total = interests.Length });
+        return Result<object>.Success(new
+        {
+            requestId,
+            requestTitle = request.Title,
+            requestStatus = request.Status,
+            items,
+            nextCursor = next,
+            hasMore = next != null,
+            total = interests.Length
+        });
     }
 
     private static Result<T> Fail<T>(string code) => Result<T>.Failure(code, "No se pudo completar la operación de interés.");

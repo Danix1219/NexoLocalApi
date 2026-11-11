@@ -147,13 +147,22 @@ public sealed class DirectoryService(IDirectoryProfiles profiles, IProviderAccou
         var days = Math.Max(0, (int)(now - p.UpdatedAt).TotalDays);
         return new
         {
-            p.ProviderId, p.Name, p.Kind, p.PhotoUrl, p.Categories, p.Specialties, bioExcerpt = p.Bio[..Math.Min(160, p.Bio.Length)],
-            zoneLabel = p.PublicZone?.Label ?? "Zona aproximada", attentionText = p.Attention == "home" ? "Va a domicilio" : p.Attention == "shop" ? "En local" : "Local y domicilio",
-            distanceKm = distance, distanceText = distance is null ? null : distance < 1 ? "a menos de 1 km" : "a ~" + distance.Value.ToString("0.#", CultureInfo.InvariantCulture) + " km",
+            p.ProviderId,
+            p.Name,
+            p.Kind,
+            p.PhotoUrl,
+            p.Categories,
+            p.Specialties,
+            bioExcerpt = p.Bio[..Math.Min(160, p.Bio.Length)],
+            zoneLabel = p.PublicZone?.Label ?? "Zona aproximada",
+            attentionText = p.Attention == "home" ? "Va a domicilio" : p.Attention == "shop" ? "En local" : "Local y domicilio",
+            distanceKm = distance,
+            distanceText = distance is null ? null : distance < 1 ? "a menos de 1 km" : "a ~" + distance.Value.ToString("0.#", CultureInfo.InvariantCulture) + " km",
             status = new { open, text = p.Schedule == null ? "Horario sin publicar" : open ? "Abierto ahora" : "Cerrado" },
             minPrice = min == null ? null : new { fromCents = min.FromCents, text = "Desde " + Money(min.FromCents!.Value) },
             visit = new { p.Visit.Mode, text = p.Visit.Mode == "free" ? "Visita sin costo" : p.Visit.Mode == "paid" ? "Visita " + Money(p.Visit.AmountCents.GetValueOrDefault()) : "Costo de visita sin publicar" },
-            rating = new { avg = p.RatingAverage, count = p.RatingCount }, p.Recs,
+            rating = new { avg = p.RatingAverage, count = p.RatingCount },
+            p.Recs,
             badges = candidate.Account.EmailVerified ? new[] { "emailVerified" } : [],
             updatedText = days == 0 ? "Actualizado hoy" : $"Actualizado hace {days} " + (days == 1 ? "día" : "días")
         };

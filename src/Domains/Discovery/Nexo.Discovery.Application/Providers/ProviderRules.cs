@@ -14,14 +14,17 @@ public static class ProviderRules
         ["carpinteria"] = ["cocinas", "puertas", "muebles", "reparaciones", "restauracion"],
         ["pintura"] = ["interiores", "exteriores", "impermeabilizado", "acabados", "muros"],
         ["jardineria"] = ["mantenimiento", "poda", "diseno", "riego", "pasto"],
-        ["cerrajeria"] = ["aperturas", "chapas", "llaves", "seguridad", "automotriz"], ["otros"] = []
+        ["cerrajeria"] = ["aperturas", "chapas", "llaves", "seguridad", "automotriz"],
+        ["otros"] = []
     };
     private static readonly Dictionary<string, string[]> Keywords = new()
     {
         ["plomeria"] = ["plomer", "fontaner", "fuga", "tuber", "calentador", "drenaje"],
         ["electricidad"] = ["electric", "cable", "circuit", "tablero", "iluminacion"],
-        ["carpinteria"] = ["carpinter", "madera", "mueble", "closet"], ["pintura"] = ["pintur", "pintor", "impermeabil"],
-        ["jardineria"] = ["jardin", "poda", "pasto", "riego"], ["cerrajeria"] = ["cerrajer", "chapa", "llave", "cerradura"]
+        ["carpinteria"] = ["carpinter", "madera", "mueble", "closet"],
+        ["pintura"] = ["pintur", "pintor", "impermeabil"],
+        ["jardineria"] = ["jardin", "poda", "pasto", "riego"],
+        ["cerrajeria"] = ["cerrajer", "chapa", "llave", "cerradura"]
     };
     public static string[] Infer(string text)
     {

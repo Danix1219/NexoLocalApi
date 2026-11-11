@@ -47,9 +47,15 @@ public sealed class OrderEndpointsTests(InfraDeSeguridad infra)
         using var scope = host.Services.CreateScope(); var profileId = Guid.CreateVersion7();
         var saved = await scope.ServiceProvider.GetRequiredService<IProviderStore>().InsertAsync(new(owner, new()
         {
-            ProviderId = profileId, Name = "Proveedor para pedidos", Categories = ["plomeria"], Location = new(20.05, -99.34),
-            PublicZone = new("Centro", new(20.05, -99.34)), Attention = "both", RadiusKm = 20,
-            CreatedAt = DateTime.UtcNow, UpdatedAt = DateTime.UtcNow
+            ProviderId = profileId,
+            Name = "Proveedor para pedidos",
+            Categories = ["plomeria"],
+            Location = new(20.05, -99.34),
+            PublicZone = new("Centro", new(20.05, -99.34)),
+            Attention = "both",
+            RadiusKm = 20,
+            CreatedAt = DateTime.UtcNow,
+            UpdatedAt = DateTime.UtcNow
         }, 0, Guid.NewGuid().ToString(), "hash", true), default);
         Assert.True(saved); return profileId;
     }
@@ -64,8 +70,16 @@ public sealed class OrderEndpointsTests(InfraDeSeguridad infra)
         _ = await Login(host, client); var providerAccount = await Login(host, provider); var providerId = await Provider(host, providerAccount);
         var post = new HttpRequestMessage(HttpMethod.Post, "/v1/engagement/orders")
         {
-            Content = JsonContent.Create(new { providerId, origin = "direct", description = "Necesito reparar una fuga de agua en casa.", attention = "home",
-                address = "Calle Hidalgo 123", addressNote = "Portón verde", location = new { lat = 20.0539, lng = -99.3403 } })
+            Content = JsonContent.Create(new
+            {
+                providerId,
+                origin = "direct",
+                description = "Necesito reparar una fuga de agua en casa.",
+                attention = "home",
+                address = "Calle Hidalgo 123",
+                addressNote = "Portón verde",
+                location = new { lat = 20.0539, lng = -99.3403 }
+            })
         };
         post.Headers.Add("Idempotency-Key", Guid.NewGuid().ToString());
         var createdResponse = await client.SendAsync(post); Assert.Equal(HttpStatusCode.Created, createdResponse.StatusCode);

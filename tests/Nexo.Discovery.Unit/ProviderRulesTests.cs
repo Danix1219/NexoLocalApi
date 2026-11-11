@@ -8,8 +8,12 @@ public sealed class ProviderRulesTests
 {
     private static ProviderProfile Valid => new()
     {
-        Name = "Oficio Local", Bio = "Reparamos fugas y tuberias del hogar.", Trades = ["Plomero"], Categories = ["plomeria"],
-        Location = new(20.05, -99.34), RadiusKm = 5
+        Name = "Oficio Local",
+        Bio = "Reparamos fugas y tuberias del hogar.",
+        Trades = ["Plomero"],
+        Categories = ["plomeria"],
+        Location = new(20.05, -99.34),
+        RadiusKm = 5
     };
     [Fact]
     public void Difuminado_se_mantiene_entre_500_y_800_m_incluso_en_fecha_y_polos()
@@ -65,8 +69,15 @@ public sealed class ProviderRulesTests
     public void Completitud_usa_una_formula_sin_superar_cien()
     {
         Assert.Equal(35, Valid.Completeness);
-        var p = Valid with { PhotoUrl = "https://example.test/a", CoverUrl = "https://example.test/c", Schedule = new([new("08:00", "18:00"), null, null, null, null, null, null]),
-            Prices = [new("Visita", 100)], Jobs = 1, Payment = ["cash"] };
+        var p = Valid with
+        {
+            PhotoUrl = "https://example.test/a",
+            CoverUrl = "https://example.test/c",
+            Schedule = new([new("08:00", "18:00"), null, null, null, null, null, null]),
+            Prices = [new("Visita", 100)],
+            Jobs = 1,
+            Payment = ["cash"]
+        };
         Assert.Equal(100, p.Completeness);
     }
     [Fact]

@@ -14,9 +14,17 @@ public sealed class DirectoryPersistenceTests(InfraFixture infra)
     private IMongoDatabase Database() => new MongoClient(infra.MongoConnectionString).GetDatabase("directory_" + Guid.NewGuid().ToString("N"));
     private static StoredProvider Profile(double lat, string cat = "plomeria", string attention = "home") => new(Guid.NewGuid(), new()
     {
-        ProviderId = Guid.CreateVersion7(), Name = "Prestador real de prueba", Categories = [cat], Attention = attention,
-        Location = new(lat, -99.34), RadiusKm = 5, PublicZone = new("Zona pública", new(lat + .006, -99.34)),
-        Owner = "NOMBRE PRIVADO", Web = "https://privado.test", CreatedAt = DateTime.UtcNow, UpdatedAt = DateTime.UtcNow
+        ProviderId = Guid.CreateVersion7(),
+        Name = "Prestador real de prueba",
+        Categories = [cat],
+        Attention = attention,
+        Location = new(lat, -99.34),
+        RadiusKm = 5,
+        PublicZone = new("Zona pública", new(lat + .006, -99.34)),
+        Owner = "NOMBRE PRIVADO",
+        Web = "https://privado.test",
+        CreatedAt = DateTime.UtcNow,
+        UpdatedAt = DateTime.UtcNow
     }, 0, "CLAVE PRIVADA", "HASH PRIVADO", true);
     [Fact]
     public async Task Semilla_idempotente_sin_keywords_y_version_publica_estable()

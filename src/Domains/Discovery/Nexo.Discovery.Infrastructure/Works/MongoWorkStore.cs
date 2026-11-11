@@ -99,18 +99,26 @@ public sealed class MongoWorkStore([FromKeyedServices(NexoDatabaseKeys.Discovery
         if (quota?.GetValue("count", 0).ToInt32() >= 30) return Fail<Work>(NexoCodes.RateLimitExceeded);
         await quotas.UpdateOneAsync(session, new BsonDocument("_id", quotaId), new BsonDocument
         {
-            ["$inc"] = new BsonDocument("count", 1), ["$setOnInsert"] = new BsonDocument("createdAt", work.CreatedAt)
+            ["$inc"] = new BsonDocument("count", 1),
+            ["$setOnInsert"] = new BsonDocument("createdAt", work.CreatedAt)
         }, new UpdateOptions { IsUpsert = true }, token);
         await works.InsertOneAsync(session, new BsonDocument
         {
-            ["_id"] = work.WorkId.ToString("D"), ["providerId"] = Id(work.ProviderId), ["ownerId"] = Id(owner), ["category"] = work.Category,
-            ["createdAt"] = work.CreatedAt, ["moderation"] = new BsonDocument { ["status"] = "approved", ["checkedAt"] = work.CheckedAt },
+            ["_id"] = work.WorkId.ToString("D"),
+            ["providerId"] = Id(work.ProviderId),
+            ["ownerId"] = Id(owner),
+            ["category"] = work.Category,
+            ["createdAt"] = work.CreatedAt,
+            ["moderation"] = new BsonDocument { ["status"] = "approved", ["checkedAt"] = work.CheckedAt },
             ["publicGeo"] = new BsonDocument { ["type"] = "Point", ["coordinates"] = new BsonArray { work.PublicPoint.Lng, work.PublicPoint.Lat } },
             ["data"] = BsonDocument.Parse(JsonSerializer.Serialize(work, ProviderService.Json))
         }, cancellationToken: token);
         await receipts.InsertOneAsync(session, new BsonDocument
         {
-            ["_id"] = Key(owner, key), ["workId"] = work.WorkId.ToString("D"), ["hash"] = hash, ["createdAt"] = work.CreatedAt
+            ["_id"] = Key(owner, key),
+            ["workId"] = work.WorkId.ToString("D"),
+            ["hash"] = hash,
+            ["createdAt"] = work.CreatedAt
         }, cancellationToken: token);
         await profiles.UpdateOneAsync(session, providerFilter, CounterUpdate(1, 0, work.CreatedAt), cancellationToken: token);
         await EmitAsync(session, work, "work.created", token);
@@ -138,7 +146,8 @@ public sealed class MongoWorkStore([FromKeyedServices(NexoDatabaseKeys.Discovery
     public Task<Result<Work>> UpdateAsync(Guid owner, Guid id, Work work, CancellationToken ct) => TransactionAsync(async (session, token) =>
     {
         var filter = new BsonDocument { ["_id"] = id.ToString("D"), ["ownerId"] = Id(owner), ["providerId"] = Id(work.ProviderId), ["moderation.status"] = "approved" };
-        var update = new BsonDocument("$set", new BsonDocument {
+        var update = new BsonDocument("$set", new BsonDocument
+        {
             ["data.title"] = work.Title,
             ["data.text"] = work.Text,
             ["data.tag"] = work.Tag == null ? BsonNull.Value : work.Tag,
@@ -160,19 +169,19 @@ public sealed class MongoWorkStore([FromKeyedServices(NexoDatabaseKeys.Discovery
         var doc = await works.Find(session, filter).FirstOrDefaultAsync(token);
         if (doc == null) return Fail<bool>(NexoCodes.WorkNotFound);
         var work = Read(doc);
-        var managed = new List<(Guid Id,string Url)>();
+        var managed = new List<(Guid Id, string Url)>();
         foreach (var image in work.Images)
         {
             if (!Uri.TryCreate(image.Url, UriKind.Absolute, out var uri) || !uri.AbsolutePath.StartsWith("/v1/discovery/media/", StringComparison.Ordinal) ||
                 !Guid.TryParse(uri.Segments.Last(), out var upload)) return Fail<bool>(NexoCodes.ServerDependencyUnavailable);
-            if (!await database.GetCollection<BsonDocument>("uploads").Find(session,new BsonDocument { ["_id"] = Id(upload), ["ownerId"] = Id(owner), ["purpose"] = "work", ["status"] = "approved" }).AnyAsync(token)) return Fail<bool>(NexoCodes.ServerDependencyUnavailable);
-            managed.Add((upload,image.Url));
+            if (!await database.GetCollection<BsonDocument>("uploads").Find(session, new BsonDocument { ["_id"] = Id(upload), ["ownerId"] = Id(owner), ["purpose"] = "work", ["status"] = "approved" }).AnyAsync(token)) return Fail<bool>(NexoCodes.ServerDependencyUnavailable);
+            managed.Add((upload, image.Url));
         }
         if (await works.FindOneAndDeleteAsync(session, filter, cancellationToken: token) == null) return Fail<bool>(NexoCodes.WorkNotFound);
-        foreach(var image in managed)
-            if(!await works.Find(session,new BsonDocument("data.images.url",image.Url)).AnyAsync(token))
-                await database.GetCollection<BsonDocument>("uploads").UpdateOneAsync(session,new BsonDocument("_id",Id(image.Id)),
-                    new BsonDocument("$set",new BsonDocument { ["status"]="deleted",["cleaned"]=false }),cancellationToken:token);
+        foreach (var image in managed)
+            if (!await works.Find(session, new BsonDocument("data.images.url", image.Url)).AnyAsync(token))
+                await database.GetCollection<BsonDocument>("uploads").UpdateOneAsync(session, new BsonDocument("_id", Id(image.Id)),
+                    new BsonDocument("$set", new BsonDocument { ["status"] = "deleted", ["cleaned"] = false }), cancellationToken: token);
         await recommendations.DeleteManyAsync(session, new BsonDocument("workId", Id(id)), cancellationToken: token);
         await saved.DeleteManyAsync(session, new BsonDocument { ["kind"] = "work", ["targetId"] = Id(id) }, cancellationToken: token);
         await profiles.UpdateOneAsync(session, new BsonDocument { ["_id"] = Id(work.ProviderId), ["accountId"] = Id(owner) },
@@ -217,8 +226,13 @@ public sealed class MongoWorkStore([FromKeyedServices(NexoDatabaseKeys.Discovery
     }
     private Task EmitAsync(IClientSessionHandle session, Work work, string type, CancellationToken ct) => events.InsertOneAsync(session, new BsonDocument
     {
-        ["_id"] = Id(Guid.CreateVersion7()), ["type"] = type, ["workId"] = Id(work.WorkId), ["providerId"] = Id(work.ProviderId),
-        ["category"] = work.Category, ["publicPoint"] = new BsonDocument { ["lat"] = work.PublicPoint.Lat, ["lng"] = work.PublicPoint.Lng }, ["createdAt"] = DateTime.UtcNow
+        ["_id"] = Id(Guid.CreateVersion7()),
+        ["type"] = type,
+        ["workId"] = Id(work.WorkId),
+        ["providerId"] = Id(work.ProviderId),
+        ["category"] = work.Category,
+        ["publicPoint"] = new BsonDocument { ["lat"] = work.PublicPoint.Lat, ["lng"] = work.PublicPoint.Lng },
+        ["createdAt"] = DateTime.UtcNow
     }, cancellationToken: ct);
     private static Result<T> Fail<T>(string code) => Result<T>.Failure(code, "No se puede completar esta operación sobre el trabajo.");
 }

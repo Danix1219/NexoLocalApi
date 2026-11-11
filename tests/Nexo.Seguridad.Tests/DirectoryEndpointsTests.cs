@@ -67,9 +67,16 @@ public sealed class DirectoryEndpointsTests(InfraDeSeguridad infra)
         var unique = "Directorio" + Guid.NewGuid().ToString("N");
         var profile = new ProviderProfile
         {
-            ProviderId = Guid.CreateVersion7(), Name = unique, Bio = "Reparación de fugas domésticas", Categories = ["plomeria"],
-            Specialties = ["fugas"], Location = new(20.05, -99.34), PublicZone = new("Zona aproximada", new(20.056, -99.346)),
-            RadiusKm = 5, CreatedAt = DateTime.UtcNow, UpdatedAt = DateTime.UtcNow
+            ProviderId = Guid.CreateVersion7(),
+            Name = unique,
+            Bio = "Reparación de fugas domésticas",
+            Categories = ["plomeria"],
+            Specialties = ["fugas"],
+            Location = new(20.05, -99.34),
+            PublicZone = new("Zona aproximada", new(20.056, -99.346)),
+            RadiusKm = 5,
+            CreatedAt = DateTime.UtcNow,
+            UpdatedAt = DateTime.UtcNow
         };
         Assert.True(await store.InsertAsync(new(id, profile, 0, "private-key", "private-hash", true), default));
         using var anon = host.CreateClient();

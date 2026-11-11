@@ -45,8 +45,14 @@ public sealed class RequestRulesTests
         p.Value = new ServiceRequest(id, "plomeria", "Fuga anterior", "Necesito reparar una fuga.", "week", "chat",
             new(20.05, -99.34), "Zona", null, "open", 0, 0, DateTime.UtcNow, DateTime.UtcNow);
         var images = new[] { Guid.NewGuid(), Guid.NewGuid() };
-        var valid = JsonSerializer.SerializeToElement(new { title = "Fuga renovada", description = "Necesito reparar dos fugas en casa.",
-            urgency = "today", contact = "chat", imageUploadIds = images });
+        var valid = JsonSerializer.SerializeToElement(new
+        {
+            title = "Fuga renovada",
+            description = "Necesito reparar dos fugas en casa.",
+            urgency = "today",
+            contact = "chat",
+            imageUploadIds = images
+        });
         var result = await p.Service().EditAsync(p.Owner, id, valid, default);
         Assert.True(result.IsSuccess); Assert.Equal(2, result.Value!.Photos.Length); Assert.Equal("Fuga renovada", result.Value.Title);
         Assert.Equal(1, p.Writes); Assert.Equal(1, p.Checks);

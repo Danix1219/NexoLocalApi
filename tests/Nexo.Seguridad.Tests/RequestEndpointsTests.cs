@@ -49,8 +49,13 @@ public sealed class RequestEndpointsTests(InfraDeSeguridad infra)
     }
     private static object Body(string title = "Fuga en el baño", string cat = "plomeria", string urgency = "today", string contact = "chat", double lat = 20.05, Guid? image = null, string? description = null) => new
     {
-        category = cat, title, description = description ?? "Necesito reparar la tubería debajo del lavabo.", urgency, contact,
-        location = new { lat, lng = -99.34 }, imageUploadId = image
+        category = cat,
+        title,
+        description = description ?? "Necesito reparar la tubería debajo del lavabo.",
+        urgency,
+        contact,
+        location = new { lat, lng = -99.34 },
+        imageUploadId = image
     };
     private static async Task<JsonElement> Json(HttpResponseMessage response) => JsonDocument.Parse(await response.Content.ReadAsStringAsync()).RootElement.Clone();
     private static async Task<Guid> Login(WebApplicationFactory<Program> host, HttpClient client)
@@ -64,8 +69,15 @@ public sealed class RequestEndpointsTests(InfraDeSeguridad infra)
         using var scope = host.Services.CreateScope(); var id = Guid.CreateVersion7();
         Assert.True(await scope.ServiceProvider.GetRequiredService<IProviderStore>().InsertAsync(new(owner, new()
         {
-            ProviderId = id, Name = "Plomería de pruebas", Categories = ["plomeria"], Location = new(20.05, -99.34), PublicZone = new("Zona", new(20.056, -99.346)),
-            Attention = radius == 0 ? "shop" : "home", RadiusKm = radius, CreatedAt = DateTime.UtcNow, UpdatedAt = DateTime.UtcNow
+            ProviderId = id,
+            Name = "Plomería de pruebas",
+            Categories = ["plomeria"],
+            Location = new(20.05, -99.34),
+            PublicZone = new("Zona", new(20.056, -99.346)),
+            Attention = radius == 0 ? "shop" : "home",
+            RadiusKm = radius,
+            CreatedAt = DateTime.UtcNow,
+            UpdatedAt = DateTime.UtcNow
         }, 0, Guid.NewGuid().ToString(), "hash", true), default));
         return id;
     }
@@ -87,17 +99,17 @@ public sealed class RequestEndpointsTests(InfraDeSeguridad infra)
     [Fact]
     public async Task Listados_entregan_descripcion_completa_y_excerpt_compatible()
     {
-        using var host=Host();using var client=host.CreateClient();using var pro=host.CreateClient();
-        await Login(host,client);var providerOwner=await Login(host,pro);await Provider(host,providerOwner);
-        var full="Necesito reparar una fuga de agua. "+new string('x',320);
-        var title="Caso"+Guid.NewGuid().ToString("N");
-        var created=await Publish(client,Body(title,description:full));Assert.Equal(HttpStatusCode.Created,created.StatusCode);
-        var own=(await Json(await client.GetAsync("/v1/discovery/requests/mine"))).GetProperty("items")[0];
-        Assert.Equal(full,own.GetProperty("description").GetString());
-        Assert.Equal(full[..200],own.GetProperty("descriptionExcerpt").GetString());
-        var other=(await Json(await pro.GetAsync("/v1/discovery/requests/opportunities?q="+title))).GetProperty("items")[0];
-        Assert.Equal(full,other.GetProperty("description").GetString());
-        Assert.False(other.TryGetProperty("location",out _));
+        using var host = Host(); using var client = host.CreateClient(); using var pro = host.CreateClient();
+        await Login(host, client); var providerOwner = await Login(host, pro); await Provider(host, providerOwner);
+        var full = "Necesito reparar una fuga de agua. " + new string('x', 320);
+        var title = "Caso" + Guid.NewGuid().ToString("N");
+        var created = await Publish(client, Body(title, description: full)); Assert.Equal(HttpStatusCode.Created, created.StatusCode);
+        var own = (await Json(await client.GetAsync("/v1/discovery/requests/mine"))).GetProperty("items")[0];
+        Assert.Equal(full, own.GetProperty("description").GetString());
+        Assert.Equal(full[..200], own.GetProperty("descriptionExcerpt").GetString());
+        var other = (await Json(await pro.GetAsync("/v1/discovery/requests/opportunities?q=" + title))).GetProperty("items")[0];
+        Assert.Equal(full, other.GetProperty("description").GetString());
+        Assert.False(other.TryGetProperty("location", out _));
     }
     [Fact]
     public async Task Editar_solo_propia_abierta_actualiza_listas_y_no_expone_ubicacion()
@@ -107,8 +119,14 @@ public sealed class RequestEndpointsTests(InfraDeSeguridad infra)
         var created = await Json(await Publish(client, Body("Fuga original" + Guid.NewGuid().ToString("N"))));
         var id = created.GetProperty("requestId").GetGuid();
         var path = $"/v1/discovery/requests/{id}";
-        var edit = new { title = "Fuga corregida", description = "Necesito revisar una fuga de agua en cocina.",
-            urgency = "week", contact = "chat", imageUploadIds = Array.Empty<Guid>() };
+        var edit = new
+        {
+            title = "Fuga corregida",
+            description = "Necesito revisar una fuga de agua en cocina.",
+            urgency = "week",
+            contact = "chat",
+            imageUploadIds = Array.Empty<Guid>()
+        };
         await Error(await other.PatchAsJsonAsync(path, edit), HttpStatusCode.NotFound, NexoCodes.RequestNotFound);
         var response = await client.PatchAsJsonAsync(path, edit);
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
@@ -137,8 +155,13 @@ public sealed class RequestEndpointsTests(InfraDeSeguridad infra)
         await Error(await Publish(client, Body(title, urgency: "week"), key), HttpStatusCode.Conflict, NexoCodes.RequestIdempotencyKeyReused);
         Assert.Empty((await Json(await pro.GetAsync("/v1/discovery/requests/mine"))).GetProperty("items").EnumerateArray());
         using var scope = host.Services.CreateScope(); var engagement = scope.ServiceProvider.GetRequiredKeyedService<IMongoDatabase>(NexoDatabaseKeys.Engagement);
-        await engagement.GetCollection<BsonDocument>("interests").InsertOneAsync(new BsonDocument { ["requestId"] = new BsonBinaryData(id, GuidRepresentation.Standard),
-            ["providerId"] = new BsonBinaryData(provider, GuidRepresentation.Standard), ["clientId"] = new BsonBinaryData(owner, GuidRepresentation.Standard), ["createdAt"] = DateTime.UtcNow });
+        await engagement.GetCollection<BsonDocument>("interests").InsertOneAsync(new BsonDocument
+        {
+            ["requestId"] = new BsonBinaryData(id, GuidRepresentation.Standard),
+            ["providerId"] = new BsonBinaryData(provider, GuidRepresentation.Standard),
+            ["clientId"] = new BsonBinaryData(owner, GuidRepresentation.Standard),
+            ["createdAt"] = DateTime.UtcNow
+        });
         var mine = await Json(await client.GetAsync("/v1/discovery/requests/mine")); var item = mine.GetProperty("items")[0];
         Assert.True(mine.GetProperty("interestSummaryAvailable").GetBoolean()); Assert.Equal(1, item.GetProperty("interestCount").GetInt32()); Assert.Single(item.GetProperty("interestedPreview").EnumerateArray());
         Assert.DoesNotContain("location", item.GetRawText()); Assert.DoesNotContain("phone", item.GetRawText());
@@ -285,8 +308,11 @@ public sealed class RequestEndpointsTests(InfraDeSeguridad infra)
             var db = scope.ServiceProvider.GetRequiredKeyedService<IMongoDatabase>(NexoDatabaseKeys.Engagement);
             await db.GetCollection<BsonDocument>("orders").InsertOneAsync(new BsonDocument
             {
-                ["_id"] = Guid.NewGuid().ToString("D"), ["requestId"] = new BsonBinaryData(requestId, GuidRepresentation.Standard),
-                ["providerId"] = new BsonBinaryData(providerId, GuidRepresentation.Standard), ["status"] = "pending", ["createdAt"] = DateTime.UtcNow
+                ["_id"] = Guid.NewGuid().ToString("D"),
+                ["requestId"] = new BsonBinaryData(requestId, GuidRepresentation.Standard),
+                ["providerId"] = new BsonBinaryData(providerId, GuidRepresentation.Standard),
+                ["status"] = "pending",
+                ["createdAt"] = DateTime.UtcNow
             });
         }
         await Error(await provider.DeleteAsync(path + "/interest"), HttpStatusCode.Conflict, NexoCodes.InterestCannotWithdrawAssigned);

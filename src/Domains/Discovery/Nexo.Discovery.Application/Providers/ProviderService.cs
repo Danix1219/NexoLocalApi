@@ -16,8 +16,10 @@ public sealed class ProviderService(IProviderStore store, IProviderSafety safety
     {
         ["basic"] = ["name", "owner", "experience", "crew", "teamSize", "photoUploadId", "coverUploadId"],
         ["services"] = ["sector", "activity", "trades", "categories", "specialties", "bio"],
-        ["zone"] = ["location", "radiusKm", "attention"], ["hours"] = ["schedule"],
-        ["prices"] = ["visit", "prices"], ["terms"] = ["channels", "payment", "responseTime", "warranty", "invoice", "web"],
+        ["zone"] = ["location", "radiusKm", "attention"],
+        ["hours"] = ["schedule"],
+        ["prices"] = ["visit", "prices"],
+        ["terms"] = ["channels", "payment", "responseTime", "warranty", "invoice", "web"],
         ["portfolio"] = ["portfolioUploadIds"]
     };
     private static readonly string[] CreateFields = ["kind", "name", "owner", "sector", "activity", "bio", "experience", "crew", "teamSize", "attention", "location", "radiusKm", "trades", "categories", "specialties", "photoUploadId", "coverUploadId", "acceptedRules"];
@@ -117,8 +119,10 @@ public sealed class ProviderService(IProviderStore store, IProviderSafety safety
         {
             var text = section switch
             {
-                "basic" => string.Join("\n", profile.Name, profile.Owner), "services" => string.Join("\n", profile.Activity, profile.Bio, string.Join(" ", profile.Trades)),
-                "prices" => string.Join("\n", profile.Prices.Select(p => p.Service)), _ => profile.Warranty ?? ""
+                "basic" => string.Join("\n", profile.Name, profile.Owner),
+                "services" => string.Join("\n", profile.Activity, profile.Bio, string.Join(" ", profile.Trades)),
+                "prices" => string.Join("\n", profile.Prices.Select(p => p.Service)),
+                _ => profile.Warranty ?? ""
             };
             if (text.Length > 0)
             {
@@ -133,7 +137,9 @@ public sealed class ProviderService(IProviderStore store, IProviderSafety safety
         {
             "basic" => new[] { "name", "owner", "experience", "crew", "teamSize", "photoUrl", "coverUrl" },
             "services" => new[] { "sector", "activity", "trades", "categories", "specialties", "bio" },
-            "zone" => new[] { "location", "radiusKm", "attention", "publicZone" }, "portfolio" => new[] { "portfolio" }, _ => fields
+            "zone" => new[] { "location", "radiusKm", "attention", "publicZone" },
+            "portfolio" => new[] { "portfolio" },
+            _ => fields
         };
         if (!await store.PatchAsync(old, profile, section, persisted, ct)) return Fail<Dictionary<string, object?>>(NexoCodes.AccountConcurrentUpdate);
         return Result<Dictionary<string, object?>>.Success(View(old with { Profile = profile }, account, true));
@@ -166,7 +172,8 @@ public sealed class ProviderService(IProviderStore store, IProviderSafety safety
         }
         return p with
         {
-            Name = p.Name?.Trim()!, Bio = p.Bio?.Trim()!,
+            Name = p.Name?.Trim()!,
+            Bio = p.Bio?.Trim()!,
             Attention = p.Kind == "trade" ? "home" : p.Attention,
             Categories = p.Kind == "business" ? ProviderRules.Infer($"{p.Activity} {p.Bio}") : p.Categories,
             PublicZone = location?.IsValid == true ? zone : null
@@ -211,7 +218,8 @@ public sealed class ProviderService(IProviderStore store, IProviderSafety safety
         static object? Canonical(JsonElement e) => e.ValueKind switch
         {
             JsonValueKind.Object => e.EnumerateObject().OrderBy(p => p.Name, StringComparer.Ordinal).ToDictionary(p => p.Name, p => Canonical(p.Value)),
-            JsonValueKind.Array => e.EnumerateArray().Select(Canonical).ToArray(), _ => e
+            JsonValueKind.Array => e.EnumerateArray().Select(Canonical).ToArray(),
+            _ => e
         };
         return Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(JsonSerializer.Serialize(Canonical(body)))));
     }

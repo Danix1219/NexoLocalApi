@@ -118,7 +118,8 @@ public sealed class MongoInterestStore : IInterestStore
     private Task EmitAsync(IClientSessionHandle session, string type, Guid requestId, Guid clientId, Guid providerId, DateTime occurredAt, CancellationToken ct) =>
         outbox.InsertOneAsync(session, new OutboxMessage
         {
-            MessageId = Guid.CreateVersion7(), Type = type,
+            MessageId = Guid.CreateVersion7(),
+            Type = type,
             Payload = System.Text.Json.JsonSerializer.Serialize(new { requestId, clientId, providerId }),
             OccurredAt = new DateTimeOffset(DateTime.SpecifyKind(occurredAt, DateTimeKind.Utc))
         }, cancellationToken: ct);

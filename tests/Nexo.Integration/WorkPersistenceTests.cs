@@ -17,8 +17,15 @@ public sealed class WorkPersistenceTests(InfraFixture infra)
         var db = new MongoClient(infra.MongoConnectionString).GetDatabase("works_" + Guid.NewGuid().ToString("N"));
         var profiles = new MongoProviderStore(db); var works = new MongoWorkStore(db); var feed = new MongoFeedStore(db);
         var owner = Guid.NewGuid(); var provider = Guid.CreateVersion7();
-        Assert.True(await profiles.InsertAsync(new(owner, new() { ProviderId = provider, Name = "Prestador de prueba", Categories = ["plomeria"],
-            Location = new(20.05, -99.34), UpdatedAt = DateTime.UtcNow, CreatedAt = DateTime.UtcNow }, 0, "key", "hash", true), default));
+        Assert.True(await profiles.InsertAsync(new(owner, new()
+        {
+            ProviderId = provider,
+            Name = "Prestador de prueba",
+            Categories = ["plomeria"],
+            Location = new(20.05, -99.34),
+            UpdatedAt = DateTime.UtcNow,
+            CreatedAt = DateTime.UtcNow
+        }, 0, "key", "hash", true), default));
         return (db, profiles, works, feed, owner, provider);
     }
     private static Work Work(Guid provider) => new(Guid.CreateVersion7(), provider, "plomeria", "Trabajo de prueba", "Reparación terminada con todos los detalles necesarios.",
@@ -53,8 +60,12 @@ public sealed class WorkPersistenceTests(InfraFixture infra)
         Assert.Equal(NexoCodes.WorkNotFound, (await s.Works.DeleteAsync(Guid.NewGuid(), work.WorkId, default)).Error!.Code);
         await s.Works.RecommendAsync(user, work.WorkId, true, default);
         await s.Works.RecommendAsync(Guid.NewGuid(), work.WorkId, true, default);
-        await s.Db.GetCollection<BsonDocument>("saved").InsertOneAsync(new BsonDocument { ["accountId"] = new BsonBinaryData(user, GuidRepresentation.Standard),
-            ["kind"] = "work", ["targetId"] = new BsonBinaryData(work.WorkId, GuidRepresentation.Standard) });
+        await s.Db.GetCollection<BsonDocument>("saved").InsertOneAsync(new BsonDocument
+        {
+            ["accountId"] = new BsonBinaryData(user, GuidRepresentation.Standard),
+            ["kind"] = "work",
+            ["targetId"] = new BsonBinaryData(work.WorkId, GuidRepresentation.Standard)
+        });
         Assert.True((await s.Works.DeleteAsync(s.Owner, work.WorkId, default)).IsSuccess);
         Assert.Null(await s.Works.FindAsync(work.WorkId, default));
         Assert.Empty(await s.Db.GetCollection<BsonDocument>("recommendations").Find(FilterDefinition<BsonDocument>.Empty).ToListAsync());

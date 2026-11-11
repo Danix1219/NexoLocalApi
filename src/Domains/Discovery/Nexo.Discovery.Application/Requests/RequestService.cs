@@ -77,8 +77,16 @@ public sealed class RequestService(IRequestStore store, IProviderStore profiles,
             if (!Uri.TryCreate(approved.Value!.Url, UriKind.Absolute, out var media) || !media.AbsolutePath.StartsWith("/v1/discovery/media/", StringComparison.Ordinal)) return Fail<ServiceRequest>(NexoCodes.ServerDependencyUnavailable);
             urls.Add(approved.Value!.Url);
         }
-        var updated = current with { Title = title, Description = description, Urgency = body.Urgency,
-            Contact = body.Contact, ImageUrl = urls.FirstOrDefault(), ImageUrls = urls.ToArray(), CheckedAt = clock.GetUtcNow().UtcDateTime };
+        var updated = current with
+        {
+            Title = title,
+            Description = description,
+            Urgency = body.Urgency,
+            Contact = body.Contact,
+            ImageUrl = urls.FirstOrDefault(),
+            ImageUrls = urls.ToArray(),
+            CheckedAt = clock.GetUtcNow().UtcDateTime
+        };
         return await store.UpdateAsync(owner, id, updated, ct);
     }
     public async Task<Result<object>> MineAsync(Guid owner, string status, string? cursor, int limit, CancellationToken ct)
@@ -101,13 +109,36 @@ public sealed class RequestService(IRequestStore store, IProviderStore profiles,
             var count = summary.Available && s != null ? s.Count : r.InterestCount;
             var preview = (s?.Providers ?? []).Where(visible.ContainsKey).Take(4).Select(id => new { providerId = id, name = visible[id].Profile.Name, photoUrl = visible[id].Profile.PhotoUrl }).ToArray();
             var picked = r.AssignedProviderId is { } assigned && visible.TryGetValue(assigned, out var chosen) ? new { providerId = assigned, name = chosen.Profile.Name, photoUrl = chosen.Profile.PhotoUrl } : null;
-            return new { r.RequestId, r.Category, r.Title, description = r.Description, descriptionExcerpt = r.Description[..Math.Min(200, r.Description.Length)], r.Urgency, r.UrgencyText,
-                r.ZoneLabel, r.ImageUrl, imageUrls = r.Photos, r.Contact, r.Status, interestCount = count, interestedPreview = preview, interestedMoreCount = Math.Max(0, count - preview.Length),
+            return new
+            {
+                r.RequestId,
+                r.Category,
+                r.Title,
+                description = r.Description,
+                descriptionExcerpt = r.Description[..Math.Min(200, r.Description.Length)],
+                r.Urgency,
+                r.UrgencyText,
+                r.ZoneLabel,
+                r.ImageUrl,
+                imageUrls = r.Photos,
+                r.Contact,
+                r.Status,
+                interestCount = count,
+                interestedPreview = preview,
+                interestedMoreCount = Math.Max(0, count - preview.Length),
                 summaryText = r.Status == "closed" ? "Solicitud cerrada" : picked != null ? "Elegiste a " + picked.name : r.Status == "assigned" ? "Ya elegiste un prestador" : count == 0 ? "Aún sin interesados" : $"{count} interesados · Compara y elige a quién pedirle",
-                pickedProvider = picked, ago = Ago(r.CreatedAt), r.CreatedAt };
+                pickedProvider = picked,
+                ago = Ago(r.CreatedAt),
+                r.CreatedAt
+            };
         }).ToArray();
-        return Result<object>.Success(new { items, nextCursor = values.Length > limit ? RequestRules.Cursor(selected[^1].RequestId, hash) : null,
-            hasMore = values.Length > limit, interestSummaryAvailable = summary.Available });
+        return Result<object>.Success(new
+        {
+            items,
+            nextCursor = values.Length > limit ? RequestRules.Cursor(selected[^1].RequestId, hash) : null,
+            hasMore = values.Length > limit,
+            interestSummaryAvailable = summary.Available
+        });
     }
     public async Task<Result<object>> OpportunitiesAsync(Guid owner, OpportunityQuery query, CancellationToken ct)
     {
@@ -116,8 +147,21 @@ public sealed class RequestService(IRequestStore store, IProviderStore profiles,
         if (profile == null) return Fail<object>(NexoCodes.ProviderProfileRequired);
         if (query.Cat != null && query.MyServiceOnly && !profile.Profile.Categories.Contains(query.Cat)) return Fail<object>(NexoCodes.ValidationFailed);
         var p = profile.Profile;
-        var hash = RequestRules.Hash(new { kind = "opportunities", owner, p.ProviderId, profile.Revision, p.Location, p.RadiusKm,
-            cats = p.Categories.Order().ToArray(), query.Cat, query.Today, query.InRadius, query.MyServiceOnly, q = DirectoryCatalog.Normalize(query.Q) });
+        var hash = RequestRules.Hash(new
+        {
+            kind = "opportunities",
+            owner,
+            p.ProviderId,
+            profile.Revision,
+            p.Location,
+            p.RadiusKm,
+            cats = p.Categories.Order().ToArray(),
+            query.Cat,
+            query.Today,
+            query.InRadius,
+            query.MyServiceOnly,
+            q = DirectoryCatalog.Normalize(query.Q)
+        });
         if (!RequestRules.TryCursor(query.Cursor, hash, out var after, out var rank)) return Fail<object>(NexoCodes.RequestCursorInvalid);
         var cats = query.Cat != null ? new[] { query.Cat } : query.MyServiceOnly ? p.Categories : null;
         var radius = p.RadiusKm == 0 ? 10 : p.RadiusKm;
@@ -131,16 +175,39 @@ public sealed class RequestService(IRequestStore store, IProviderStore profiles,
         var items = selected.Select(v =>
         {
             var r = v.Request; summary.Items.TryGetValue(r.RequestId, out var s);
-            return new { r.RequestId, r.Category, r.Title, description = r.Description, descriptionExcerpt = r.Description[..Math.Min(200, r.Description.Length)], r.Urgency, r.UrgencyText,
-                r.ZoneLabel, r.PublicPoint, distanceText = RequestRules.DistanceText(v.DistanceKm), r.ImageUrl, imageUrls = r.Photos,
-                interestCount = summary.Available && s != null ? s.Count : r.InterestCount, ago = Ago(r.CreatedAt),
-                iAmInterested = summary.Available && s != null ? (bool?)s.Interested : null, inMyRadius = v.DistanceKm <= radius,
-                matchesMyService = p.Categories.Contains(r.Category), client = labels.TryGetValue(v.ClientId, out var label) ? new { displayName = label.DisplayName, photoUrl = label.PhotoUrl } : new { displayName = "Persona", photoUrl = (string?)null } };
+            return new
+            {
+                r.RequestId,
+                r.Category,
+                r.Title,
+                description = r.Description,
+                descriptionExcerpt = r.Description[..Math.Min(200, r.Description.Length)],
+                r.Urgency,
+                r.UrgencyText,
+                r.ZoneLabel,
+                r.PublicPoint,
+                distanceText = RequestRules.DistanceText(v.DistanceKm),
+                r.ImageUrl,
+                imageUrls = r.Photos,
+                interestCount = summary.Available && s != null ? s.Count : r.InterestCount,
+                ago = Ago(r.CreatedAt),
+                iAmInterested = summary.Available && s != null ? (bool?)s.Interested : null,
+                inMyRadius = v.DistanceKm <= radius,
+                matchesMyService = p.Categories.Contains(r.Category),
+                client = labels.TryGetValue(v.ClientId, out var label) ? new { displayName = label.DisplayName, photoUrl = label.PhotoUrl } : new { displayName = "Persona", photoUrl = (string?)null }
+            };
         }).ToArray();
         var filters = new[] { query.InRadius ? "inRadius" : null, query.MyServiceOnly ? "myServiceOnly" : null, query.Today ? "today" : null,
             query.Cat != null ? "cat:" + query.Cat : null, query.Q.Length > 0 ? "q" : null }.OfType<string>().ToArray();
-        return Result<object>.Success(new { items, nextCursor = rest.Length > query.Limit ? RequestRules.Cursor(selected[^1].Request.RequestId, hash, RequestRules.Rank(selected[^1].Request.Urgency)) : null,
-            hasMore = rest.Length > query.Limit, total = values.Count, appliedFilters = filters, interestSummaryAvailable = summary.Available });
+        return Result<object>.Success(new
+        {
+            items,
+            nextCursor = rest.Length > query.Limit ? RequestRules.Cursor(selected[^1].Request.RequestId, hash, RequestRules.Rank(selected[^1].Request.Urgency)) : null,
+            hasMore = rest.Length > query.Limit,
+            total = values.Count,
+            appliedFilters = filters,
+            interestSummaryAvailable = summary.Available
+        });
     }
     public async Task<Result<object>> MapAsync(Guid owner, ProviderPoint center, int radius, string? cat, int limit, CancellationToken ct)
     {
@@ -151,11 +218,23 @@ public sealed class RequestService(IRequestStore store, IProviderStore profiles,
         var values = await ActiveCandidatesAsync(owner, center, effective, cat == null ? provider.Profile.Categories : [cat], "", false, ct);
         var points = values.OrderBy(v => v.DistanceKm).ThenBy(v => v.Request.RequestId).Take(limit).Select(v => new
         {
-            id = v.Request.RequestId, point = v.Request.PublicPoint, state = v.Request.Urgency == "today" ? "today" : "other", title = v.Request.Title[..Math.Min(80, v.Request.Title.Length)],
-            subtitle = v.Request.UrgencyText, distanceKm = DirectoryService.PublicDistance(v.DistanceKm), exact = false
+            id = v.Request.RequestId,
+            point = v.Request.PublicPoint,
+            state = v.Request.Urgency == "today" ? "today" : "other",
+            title = v.Request.Title[..Math.Min(80, v.Request.Title.Length)],
+            subtitle = v.Request.UrgencyText,
+            distanceKm = DirectoryService.PublicDistance(v.DistanceKm),
+            exact = false
         }).ToArray();
-        return Result<object>.Success(new { kind = "requests", center, radiusKm = effective, count = values.Count,
-            summary = $"{values.Count} solicitudes de tu rubro dentro de {effective} km · Toca un punto para verla", points });
+        return Result<object>.Success(new
+        {
+            kind = "requests",
+            center,
+            radiusKm = effective,
+            count = values.Count,
+            summary = $"{values.Count} solicitudes de tu rubro dentro de {effective} km · Toca un punto para verla",
+            points
+        });
     }
     public async Task<Result<RequestClosure>> CloseAsync(Guid owner, Guid id, JsonElement? json, CancellationToken ct)
     {
@@ -183,7 +262,20 @@ public sealed class RequestService(IRequestStore store, IProviderStore profiles,
         var elapsed = clock.GetUtcNow().UtcDateTime - created;
         return elapsed.TotalHours < 1 ? "hace un momento" : elapsed.TotalDays < 1 ? $"hace {(int)elapsed.TotalHours} h" : $"hace {(int)elapsed.TotalDays} días";
     }
-    public static object Created(ServiceRequest r) => new { r.RequestId, r.Category, r.Title, r.Urgency, r.UrgencyText, r.ZoneLabel, r.PublicPoint, r.Status, r.InterestCount,
-        r.ReachableProviders, r.CreatedAt, moderation = new { status = "approved", checkedAt = r.CheckedAt } };
+    public static object Created(ServiceRequest r) => new
+    {
+        r.RequestId,
+        r.Category,
+        r.Title,
+        r.Urgency,
+        r.UrgencyText,
+        r.ZoneLabel,
+        r.PublicPoint,
+        r.Status,
+        r.InterestCount,
+        r.ReachableProviders,
+        r.CreatedAt,
+        moderation = new { status = "approved", checkedAt = r.CheckedAt }
+    };
     private static Result<T> Fail<T>(string code) => Result<T>.Failure(code, "No se puede completar esta operación sobre la solicitud.");
 }

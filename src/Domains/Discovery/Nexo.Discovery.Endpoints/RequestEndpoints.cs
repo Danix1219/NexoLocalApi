@@ -35,16 +35,22 @@ public static class RequestEndpoints
         Document(group.MapPatch("/requests/{id}", async (string id, JsonElement body, HttpContext http, RequestService service, CancellationToken ct) =>
         {
             Private(http); if (!Guid.TryParse(id, out var requestId)) return Invalid(http);
-            try { return (await service.EditAsync(User(http), requestId, body, ct)).Match<IResult>(
-                value => Results.Json(value, ProviderService.Json), e => Error(e, http)); }
+            try
+            {
+                return (await service.EditAsync(User(http), requestId, body, ct)).Match<IResult>(
+                value => Results.Json(value, ProviderService.Json), e => Error(e, http));
+            }
             catch (Exception e) when (Unavailable(e)) { return Dependency(http); }
         })).Produces(200).WithSummary("Editar una solicitud propia abierta");
         Document(group.MapGet("/requests/mine", async (HttpContext http, RequestService service, CancellationToken ct) =>
         {
             Private(http); var q = http.Request.Query;
             if (!Singles(q) || !Int(q, "limit", 20, out var limit)) return Invalid(http);
-            try { return (await service.MineAsync(User(http), q.ContainsKey("status") ? q["status"].ToString() : "all", q["cursor"], limit, ct))
-                .Match<IResult>(body => Results.Json(body, ProviderService.Json), e => Error(e, http)); }
+            try
+            {
+                return (await service.MineAsync(User(http), q.ContainsKey("status") ? q["status"].ToString() : "all", q["cursor"], limit, ct))
+                .Match<IResult>(body => Results.Json(body, ProviderService.Json), e => Error(e, http));
+            }
             catch (Exception e) when (Unavailable(e)) { return Dependency(http); }
         })).Produces(200).WithSummary("Mis solicitudes")
             .WithDescription("Query: status all/open/assigned/closed, cursor hasta 64, limit 1–50 (20). Solo propias; resumen real de Engagement por contrato, sin teléfono ni punto exacto.");
@@ -67,8 +73,15 @@ public static class RequestEndpoints
                 return (await service.CloseAsync(User(http), requestId, body, ct)).Match<IResult>(result => result.AlreadyClosed
                     ? Results.Problem(statusCode: 409, title: "La solicitud ya está cerrada", instance: http.Request.Path,
                         extensions: new Dictionary<string, object?> { ["code"] = NexoCodes.RequestAlreadyClosed, ["closedAt"] = result.Request.ClosedAt, ["traceId"] = http.TraceIdentifier })
-                    : Results.Json(new { requestId = result.Request.RequestId, status = "closed", result.Request.ClosedAt, result.Request.InterestCount,
-                        canReview = false, reviewProviderId = (Guid?)null }, ProviderService.Json), e => Error(e, http));
+                    : Results.Json(new
+                    {
+                        requestId = result.Request.RequestId,
+                        status = "closed",
+                        result.Request.ClosedAt,
+                        result.Request.InterestCount,
+                        canReview = false,
+                        reviewProviderId = (Guid?)null
+                    }, ProviderService.Json), e => Error(e, http));
             }
             catch (Exception e) when (Unavailable(e)) { return Dependency(http); }
         })).Produces(200).WithSummary("Cerrar una solicitud propia")

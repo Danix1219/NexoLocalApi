@@ -23,7 +23,8 @@ public sealed class PhotonGeocoderTests
         Assert.Equal(1, handler.Calls);
     }
     [Theory]
-    [InlineData(429)] [InlineData(503)]
+    [InlineData(429)]
+    [InlineData(503)]
     public async Task No_inventa_resultados_cuando_falla_el_proveedor(int status)
     {
         using var api = new PhotonGeocoder(new HttpClient(new ResponseHandler(Json, (HttpStatusCode)status)), Options.Create(new GeocodingOptions()));

@@ -33,8 +33,11 @@ public static class WorkEndpoints
         Document(group.MapPatch("/works/{id}", async (string id, JsonElement body, HttpContext http, WorkService service, CancellationToken ct) =>
         {
             NoStore(http); if (!Guid.TryParse(id, out var work)) return Invalid(http);
-            try { return (await service.EditAsync(User(http), work, body, ct)).Match<IResult>(
-                value => Results.Json(value, ProviderService.Json), error => Error(error, http)); }
+            try
+            {
+                return (await service.EditAsync(User(http), work, body, ct)).Match<IResult>(
+                value => Results.Json(value, ProviderService.Json), error => Error(error, http));
+            }
             catch (Exception error) when (error is WorkUnavailableException || DependencyErrors.IsUnavailable(error)) { return Unavailable(http); }
         }).RequireAuthorization().RequireRateLimiting(NexoRateLimits.User)).Produces(200).WithSummary("Editar trabajo propio moderado");
         Document(group.MapGet("/providers/{id}/works", async (string id, HttpContext http, WorkService service, CancellationToken ct) =>

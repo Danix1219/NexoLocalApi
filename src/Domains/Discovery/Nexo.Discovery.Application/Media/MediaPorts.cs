@@ -1,7 +1,8 @@
 using Nexo.Common.Results;
 namespace Nexo.Discovery.Application.Media;
+
 public sealed record UploadDraft(string Purpose, string ContentType, int Size, int? Width = null, int? Height = null);
-public sealed record UploadTicket(Guid UploadId, string UploadUrl, Dictionary<string,string> Headers, string Method = "PUT", int ExpiresInSeconds = 900, int MaxSizeBytes = 5242880);
+public sealed record UploadTicket(Guid UploadId, string UploadUrl, Dictionary<string, string> Headers, string Method = "PUT", int ExpiresInSeconds = 900, int MaxSizeBytes = 5242880);
 public sealed record UploadState(Guid UploadId, string Status, string? Url = null, string? ThumbUrl = null, int? Width = null, int? Height = null, string? Code = null);
 public sealed record MediaFile(byte[] Bytes, string ContentType);
 public interface IMediaService

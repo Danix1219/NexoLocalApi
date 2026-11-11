@@ -67,9 +67,16 @@ public sealed class MongoProviderStore([FromKeyedServices(NexoDatabaseKeys.Disco
         await EnsureAsync(ct);
         var doc = new BsonDocument
         {
-            ["_id"] = Id(stored.Profile.ProviderId), ["accountId"] = Id(stored.AccountId), ["data"] = Data(stored.Profile),
-            ["locationGeo"] = Geo(stored.Profile.Location!), ["revision"] = 0L, ["published"] = true,
-            ["creationKey"] = stored.CreationKey, ["creationHash"] = stored.CreationHash, ["creationProfile"] = Data(stored.Profile), ["views"] = 0L,
+            ["_id"] = Id(stored.Profile.ProviderId),
+            ["accountId"] = Id(stored.AccountId),
+            ["data"] = Data(stored.Profile),
+            ["locationGeo"] = Geo(stored.Profile.Location!),
+            ["revision"] = 0L,
+            ["published"] = true,
+            ["creationKey"] = stored.CreationKey,
+            ["creationHash"] = stored.CreationHash,
+            ["creationProfile"] = Data(stored.Profile),
+            ["views"] = 0L,
             ["events"] = new BsonArray { Event(stored.Profile, "provider.created", "all") }
         };
         try { await profiles.InsertOneAsync(doc, cancellationToken: ct); return true; }
@@ -123,7 +130,12 @@ public sealed class MongoProviderStore([FromKeyedServices(NexoDatabaseKeys.Disco
         await profiles.UpdateOneAsync(new BsonDocument { ["_id"] = Id(providerId), ["published"] = true }, new BsonDocument("$inc", new BsonDocument("views", 1L)), cancellationToken: ct);
     private static BsonDocument Event(ProviderProfile p, string type, string section) => new()
     {
-        ["id"] = Id(Guid.CreateVersion7()), ["type"] = type, ["providerId"] = Id(p.ProviderId), ["section"] = section,
-        ["occurredAt"] = DateTime.UtcNow, ["categories"] = new BsonArray(p.Categories), ["publicZone"] = Data(p)["publicZone"]
+        ["id"] = Id(Guid.CreateVersion7()),
+        ["type"] = type,
+        ["providerId"] = Id(p.ProviderId),
+        ["section"] = section,
+        ["occurredAt"] = DateTime.UtcNow,
+        ["categories"] = new BsonArray(p.Categories),
+        ["publicZone"] = Data(p)["publicZone"]
     };
 }

@@ -67,8 +67,11 @@ public static class DirectoryEndpoints
             if (kind == "requests")
             {
                 if (http.User.Identity?.IsAuthenticated != true || !Guid.TryParse(http.User.FindFirst("sub")?.Value, out var id)) return Results.Unauthorized();
-                try { return (await requests.MapAsync(id, point, radius, q.ContainsKey("cat") ? q["cat"].ToString() : null, limit, ct))
-                    .Match<IResult>(body => Results.Json(body, ProviderService.Json), e => RequestEndpoints.Error(e, http)); }
+                try
+                {
+                    return (await requests.MapAsync(id, point, radius, q.ContainsKey("cat") ? q["cat"].ToString() : null, limit, ct))
+                    .Match<IResult>(body => Results.Json(body, ProviderService.Json), e => RequestEndpoints.Error(e, http));
+                }
                 catch (Exception e) when (RequestEndpoints.Unavailable(e)) { return Unavailable(http); }
             }
             try { return Results.Json(await service.MapAsync(point, radius, limit, ct), ProviderService.Json); }

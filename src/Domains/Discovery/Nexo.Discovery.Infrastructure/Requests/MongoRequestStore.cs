@@ -75,14 +75,19 @@ public sealed class MongoRequestStore([FromKeyedServices(NexoDatabaseKeys.Discov
     {
         var filter = new BsonDocument
         {
-            ["_id"] = id.ToString("D"), ["clientId"] = new BsonDocument("$ne", Id(viewer)),
-            ["status"] = new BsonDocument("$in", new BsonArray { "open", "assigned" }), ["moderation.status"] = "approved"
+            ["_id"] = id.ToString("D"),
+            ["clientId"] = new BsonDocument("$ne", Id(viewer)),
+            ["status"] = new BsonDocument("$in", new BsonArray { "open", "assigned" }),
+            ["moderation.status"] = "approved"
         };
         var near = new BsonDocument
         {
             ["near"] = new BsonDocument { ["type"] = "Point", ["coordinates"] = new BsonArray { point.Lng, point.Lat } },
-            ["distanceField"] = "distanceMeters", ["key"] = "location", ["spherical"] = true,
-            ["maxDistance"] = radiusKm * 1000, ["query"] = filter
+            ["distanceField"] = "distanceMeters",
+            ["key"] = "location",
+            ["spherical"] = true,
+            ["maxDistance"] = radiusKm * 1000,
+            ["query"] = filter
         };
         var doc = await requests.Aggregate<BsonDocument>(new BsonDocument[]
         {
@@ -104,12 +109,17 @@ public sealed class MongoRequestStore([FromKeyedServices(NexoDatabaseKeys.Discov
         if (quota?.GetValue("count", 0).ToInt32() >= 10) return Fail<ServiceRequest>(NexoCodes.RateLimitExceeded);
         await quotas.UpdateOneAsync(session, new BsonDocument("_id", quotaId), new BsonDocument
         {
-            ["$inc"] = new BsonDocument("count", 1), ["$setOnInsert"] = new BsonDocument("createdAt", request.CreatedAt)
+            ["$inc"] = new BsonDocument("count", 1),
+            ["$setOnInsert"] = new BsonDocument("createdAt", request.CreatedAt)
         }, new UpdateOptions { IsUpsert = true }, token);
         await requests.InsertOneAsync(session, new BsonDocument
         {
-            ["_id"] = request.RequestId.ToString("D"), ["clientId"] = Id(owner), ["category"] = request.Category, ["status"] = "open",
-            ["urgencyRank"] = RequestRules.Rank(request.Urgency), ["createdAt"] = request.CreatedAt,
+            ["_id"] = request.RequestId.ToString("D"),
+            ["clientId"] = Id(owner),
+            ["category"] = request.Category,
+            ["status"] = "open",
+            ["urgencyRank"] = RequestRules.Rank(request.Urgency),
+            ["createdAt"] = request.CreatedAt,
             ["searchText"] = DirectoryCatalog.Normalize(request.Title + " " + request.Description),
             ["location"] = new BsonDocument { ["type"] = "Point", ["coordinates"] = new BsonArray { exact.Lng, exact.Lat } },
             ["moderation"] = new BsonDocument { ["status"] = "approved", ["checkedAt"] = request.CheckedAt },
@@ -161,7 +171,10 @@ public sealed class MongoRequestStore([FromKeyedServices(NexoDatabaseKeys.Discov
         var near = new BsonDocument
         {
             ["near"] = new BsonDocument { ["type"] = "Point", ["coordinates"] = new BsonArray { point.Lng, point.Lat } },
-            ["distanceField"] = "distanceMeters", ["key"] = "location", ["spherical"] = true, ["query"] = filter
+            ["distanceField"] = "distanceMeters",
+            ["key"] = "location",
+            ["spherical"] = true,
+            ["query"] = filter
         };
         if (radiusKm.HasValue) near["maxDistance"] = radiusKm.Value * 1000;
         var docs = await requests.Aggregate<BsonDocument>(new BsonDocument[]
@@ -174,12 +187,19 @@ public sealed class MongoRequestStore([FromKeyedServices(NexoDatabaseKeys.Discov
     public Task<Result<RequestClosure>> CloseAsync(Guid owner, Guid id, string outcome, Guid? declaredProvider, DateTime now, CancellationToken ct) => TransactionAsync(async (session, token) =>
     {
         var filter = Own(owner, id); filter["status"] = new BsonDocument("$ne", "closed");
-        var update = new BsonDocument { ["status"] = "closed", ["data.status"] = "closed", ["data.closedAt"] = now.ToUniversalTime().ToString("O", System.Globalization.CultureInfo.InvariantCulture),
-            ["outcome"] = outcome, ["declaredProviderId"] = declaredProvider == null ? BsonNull.Value : Id(declaredProvider.Value) };
+        var update = new BsonDocument
+        {
+            ["status"] = "closed",
+            ["data.status"] = "closed",
+            ["data.closedAt"] = now.ToUniversalTime().ToString("O", System.Globalization.CultureInfo.InvariantCulture),
+            ["outcome"] = outcome,
+            ["declaredProviderId"] = declaredProvider == null ? BsonNull.Value : Id(declaredProvider.Value)
+        };
         // Return only safe fields even on a write: the exact point never leaves Mongo's projection.
         var doc = await requests.FindOneAndUpdateAsync(session, filter, new BsonDocument("$set", update), new FindOneAndUpdateOptions<BsonDocument>
         {
-            ReturnDocument = ReturnDocument.After, Projection = Safe
+            ReturnDocument = ReturnDocument.After,
+            Projection = Safe
         }, token);
         if (doc == null)
         {
@@ -192,8 +212,12 @@ public sealed class MongoRequestStore([FromKeyedServices(NexoDatabaseKeys.Discov
     }, ct);
     private Task EmitAsync(IClientSessionHandle session, ServiceRequest request, string type, CancellationToken ct) => events.InsertOneAsync(session, new BsonDocument
     {
-        ["_id"] = Id(Guid.CreateVersion7()), ["type"] = type, ["requestId"] = Id(request.RequestId), ["category"] = request.Category,
-        ["publicPoint"] = new BsonDocument { ["lat"] = request.PublicPoint.Lat, ["lng"] = request.PublicPoint.Lng }, ["createdAt"] = DateTime.UtcNow
+        ["_id"] = Id(Guid.CreateVersion7()),
+        ["type"] = type,
+        ["requestId"] = Id(request.RequestId),
+        ["category"] = request.Category,
+        ["publicPoint"] = new BsonDocument { ["lat"] = request.PublicPoint.Lat, ["lng"] = request.PublicPoint.Lng },
+        ["createdAt"] = DateTime.UtcNow
     }, cancellationToken: ct);
     private static Result<T> Fail<T>(string code) => Result<T>.Failure(code, "No se puede completar esta operación sobre la solicitud.");
 }

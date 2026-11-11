@@ -49,7 +49,7 @@ static async Task RunApiAsync(string[] args)
 
     // OpenIddict registra su esquema; aqui solo hace falta la pieza de autorizacion.
     builder.Services.AddAuthorization();
-    builder.Services.AddHttpClient<Nexo.Identity.Infrastructure.Safety.AccountProfileSafety>(c=>c.Timeout=TimeSpan.FromSeconds(8));
+    builder.Services.AddHttpClient<Nexo.Identity.Infrastructure.Safety.AccountProfileSafety>(c => c.Timeout = TimeSpan.FromSeconds(8));
 
     // OpenAPI del framework (.NET 10), sin Swashbuckle. Se publica solo fuera de produccion.
     // La version sellada en el ensamblado viaja al documento, de modo que se puede comprobar que
@@ -104,7 +104,7 @@ static async Task RunApiAsync(string[] args)
 
     builder.Services.AddIdentityInfrastructure(builder.Configuration, builder.Environment.IsDevelopment());
     builder.Services.AddDiscoveryInfrastructure(builder.Configuration);
-    builder.Services.AddScoped<Nexo.Identity.Application.Ports.IAccountProfileSafety,Nexo.Host.AccountMediaBridge>();
+    builder.Services.AddScoped<Nexo.Identity.Application.Ports.IAccountProfileSafety, Nexo.Host.AccountMediaBridge>();
     builder.Services.AddEngagementInfrastructure();
     builder.Services.AddIdentityOutboxHandler(builder.Configuration);
     builder.Services.AddOutbox(NexoDatabaseKeys.Identity);

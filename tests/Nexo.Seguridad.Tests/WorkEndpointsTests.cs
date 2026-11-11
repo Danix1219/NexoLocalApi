@@ -37,8 +37,15 @@ public sealed class WorkEndpointsTests(InfraDeSeguridad infra)
     }
     private static object Body(string title = "Trabajo de prueba", Guid[]? images = null, string category = "plomeria") => new
     {
-        category, title, text = "Reparamos las tuberías y comprobamos el funcionamiento.", problem = "Fuga en el calentador", did = "Cambio de válvula", time = "2 horas", tag = "Terminado",
-        location = new { lat = 20.053912345, lng = -99.340312345 }, imageUploadIds = images ?? []
+        category,
+        title,
+        text = "Reparamos las tuberías y comprobamos el funcionamiento.",
+        problem = "Fuga en el calentador",
+        did = "Cambio de válvula",
+        time = "2 horas",
+        tag = "Terminado",
+        location = new { lat = 20.053912345, lng = -99.340312345 },
+        imageUploadIds = images ?? []
     };
     private static async Task<JsonElement> Json(HttpResponseMessage response) => JsonDocument.Parse(await response.Content.ReadAsStringAsync()).RootElement.Clone();
     private static async Task<Guid> Login(WebApplicationFactory<Program> host, HttpClient client)
@@ -50,8 +57,16 @@ public sealed class WorkEndpointsTests(InfraDeSeguridad infra)
     private static async Task<Guid> Provider(WebApplicationFactory<Program> host, Guid owner, bool realZone = false)
     {
         using var scope = host.Services.CreateScope(); var id = Guid.CreateVersion7();
-        var profile = new ProviderProfile { ProviderId = id, Name = "Prestador de trabajos", Categories = ["plomeria"], Location = realZone ? new(20.053912345, -99.340312345) : new(20.05, -99.34),
-            PublicZone = new(realZone ? "Santa María Magdalena, Hidalgo" : "Zona aproximada", new(20.056, -99.346)), CreatedAt = DateTime.UtcNow, UpdatedAt = DateTime.UtcNow };
+        var profile = new ProviderProfile
+        {
+            ProviderId = id,
+            Name = "Prestador de trabajos",
+            Categories = ["plomeria"],
+            Location = realZone ? new(20.053912345, -99.340312345) : new(20.05, -99.34),
+            PublicZone = new(realZone ? "Santa María Magdalena, Hidalgo" : "Zona aproximada", new(20.056, -99.346)),
+            CreatedAt = DateTime.UtcNow,
+            UpdatedAt = DateTime.UtcNow
+        };
         Assert.True(await scope.ServiceProvider.GetRequiredService<IProviderStore>().InsertAsync(new(owner, profile, 0, Guid.NewGuid().ToString(), "hash", true), default));
         return id;
     }
@@ -93,8 +108,13 @@ public sealed class WorkEndpointsTests(InfraDeSeguridad infra)
         await Login(host, other);
         var created = await Json(await Publish(owner, Body("Trabajo original")));
         var id = created.GetProperty("workId").GetGuid(); var path = $"/v1/discovery/works/{id}";
-        var edit = new { title = "Trabajo actualizado", text = "Reparamos la tubería y comprobamos que ya no hay fugas.",
-            tag = "Finalizado", imageUploadIds = Array.Empty<Guid>() };
+        var edit = new
+        {
+            title = "Trabajo actualizado",
+            text = "Reparamos la tubería y comprobamos que ya no hay fugas.",
+            tag = "Finalizado",
+            imageUploadIds = Array.Empty<Guid>()
+        };
         Assert.Equal(HttpStatusCode.Unauthorized, (await host.CreateClient().PatchAsJsonAsync(path, edit)).StatusCode);
         await Error(await other.PatchAsJsonAsync(path, edit), HttpStatusCode.NotFound, NexoCodes.WorkNotFound);
         Assert.Equal(HttpStatusCode.OK, (await owner.PatchAsJsonAsync(path, edit)).StatusCode);

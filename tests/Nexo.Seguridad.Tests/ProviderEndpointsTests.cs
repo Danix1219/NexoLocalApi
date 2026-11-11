@@ -53,8 +53,16 @@ public sealed class ProviderEndpointsTests(InfraDeSeguridad infra)
     }
     private static object Body(string name = "Oficio Local") => new
     {
-        kind = "trade", name, trades = new[] { "Plomero" }, categories = new[] { "plomeria" }, specialties = new[] { "fugas" },
-        bio = "Reparamos fugas y tuberias de los hogares.", attention = "home", location = new { lat = 20.0539, lng = -99.3403 }, radiusKm = 5, acceptedRules = true
+        kind = "trade",
+        name,
+        trades = new[] { "Plomero" },
+        categories = new[] { "plomeria" },
+        specialties = new[] { "fugas" },
+        bio = "Reparamos fugas y tuberias de los hogares.",
+        attention = "home",
+        location = new { lat = 20.0539, lng = -99.3403 },
+        radiusKm = 5,
+        acceptedRules = true
     };
     private static async Task Login(WebApplicationFactory<Program> host, HttpClient client)
     {
@@ -197,9 +205,17 @@ public sealed class ProviderEndpointsTests(InfraDeSeguridad infra)
         await Login(host, client);
         var result = await Json(await Create(client, new
         {
-            kind = "business", name = "Electricidad Local", owner = "Responsable Local", sector = "servicios-hogar", activity = "Instalaciones electricas",
-            bio = "Realizamos instalaciones electricas residenciales y comerciales.", categories = new[] { "cerrajeria" },
-            attention = "shop", location = new { lat = 20.0539, lng = -99.3403 }, radiusKm = 0, acceptedRules = true
+            kind = "business",
+            name = "Electricidad Local",
+            owner = "Responsable Local",
+            sector = "servicios-hogar",
+            activity = "Instalaciones electricas",
+            bio = "Realizamos instalaciones electricas residenciales y comerciales.",
+            categories = new[] { "cerrajeria" },
+            attention = "shop",
+            location = new { lat = 20.0539, lng = -99.3403 },
+            radiusKm = 0,
+            acceptedRules = true
         }));
         Assert.Equal("electricidad", result.GetProperty("categories")[0].GetString());
         Assert.True(result.GetProperty("inferredCategories").GetBoolean());

@@ -48,8 +48,13 @@ public sealed class ProviderSafetyTests(InfraFixture infra)
         var collection = db.GetCollection<BsonDocument>("uploads");
         await collection.InsertOneAsync(new BsonDocument
         {
-            ["_id"] = new BsonBinaryData(upload, GuidRepresentation.Standard), ["ownerId"] = new BsonBinaryData(owner, GuidRepresentation.Standard),
-            ["purpose"] = "avatar", ["status"] = "approved", ["url"] = "https://cdn.example.test/image.webp", ["w"] = 400, ["h"] = 400
+            ["_id"] = new BsonBinaryData(upload, GuidRepresentation.Standard),
+            ["ownerId"] = new BsonBinaryData(owner, GuidRepresentation.Standard),
+            ["purpose"] = "avatar",
+            ["status"] = "approved",
+            ["url"] = "https://cdn.example.test/image.webp",
+            ["w"] = 400,
+            ["h"] = 400
         });
         using var client = new HttpClient();
         var safety = new ProviderSafety(client, Options.Create(new ProviderSafetyOptions()), db);

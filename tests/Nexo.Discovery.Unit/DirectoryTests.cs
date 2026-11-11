@@ -37,10 +37,20 @@ public sealed class DirectoryTests
     private static readonly ProviderPoint Center = new(20.05, -99.34);
     private static StoredProvider Provider(string name, double distance = 1, string attention = "home", int recs = 0) => new(Guid.NewGuid(), new()
     {
-        ProviderId = Guid.CreateVersion7(), Name = name, Bio = "Reparación de fugas y calentadores", Categories = ["plomeria"], Specialties = ["fugas"],
-        Attention = attention, RadiusKm = 5, Recs = recs, PublicZone = new("Zona pública", new(20.06, -99.35)), Location = attention == "home" ? null : Center,
+        ProviderId = Guid.CreateVersion7(),
+        Name = name,
+        Bio = "Reparación de fugas y calentadores",
+        Categories = ["plomeria"],
+        Specialties = ["fugas"],
+        Attention = attention,
+        RadiusKm = 5,
+        Recs = recs,
+        PublicZone = new("Zona pública", new(20.06, -99.35)),
+        Location = attention == "home" ? null : Center,
         Schedule = new(Enumerable.Repeat<ProviderDay?>(new("08:00", "18:00"), 7).ToArray(), true),
-        Visit = new("free"), Prices = [new("Reparación", 15000)], UpdatedAt = DateTime.UtcNow
+        Visit = new("free"),
+        Prices = [new("Reparación", 15000)],
+        UpdatedAt = DateTime.UtcNow
     }, 0, "", "", true, distance);
     private static DirectoryService Service(Profiles p, Accounts? a = null) => new(p, a ?? new(), new Catalog(),
         [new RelevantProviderSort(), new NearestProviderSort(), new RecommendedProviderSort()], new Clock());

@@ -21,8 +21,18 @@ public static class ProviderEndpoints
             var result = await service.CreateAsync(User(http), http.Request.Headers["Idempotency-Key"].FirstOrDefault(), body, ct);
             return result.Match<IResult>(p => Results.Created($"/v1/discovery/providers/{p.ProviderId}", new
             {
-                p.ProviderId, p.Kind, p.Name, p.Categories, inferredCategories = p.Kind == "business", p.Attention,
-                p.PublicZone, p.RadiusKm, p.Completeness, policyVersion = ProviderProfile.CompletenessPolicyVersion, isNew = true, emailVerified = true,
+                p.ProviderId,
+                p.Kind,
+                p.Name,
+                p.Categories,
+                inferredCategories = p.Kind == "business",
+                p.Attention,
+                p.PublicZone,
+                p.RadiusKm,
+                p.Completeness,
+                policyVersion = ProviderProfile.CompletenessPolicyVersion,
+                isNew = true,
+                emailVerified = true,
                 nextOptionalSteps = new[] { "hours", "prices", "terms", "portfolio" }
             }), error => NexoProblem.From(error, http));
         }).RequireAuthorization().RequireRateLimiting(NexoRateLimits.User)).Produces(201);

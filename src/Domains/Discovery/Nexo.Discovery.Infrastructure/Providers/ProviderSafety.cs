@@ -55,8 +55,10 @@ public sealed class ProviderSafety(HttpClient client, IOptions<ProviderSafetyOpt
     {
         var doc = await database.GetCollection<BsonDocument>("uploads").Find(new BsonDocument
         {
-            ["_id"] = new BsonBinaryData(uploadId, GuidRepresentation.Standard), ["ownerId"] = new BsonBinaryData(ownerId, GuidRepresentation.Standard),
-            ["status"] = "approved", ["purpose"] = purpose
+            ["_id"] = new BsonBinaryData(uploadId, GuidRepresentation.Standard),
+            ["ownerId"] = new BsonBinaryData(ownerId, GuidRepresentation.Standard),
+            ["status"] = "approved",
+            ["purpose"] = purpose
         }).FirstOrDefaultAsync(ct);
         if (doc == null) return Result<ProviderImage>.Failure(NexoCodes.UploadNotFound, "La imagen no esta disponible.");
         static string? Url(BsonDocument d, string name) => d.TryGetValue(name, out var v) && v.IsString && v.AsString.Length <= 200 &&
