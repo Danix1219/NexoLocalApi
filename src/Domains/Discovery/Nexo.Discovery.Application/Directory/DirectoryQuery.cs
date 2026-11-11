@@ -18,7 +18,18 @@ public sealed record DirectoryQuery(string Q = "", string? Cat = null, double? L
         (Point == null && (Sort == "near" || Attention == "shop" || Expanded)) ? NexoCodes.ValidationFailed : null;
     public byte[] FilterHash => SHA256.HashData(JsonSerializer.SerializeToUtf8Bytes(new
     {
-        q = DirectoryCatalog.Normalize(Q), Cat, Lat, Lng, RadiusKm, Open, Free, Prices, Urgent, Attention, Sort, Expanded
+        q = DirectoryCatalog.Normalize(Q),
+        Cat,
+        Lat,
+        Lng,
+        RadiusKm,
+        Open,
+        Free,
+        Prices,
+        Urgent,
+        Attention,
+        Sort,
+        Expanded
     }))[..16];
 }
 
