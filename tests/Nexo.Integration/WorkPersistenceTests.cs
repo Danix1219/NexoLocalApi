@@ -127,24 +127,29 @@ public sealed class WorkPersistenceTests(InfraFixture infra)
         Assert.True((await s.Works.CreateAsync(s.Owner, Guid.NewGuid(), "feed-1", first, default)).IsSuccess);
         Assert.True((await s.Works.CreateAsync(s.Owner, Guid.NewGuid(), "feed-2", second, default)).IsSuccess);
         var viewer = Guid.NewGuid();
-        Assert.True((await s.Works.RecommendAsync(viewer, second.WorkId, true, default)).IsSuccess);
-        await s.Db.GetCollection<BsonDocument>("saved").InsertOneAsync(new BsonDocument
-        {
-            ["accountId"] = new BsonBinaryData(viewer, GuidRepresentation.Standard),
-            ["kind"] = "work",
-            ["targetId"] = new BsonBinaryData(second.WorkId, GuidRepresentation.Standard)
-        });
-
         var center = new ProviderPoint(20.0539, -99.3403);
         var page1 = await s.Feed.ReadAsync(center, [s.Provider], null, 1, viewer, default);
         Assert.Single(page1.Items);
         Assert.True(page1.HasMore);
         var last = page1.Items[0];
-        var page2 = await s.Feed.ReadAsync(center, [s.Provider], last.WorkId, 1, viewer, default);
+
+        // Feed ordering is based on persisted IDs and can place either insert first.
+        // Mark the actual first-page item instead of assuming which generated UUID sorts first.
+        Assert.True((await s.Works.RecommendAsync(viewer, last.WorkId, true, default)).IsSuccess);
+        await s.Db.GetCollection<BsonDocument>("saved").InsertOneAsync(new BsonDocument
+        {
+            ["accountId"] = new BsonBinaryData(viewer, GuidRepresentation.Standard),
+            ["kind"] = "work",
+            ["targetId"] = new BsonBinaryData(last.WorkId, GuidRepresentation.Standard)
+        });
+        var markedPage1 = await s.Feed.ReadAsync(center, [s.Provider], null, 1, viewer, default);
+        Assert.Contains(last.WorkId, markedPage1.Recommended);
+        Assert.Contains(last.WorkId, markedPage1.Saved);
+
+        var page2 = await s.Feed.ReadAsync(center, [s.Provider], markedPage1.Items[0].WorkId, 1, viewer, default);
         Assert.Single(page2.Items);
         Assert.False(page2.HasMore);
-        Assert.Contains(second.WorkId, page1.Recommended);
-        Assert.Contains(second.WorkId, page1.Saved);
-        Assert.InRange(center.DistanceKm(page1.Items[0].PublicPoint), 0, 3.8);
+        Assert.NotEqual(markedPage1.Items[0].WorkId, page2.Items[0].WorkId);
+        Assert.InRange(center.DistanceKm(markedPage1.Items[0].PublicPoint), 0, 3.8);
     }
 }
