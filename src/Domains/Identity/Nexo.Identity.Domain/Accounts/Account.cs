@@ -38,6 +38,14 @@ public sealed class Account
     public DateTime UpdatedAt { get; set; }
     public DateTime? PasswordChangedAt { get; set; }
     public DateTime? LastLoginAt { get; set; }
+    public string? PhotoUrl { get; set; }
+    public string? Phone { get; set; }
+    public DateTime? DeletionRequestedAt { get; set; }
+    public string? DeletionReason { get; set; }
+    public long Revision { get; set; }
+    public long AuthEpoch { get; set; }
+    public string? AuditHash { get; set; }
+    public List<PendingAccountEvent> PendingEvents { get; set; } = [];
 
     public bool IsDeleted => Status == AccountStatus.Deleted;
 
@@ -61,6 +69,9 @@ public sealed class Account
         return trimmed.All(char.IsDigit) ? "El nombre no puede ser solo numeros." : null;
     }
 }
+
+/// <summary>Intencion durable guardada junto al cambio; el relay la entrega al outbox sin perderla.</summary>
+public sealed record PendingAccountEvent(Guid Id, string Type, string Payload, DateTime OccurredAt);
 
 /// <summary>Normalizacion y validacion del correo, que es la llave unica de la cuenta.</summary>
 public static class EmailAddress

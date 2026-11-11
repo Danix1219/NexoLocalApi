@@ -5,7 +5,7 @@
 | Módulo | Identity |
 | Quién | **C/Pr** (autenticado) |
 | Pantalla de la maqueta | 7.13 Cuenta · `V.account` |
-| Spec SDD | nv-02 |
+| Spec SDD | nv-04 |
 | Idempotente | Sí (lectura) |
 
 ## 1. Función
@@ -37,7 +37,6 @@ Sin cuerpo ni parámetros.
   "currentMode": "client",
   "hasProvider": false,
   "phone": "+527715550100",
-  "phoneVerifiedAt": "2026-11-03T09:12:00Z",
   "status": "active",
   "deletionRequestedAt": null,
   "createdAt": "2026-11-02T18:41:02Z"
@@ -53,7 +52,7 @@ Sin cuerpo ni parámetros.
 | `currentMode` | string | enum | `client` \| `provider` |
 | `hasProvider` | bool | — | Si `false`, la app abre el alta de perfil al cambiar a Proveedor |
 | `phone` | string | 13 | **El propio, completo.** Ausente si no lo registró |
-| `phoneVerifiedAt` | date | — | Ausente si no lo confirmó. Enciende *Teléfono confirmado* |
+| `emailVerifiedAt` | date | — | Confirma el correo; no acredita control del móvil |
 | `status` | string | enum | `active` \| `pendingDeletion` |
 | `deletionRequestedAt` | date | — | Presente solo en `pendingDeletion`; la app muestra los días restantes |
 
@@ -77,9 +76,8 @@ Proyección explícita, nunca el documento entero: `passwordHash` no debe salir 
 
 ## 6. Caché y rate limit
 
-- **L1 30 s**, clave `me:{accountId}`. Sin L2: es un dato personal y la lectura por `_id` ya es
-  barata. `Cache-Control: private, no-store`.
-- Invalidación por tag `account:{id}` al cambiar nombre, modo, celular o estado.
+- Sin caché interna: consulta por `_id` para reflejar cambios entre réplicas inmediatamente.
+  `Cache-Control: private, no-store`. Decisión de este [incremento](implementacion.md).
 - Rate limit **`user`** (120/min).
 
 ## 7. Tecnologías
@@ -87,7 +85,6 @@ Proyección explícita, nunca el documento entero: `passwordHash` no debe salir 
 | Pieza | Para qué |
 |---|---|
 | **MongoDB** | Lectura por `_id` |
-| **HybridCache** (L1) | Caché corta en memoria |
 | **Front Door CDN** | Sirve `photoUrl` |
 
 ## 8. Seguridad y privacidad

@@ -54,7 +54,7 @@ Content-Type: application/json
 
 ## 5. Datos
 
-**No escribe en MongoDB.** Lectura: `accounts.findOne({ email, status: "active" }, { _id: 1, name: 1 })`
+Lee cuentas `active` o `pendingDeletion` y escribe el mensaje de correo en outbox. Lectura: `accounts.findOne({ email })`
 con el índice único `email`.
 
 | Clave Redis | Estructura | TTL | Contenido |
@@ -89,7 +89,7 @@ la advertencia de ignorar el correo si no fue quien lo pidió.
 ## 8. Seguridad y privacidad
 
 1. **Respuesta y tiempo uniformes** exista o no la cuenta; el trabajo real va al worker.
-2. El código se guarda **solo como HMAC**, con 5 intentos y 15 minutos de vida.
+2. Redis guarda el HMAC, con 5 intentos y 15 minutos de vida; el outbox conserva el código necesario para enviarlo y requiere controlar su retención.
 3. La cuota de `otp` es **compartida** entre registro y recuperación, por correo y por IP.
 4. Una cuenta en `pendingDeletion` **sí** puede recuperar contraseña: es la vía para entrar y
    cancelar la baja.

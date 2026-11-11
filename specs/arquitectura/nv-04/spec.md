@@ -210,3 +210,67 @@ Dueño de este incremento: S01 Identity. [Mapa backend](../../../docs/estructura
 |---|---|---|
 | FR-960 | T-960 | AC-960 |
 | NFR-960 | T-960 | AC-960 |
+
+
+## Conciliacion vigente de identidad (2026-11-08)
+
+La decision vigente de correo SMTP y movil declarado esta en [el registro](../../../docs/decisions/registro.md).
+El estado implementado esta en [el indice](../../../docs/endpoints.md); las referencias EP de la linea
+base no son aliases HTTP. Esta correccion no implementa nuevas operaciones de cuenta.
+
+- FR-970: El envio publico acepta signup y changeEmail; changeEmail requiere sesion con sub UUID valido. Recuperacion se solicita por password/forgot.
+- NFR-970: La verificacion por correo no acredita posesion del movil; no publicar una insignia de telefono confirmado ni exigir SMS en las fichas vigentes.
+- [ ] AC-970: Signup conserva su flujo; changeEmail sin sesion responde 401 y no encola; con sesion encola el codigo; resetPassword en la ruta de registro responde 400. Las fichas distinguen contacto declarado de correo verificado.
+
+| Requisito local | Tareas definidas | Criterios vinculados |
+|---|---|---|
+| FR-970 | T-970 | AC-970 |
+| NFR-970 | T-970 | AC-970 |
+
+
+## Cuenta local autorizada — 2026-11-09
+
+El encargo autoriza las ocho operaciones vigentes de [02-cuenta](../../endpoints/02-cuenta/implementacion.md), sobre Identity existente. La saga global conserva aceptación pendiente en nv-12.
+
+- FR-981: Consultar exclusivamente la cuenta propia mediante proyección sin hash y respuesta privada sin caché.
+- [ ] AC-981: La operación cumple su ficha vigente, 401 sin sesión, validación y regla propia; evidencia en CuentaTests.Consulta_propia_proyecta_solo_datos_publicables_y_no_acepta_otro_id.
+- FR-982: Editar nombre moderado y avatar aprobado propio; distinguir ausente/null y rechazar propiedades no permitidas.
+- [ ] AC-982: La operación cumple su ficha vigente, 401 sin sesión, validación y regla propia; evidencia en CuentaTests.Nombre_moderado_se_guarda_y_repetir_no_duplica_revision; Foto_exige_propiedad_aprobacion_y_finalidad_y_null_la_borra; Moderacion_fallida_o_rechazada_no_persiste.
+- FR-983: Cambiar modo sin emitir tokens ni conceder perfil; informar si se requiere renovar por /connect/token.
+- [ ] AC-983: La operación cumple su ficha vigente, 401 sin sesión, validación y regla propia; evidencia en CuentaTests.Modo_exige_perfil_y_el_refresco_relee_la_cuenta.
+- FR-984: Normalizar el móvil como dato declarado sin OTP ni verificación de posesión y exigir correo verificado.
+- [ ] AC-984: La operación cumple su ficha vigente, 401 sin sesión, validación y regla propia; evidencia en CuentaTests.Movil_se_normaliza_como_declarado_sin_otp.
+- FR-985: Registrar dispositivo por token único; impedir reasignación activa reciente y expirar tras 90 días.
+- [ ] AC-985: La operación cumple su ficha vigente, 401 sin sesión, validación y regla propia; evidencia en CuentaTests.Dispositivo_repetido_no_duplica_y_borrado_ajeno_no_revela_existencia; Dispositivo_inactivo_se_reasigna_conservando_un_solo_registro.
+- FR-986: Eliminar dispositivo con pertenencia en el mismo filtro; ausente y ajeno devuelven el mismo 404.
+- [ ] AC-986: La operación cumple su ficha vigente, 401 sin sesión, validación y regla propia; evidencia en CuentaTests.Dispositivo_repetido_no_duplica_y_borrado_ajeno_no_revela_existencia.
+- FR-987: Solicitar baja con contraseña, plazo estable de 30 días, evento durable y revocación de sesiones previas.
+- [ ] AC-987: La operación cumple su ficha vigente, 401 sin sesión, validación y regla propia; evidencia en CuentaTests.Solicitud_repetida_no_adelanta_la_baja_y_el_motivo_tiene_limite; Baja_cancelacion_y_refresco_no_reactivan_tokens_anteriores.
+- FR-988: Cancelar baja dentro de gracia; no devolver conteos de otros dominios; recuperación restringida hasta renovar.
+- [ ] AC-988: La operación cumple su ficha vigente, 401 sin sesión, validación y regla propia; evidencia en CuentaTests.Cancelar_sin_baja_es_409_y_ventana_vencida_es_410; Baja_cancelacion_y_refresco_no_reactivan_tokens_anteriores.
+- NFR-981: Guardar cambio y evento de forma atómica, usar revisión optimista, transferir al outbox sin duplicar y aplicar auth_epoch/recovery_only entre réplicas. Sin hash ni secretos en DTO o logs.
+
+| Requisito local | Tareas definidas | Criterios vinculados |
+|---|---|---|
+| FR-981 | T-981 | AC-981 |
+| FR-982 | T-982 | AC-982 |
+| FR-983 | T-983 | AC-983 |
+| FR-984 | T-984 | AC-984 |
+| FR-985 | T-985 | AC-985 |
+| FR-986 | T-986 | AC-986 |
+| FR-987 | T-987 | AC-987 |
+| FR-988 | T-988 | AC-988 |
+| NFR-981 | T-981, T-982, T-983, T-984, T-985, T-986, T-987, T-988 | AC-981, AC-982, AC-983, AC-984, AC-985, AC-986, AC-987, AC-988 |
+
+
+## Incremento 2026-11-10 — correo y ubicación
+- FR-990: Enviar códigos de alta/cambio/recuperación en HTML con identidad Nexo y alternativa de texto.
+- NFR-990: Sin imágenes remotas ni inyección HTML; caducidad original en hora del centro de México.
+- [ ] AC-990: Plantilla y MIME verificados por CodeEmailTemplateTests; sin afirmar entrega Gmail real.
+
+| Requisito | Tarea | Criterio |
+|---|---|---|
+| FR-990 | T-990 | AC-990 |
+| NFR-990 | T-990 | AC-990 |
+
+Estado del incremento: implementación y pruebas registradas en el contrato incremental; aceptación documental/humana pendiente. No supone cerrar el resto del dominio.

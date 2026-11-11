@@ -38,7 +38,7 @@ Sin parámetros.
     "name": "Ana López",
     "photoUrl": null,
     "phone": "+527715550100",
-    "phoneVerified": true,
+    "emailVerified": true,
     "status": "active",
     "deletionRequestedAt": null,
     "memberSince": "2026-11-02T18:41:02Z"

@@ -1,5 +1,7 @@
 # Confirmar la subida · `POST /v1/discovery/uploads/{id}/complete`
 
+> Incremento local: consultar [refinamiento implementado](implementacion.md). Entrega mediante backend privado sin CDN nuevo; polling acotado sin SignalR. SAS create-only previene sobrescritura. Cuota transaccional Mongo en lugar del contador Redis histórico. Chat queda pendiente.
+
 | Campo | Valor |
 |---|---|
 | Módulo | Discovery |

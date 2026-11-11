@@ -99,3 +99,18 @@ El usuario autoriza el scaffold de todos los propietarios, además de G01/S01. [
 ## Arquitectura interna revisada por responsabilidad
 
 Perfil S02: **vertical-slices**; proyectos activos: Features, Adapters, Api. Catálogo, edición y búsqueda cambian por funcionalidad; reglas de contacto y visibilidad permanecen en su slice. Patrones: Separación lógica de consulta/comando; cache-aside solo público, índices y proyecciones por contrato. La [selección por caso de uso](../../../docs/arquitectura/seleccion-arquitecturas.md) sustituye la plantilla común de cuatro capas donde no aplica. Refinamiento y comprobación de la tarea de perfil ya existente; no añade operaciones ni declara Ready.
+
+## Preparación concreta del subset autorizado 2026-11-09
+
+Dueño Discovery; capas existentes en `src/Domains/Discovery/Nexo.Discovery.{Domain,Application,Infrastructure,Endpoints}`. Modelos/reglas en Domain/ProviderProfile.cs y Application/Providers; adaptadores en Infrastructure/Providers; rutas en Endpoints/ProviderEndpoints.cs. Identity.Contracts expone estado mínimo, implementado por su Infrastructure; Host/ProviderAccountsBridge compone contratos. Ninguna base ajena se resuelve desde Discovery.
+
+Entradas: Identity/Cuenta implementados y fichas de `specs/endpoints/03-perfil-prestador`. FR-216/217/218 → alta/lecturas; FR-219/220/221/222 → edición por sección; FR-706/707/709/710 → completitud única/versionada, contadores separados y modalidad local. Rutas/fallos/pruebas y límites exactos en [incremento](../../endpoints/03-perfil-prestador/implementacion.md). Comando: `dotnet test src/Nexo.sln -c Release -m:1` desde la raíz backend. Suites actuales de Discovery.Unit, Integration y Seguridad.Tests, sin crear proyectos paralelos.
+
+Envío SMTP, moderación Azure, Blob/CDN y dos réplicas no se acreditan mediante Testcontainers o dobles HTTP. Revisor humano pendiente; no hay firma ni Ready global inferido.
+
+
+## Incremento 2026-11-10 — correo y ubicación
+Geocodificación real anónima para alta y restauración privada de ubicación. Application/Infrastructure/Endpoints y capas existentes de pruebas; contrato incremental en specs/endpoints/04-descubrimiento/geocodificacion.md. T-990 acredita implementación, no cierre global.
+
+## Plan T-991 — directorio público
+Dueño Discovery; entradas implementadas de perfiles/Identity/ubicación. Rutas objetivo, decisiones, proyecciones y pruebas AC-991/992/993 detalladas en [contrato](../../endpoints/04-descubrimiento/implementacion-directorio.md). Application/Directory, Infrastructure/Directory y Providers/MongoProviderStore, Endpoints/DirectoryEndpoints y registros actuales; sin proyectos nuevos. Suites existentes Discovery.Unit, Integration, Seguridad.Tests y Architecture.Tests. Sin cambios en móvil, secretos ni despliegue. Revisión humana pendiente.

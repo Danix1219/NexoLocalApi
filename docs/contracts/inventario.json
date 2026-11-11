@@ -1,6 +1,7 @@
 {
   "baseline": "1.2.0",
-  "status": "catalogo-diseno-no-openapi-no-implementado",
+  "status": "linea-base-historica-no-usar-como-rutas-http-actuales",
+  "currentEndpointIndex": "../endpoints.md",
   "count": 101,
   "operations": [
     {

@@ -1,5 +1,7 @@
 # Pipeline de imágenes, CDN y purga (no es un endpoint)
 
+> Incremento local: consultar [refinamiento implementado](implementacion.md). Entrega mediante backend privado sin CDN nuevo; polling acotado sin SignalR. SAS create-only previene sobrescritura. Cuota transaccional Mongo en lugar del contador Redis histórico. Chat queda pendiente.
+
 > Documento de apoyo del bloque 14. Describe la infraestructura que usan
 > [`POST /uploads`](post-uploads.md) y [`POST /uploads/{id}/complete`](post-uploads-id-complete.md),
 > y cómo se borra una imagen.

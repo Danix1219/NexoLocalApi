@@ -193,3 +193,16 @@ Dueño de este incremento: S06 Trust. [Mapa backend](../../../docs/estructura-ba
 |---|---|---|
 | FR-960 | T-960 | AC-960 |
 | NFR-960 | T-960 | AC-960 |
+
+## Incremento de medios solicitado 2026-11-10
+Refinamiento de propietario para el subset existente grupo14: Discovery posee uploads y publicación de medios de perfiles/trabajos/solicitudes; Identity conserva cuenta y consume solo IMediaContract por composición Host. El encabezado histórico Engagement no autoriza consultar bases ajenas. Se conserva ese diseño histórico fuera de este subset.
+- FR-991: Subir, procesar, consultar y retirar imágenes reales de perfil/portada/publicaciones por sus propietarios.
+- NFR-991: SAS acotada, cuota, ETag, lease, moderación real, eliminación EXIF y limpieza recuperable sin imágenes aprobadas ficticias.
+- [ ] AC-991 → FR-991/NFR-991: MediaPipelineTests, MediaEndpointsTests, prueba sintética cloud y suites móviles verifican flujo/propiedad/bytes/privacidad. Revisión humana pendiente.
+
+| Requisito local | Tareas definidas | Criterios vinculados |
+|---|---|---|
+| FR-991 | T-991 | AC-991 |
+| NFR-991 | T-991 | AC-991 |
+
+[Decisiones y evidencia](../../endpoints/14-imagenes-cdn/implementacion.md). No CDN/chat/push nuevos en este incremento.

@@ -1,5 +1,9 @@
 # Fijar la contraseña nueva · `POST /v1/identity/password/reset`
 
+Estado auditado 2026-11-08: restablecimiento y revocación implementados. El evento
+`password.changed` se encola, pero el consumidor actual solo lo registra: el aviso por correo/push
+descrito abajo sigue pendiente. No declarar cumplida esa aceptación ni entrega real por Gmail.
+
 | Campo | Valor |
 |---|---|
 | Módulo | Identity |

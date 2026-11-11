@@ -6,6 +6,7 @@ using Nexo.Common.RateLimiting;
 using Nexo.Common.Redis;
 using Nexo.Common.Results;
 using Nexo.Identity.Application.Features;
+using Nexo.Identity.Domain.Accounts;
 using OpenIddict.Abstractions;
 
 namespace Nexo.Identity.Endpoints.Http;
@@ -50,6 +51,19 @@ public static class AuthEndpoints
         group.MapPost("/email/verification", async (
             SendEmailCodeBody body, HttpContext http, EmailVerificationService service, CancellationToken ct) =>
         {
+            if (!VerificationPurpose.IsPublicRequest(body.Purpose))
+            {
+                return NexoProblem.From(NexoCodes.ValidationFailed, "El proposito no es valido.", http);
+            }
+
+            // Cambiar el correo exige una sesion; registro y recuperacion siguen siendo publicos.
+            if (body.Purpose == VerificationPurpose.ChangeEmail &&
+                (http.User.Identity?.IsAuthenticated != true ||
+                 !Guid.TryParse(http.User.FindFirst(OpenIddictConstants.Claims.Subject)?.Value, out _)))
+            {
+                return NexoProblem.From(NexoCodes.AuthTokenExpired, "Inicia sesion para cambiar el correo.", http);
+            }
+
             var result = await service.SendAsync(body.Email, body.Purpose, ClientIp(http), ct);
             return result.Match(
                 value => Results.Accepted(

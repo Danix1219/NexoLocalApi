@@ -3,6 +3,9 @@ using Microsoft.Extensions.Logging;
 using Nexo.Identity.Application.Features;
 using Nexo.Identity.Domain.Accounts;
 using Nexo.Outbox;
+using Nexo.Identity.Infrastructure.Persistence;
+using MongoDB.Bson;
+using MongoDB.Driver;
 
 namespace Nexo.Identity.Infrastructure.Messaging;
 
@@ -13,11 +16,37 @@ namespace Nexo.Identity.Infrastructure.Messaging;
 /// Si el envio lanza, el despachador marca el mensaje como fallido y el codigo sigue vivo en
 /// Redis hasta su vencimiento, asi que el usuario puede pedir otro.
 /// </summary>
-public sealed class IdentityOutboxHandler(IEmailSender sender, ILogger<IdentityOutboxHandler> logger)
+public sealed class IdentityOutboxHandler(IEmailSender sender, ILogger<IdentityOutboxHandler> logger, IdentityCollections collections)
     : IOutboxHandler
 {
     public async Task HandleAsync(OutboxMessage message, CancellationToken cancellationToken = default)
     {
+        if (message.Type == OutboxIdentityEvents.AuditType)
+        {
+            var audit = BsonDocument.Parse(message.Payload);
+            audit["_id"] = new BsonBinaryData(message.MessageId, GuidRepresentation.Standard);
+            try { await collections.AuditEvents.InsertOneAsync(audit, cancellationToken: cancellationToken); }
+            catch (MongoWriteException error) when (error.WriteError.Category == ServerErrorCategory.DuplicateKey)
+            {
+                // La entrega repetida no altera un registro de auditoria ya persistido.
+            }
+            return;
+        }
+
+        if (message.Type == "identity.account_notice")
+        {
+            var notice = JsonSerializer.Deserialize<AccountNotice>(message.Payload)
+                ?? throw new InvalidOperationException("Aviso de cuenta invalido.");
+            var pending = notice.Status == AccountStatus.PendingDeletion;
+            await sender.SendAsync(notice.Email,
+                pending ? "Solicitud de baja de Nexo Local" : "Tu cuenta de Nexo Local sigue activa",
+                pending
+                    ? $"Solicitaste la baja de tu cuenta. Fecha efectiva prevista: {notice.EffectiveAt:yyyy-MM-dd}. Puedes iniciar sesion para cancelarla durante la ventana de gracia."
+                    : "Se cancelo la solicitud de baja. Tu cuenta vuelve a estar activa. Los dispositivos se registran de nuevo y los efectos en otros modulos se procesan por separado.",
+                cancellationToken);
+            return;
+        }
+
         if (message.Type != OutboxIdentityEvents.EmailCodeType)
         {
             logger.LogInformation(
@@ -38,41 +67,14 @@ public sealed class IdentityOutboxHandler(IEmailSender sender, ILogger<IdentityO
             return;
         }
 
-        await sender.SendAsync(payload.Email, Subject(payload.Purpose), Body(payload), cancellationToken);
+        await sender.SendRichAsync(payload.Email,
+            CodeEmailTemplate.Render(payload.Purpose, payload.Code,
+                message.OccurredAt + EmailVerificationService.CodeLifetime),
+            cancellationToken);
 
         // Nunca el codigo ni el correo completo: el registro no es un lugar donde guardar secretos.
         logger.LogInformation("Codigo de {Purpose} enviado para el mensaje {MessageId}.",
             payload.Purpose, message.MessageId);
     }
 
-    private static string Subject(string purpose) => purpose switch
-    {
-        VerificationPurpose.Signup => "Tu codigo para crear la cuenta",
-        VerificationPurpose.ChangeEmail => "Tu codigo para cambiar el correo",
-        VerificationPurpose.ResetPassword => "Tu codigo para recuperar la contrasena",
-        _ => "Tu codigo de verificacion"
-    };
-
-    private static string Body(EmailCodeRequested payload)
-    {
-        var action = payload.Purpose switch
-        {
-            VerificationPurpose.Signup => "crear tu cuenta en Nexo Local",
-            VerificationPurpose.ChangeEmail => "cambiar el correo de tu cuenta",
-            VerificationPurpose.ResetPassword => "recuperar tu contrasena",
-            _ => "verificar tu correo"
-        };
-
-        return $"""
-            Tu codigo para {action} es:
-
-                {payload.Code}
-
-            Vence en {EmailVerificationService.CodeLifetime.TotalMinutes:0} minutos y solo sirve una vez.
-
-            Si no lo pediste, ignora este mensaje: nadie puede entrar a tu cuenta sin el.
-
-            Nexo Local
-            """;
-    }
 }

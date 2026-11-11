@@ -1,6 +1,7 @@
 using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Nexo.Seguridad.Tests;
 
@@ -17,6 +18,56 @@ public sealed class SeguridadDeIdentidadTests(InfraDeSeguridad infra)
     private HostDeSeguridad NuevoHost() => new(infra.CadenaMongo, infra.CadenaRedis);
 
     private static string CorreoNuevo() => $"seg.{Guid.NewGuid():N}@nexolocal.mx";
+
+    [Fact]
+    public async Task Cambiar_correo_sin_sesion_no_encola_un_codigo()
+    {
+        using var host = NuevoHost();
+        using var cliente = host.CreateClient();
+        var correo = CorreoNuevo();
+
+        var respuesta = await cliente.PostAsJsonAsync(
+            "/v1/identity/email/verification", new { email = correo, purpose = "changeEmail" });
+
+        Assert.Equal(HttpStatusCode.Unauthorized, respuesta.StatusCode);
+        Assert.Equal("auth.token_expired", await Cuenta.Campo(respuesta, "code"));
+        using var scope = host.Services.CreateScope();
+        var database = scope.ServiceProvider.GetRequiredKeyedService<MongoDB.Driver.IMongoDatabase>(
+            Nexo.Common.Mongo.NexoDatabaseKeys.Identity);
+        var messages = database.GetCollection<MongoDB.Bson.BsonDocument>("outbox");
+        Assert.Equal(0, await messages.CountDocumentsAsync(
+            MongoDB.Driver.Builders<MongoDB.Bson.BsonDocument>.Filter.Regex(
+                "Payload", new MongoDB.Bson.BsonRegularExpression(System.Text.RegularExpressions.Regex.Escape(correo)))));
+    }
+
+    [Fact]
+    public async Task Recuperacion_no_se_solicita_desde_la_ruta_de_registro()
+    {
+        using var host = NuevoHost();
+        using var cliente = host.CreateClient();
+
+        var respuesta = await cliente.PostAsJsonAsync(
+            "/v1/identity/email/verification", new { email = CorreoNuevo(), purpose = "resetPassword" });
+
+        Assert.Equal(HttpStatusCode.BadRequest, respuesta.StatusCode);
+        Assert.Equal("validation_failed", await Cuenta.Campo(respuesta, "code"));
+    }
+
+    [Fact]
+    public async Task Cambiar_correo_con_sesion_encola_la_verificacion_del_nuevo_buzon()
+    {
+        using var host = NuevoHost();
+        using var cliente = host.CreateClient();
+        var sesion = await Cuenta.CrearAsync(host, cliente, CorreoNuevo());
+        cliente.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", sesion.AccessToken);
+        var correo = CorreoNuevo();
+
+        var respuesta = await cliente.PostAsJsonAsync(
+            "/v1/identity/email/verification", new { email = correo, purpose = "changeEmail" });
+
+        Assert.Equal(HttpStatusCode.Accepted, respuesta.StatusCode);
+        Assert.Equal(6, (await Cuenta.CodigoDelOutboxAsync(host, correo)).Length);
+    }
 
     // ---------------------------------------------------------------------
     // No se pueden enumerar cuentas

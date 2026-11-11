@@ -81,7 +81,7 @@ Formato OAuth (`error`, `error_description`) además del `code` de Nexo:
 | 401 | `auth.invalid_credentials` | Correo inexistente **o** contraseña incorrecta — **mensaje único** |
 | 423 | `auth.account_locked` | 5 fallos consecutivos. `Retry-After` con los segundos restantes |
 | 403 | `auth.email_not_verified` | |
-| 403 | `account.pending_deletion` | Cuenta en los 30 días de baja. El `detail` explica cómo cancelarla |
+| 403 | `account.pending_deletion` | OAuth access_denied cuando venció la gracia o falta su fecha; durante la gracia se emite token restringido |
 | 400 | `validation_failed` | Falta `grant_type` o `scope` inválido |
 | 429 | `rate.limit_exceeded` | Política `auth`: 20/min por IP |
 
@@ -129,3 +129,8 @@ señuelo para que el tiempo de respuesta no delate la existencia de la cuenta.
 4. `mode` y `has_provider` viajan en el token solo como pista para la app. Cada endpoint vuelve a
    comprobar la propiedad del recurso en la misma consulta (constitución §III.2).
 5. `password` está excluido del logging estructurado y del volcado de errores.
+
+Desde 02-cuenta (2026-11-09), los tokens llevan `auth_epoch`. Durante baja en gracia añaden
+`recovery_only: true`: solo permiten consultar cuenta, cancelar baja, repetir solicitud pendiente
+con contraseña y cerrar sesión. Después de cancelar se requiere renovar o iniciar sesión para
+acceso normal. La baja incrementa la época; los JWT anteriores no recuperan validez al cancelar.

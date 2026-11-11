@@ -1,5 +1,7 @@
 # Autocompletado del buscador · `GET /v1/discovery/search/suggest`
 
+> Refinamiento ejecutable 2026-11-10: [contrato y l?mites del incremento](implementacion-directorio.md) prevalece sobre los ejemplos hist?ricos de índices/caché/hora fija y especialidades de esta ficha. Autoridad de arquitectura: nv-06.
+
 | Campo | Valor |
 |---|---|
 | Módulo | Discovery |
@@ -17,7 +19,7 @@ empiezan con el texto. Es una consulta muy frecuente y muy barata, por eso va a 
 ## 2. Petición
 
 ```http
-GET /v1/discovery/search/suggest?q=calen&lat=20.0539&lng=-99.3403&limit=8
+GET /v1/discovery/search/suggestáq=calen&lat=20.0539&lng=-99.3403&limit=8
 ```
 
 | Parámetro | Tipo | Tamaño o rango | Requerido | Regla |
