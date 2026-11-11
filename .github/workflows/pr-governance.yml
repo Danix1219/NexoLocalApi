@@ -16,7 +16,7 @@ jobs:
     steps:
       # Run only trusted code from the protected default branch; never PR head code.
       - name: Checkout trusted governance
-        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # pinned official action
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # pinned official action
         with:
           ref: ${{ github.sha }}
           persist-credentials: false
