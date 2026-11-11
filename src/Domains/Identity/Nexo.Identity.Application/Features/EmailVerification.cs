@@ -12,7 +12,7 @@ public sealed record TicketIssued(string VerificationTicket, int ExpiresInSecond
 
 /// <summary>
 /// Envio y confirmacion del codigo de correo (01-auth/post-email-verification*.md).
-/// El codigo vive solo en Redis y solo como HMAC; el correo nunca aparece en claro en un registro.
+/// Redis guarda el HMAC; el outbox conserva el codigo hasta su envio. No se escribe en logs.
 /// </summary>
 public sealed class EmailVerificationService(
     IEmailVerificationStore codes,

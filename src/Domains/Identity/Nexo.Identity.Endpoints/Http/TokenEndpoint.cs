@@ -22,6 +22,8 @@ public static class TokenEndpoint
 {
     public const string ModeClaim = "mode";
     public const string HasProviderClaim = "has_provider";
+    public const string RecoveryClaim = "recovery_only";
+    public const string AuthEpochClaim = "auth_epoch";
 
     public static IEndpointRouteBuilder MapIdentityTokenEndpoint(this IEndpointRouteBuilder app)
     {
@@ -63,7 +65,14 @@ public static class TokenEndpoint
                     return OAuthError(NexoCodes.AuthTokenRevoked, "La sesion ya no es valida.");
                 }
 
-                if (account.Status == AccountStatus.PendingDeletion)
+                _ = long.TryParse(stored.Principal?.GetClaim(AuthEpochClaim), out var epoch);
+                if (epoch != account.AuthEpoch)
+                {
+                    return OAuthError(NexoCodes.AuthTokenRevoked, "Inicia sesion de nuevo.");
+                }
+
+                if (account.Status == AccountStatus.PendingDeletion &&
+                    (account.DeletionRequestedAt is null || account.DeletionRequestedAt + AccountManagement.DeletionGrace <= DateTime.UtcNow))
                 {
                     return OAuthError(NexoCodes.AccountPendingDeletion, "La cuenta esta en proceso de baja.");
                 }
@@ -89,6 +98,8 @@ public static class TokenEndpoint
         identity.SetClaim(OpenIddictConstants.Claims.Subject, account.Id.ToString());
         identity.SetClaim(ModeClaim, account.CurrentMode);
         identity.SetClaim(HasProviderClaim, account.HasProvider.ToString().ToLowerInvariant());
+        identity.SetClaim(AuthEpochClaim, account.AuthEpoch.ToString(System.Globalization.CultureInfo.InvariantCulture));
+        if (account.Status == AccountStatus.PendingDeletion) identity.SetClaim(RecoveryClaim, "true");
 
         // Sin offline_access no hay refresh token: lo decide el cliente al pedir el scope.
         identity.SetScopes(scopes);
