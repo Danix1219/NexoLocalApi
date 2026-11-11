@@ -5,17 +5,19 @@
 | Módulo | Identity |
 | Quién | **C/Pr** (autenticado) |
 | Pantalla de la maqueta | 7.13 Cuenta → "Eliminar cuenta" · `ACT.delacct` |
-| Spec SDD | nv-15 |
-| Idempotente | Sí — pedirla dos veces no adelanta la fecha |
+| Spec SDD | nv-12 (coordinación global); nv-04 (cuenta local) |
+| Idempotente | Sí sobre el estado: repetir no adelanta la fecha y responde `409` con la fecha vigente |
 
 ## 1. Función
 
 Inicia la baja de la cuenta con **ventana de gracia de 30 días**, que es lo que exige la constitución
 §IV.2 (derechos ARCO, LFPDPPP: borrado real en ≤ 30 días con anonimización). Durante la ventana la
-cuenta queda en `pendingDeletion`: se puede iniciar sesión solo para
-[cancelar la baja](delete-me-deletion.md).
+cuenta queda en `pendingDeletion`. La [cancelación](delete-me-deletion.md) requiere una sesión
+válida. Desde este incremento, login/refresh emiten un token `recovery_only` durante la gracia.
+Permite consultar cuenta, cancelar baja y cerrar sesión. Al solicitar baja se invalidan todos los
+tokens anteriores mediante `auth_epoch`; hay que iniciar sesión de nuevo para cancelar.
 
-Efecto inmediato al solicitarla:
+Efectos globales previstos de nv-12 tras consumir el evento (todavía no implementados en los otros dominios):
 
 - El perfil profesional **deja de aparecer** en búsqueda, mapa y feed.
 - Las solicitudes abiertas se **cierran**.
@@ -66,7 +68,7 @@ Content-Type: application/json
 |---|---|---|
 | 401 | `auth.invalid_credentials` | Contraseña incorrecta |
 | 409 | `account.already_pending_deletion` | Ya estaba solicitada; el cuerpo trae la fecha vigente |
-| 409 | `account.has_active_orders` | Hay pedidos `accepted` sin resolver. El `detail` los enumera por cantidad y la app pide resolverlos o cancelarlos primero |
+| 409 | `account.concurrent_update` | La cuenta cambió durante la operación |
 | 403 | `account.pending_deletion` | |
 
 ## 5. Datos
@@ -74,7 +76,7 @@ Content-Type: application/json
 | Colección | Operación | Índice |
 |---|---|---|
 | `accounts` | `updateOne` de `status: "pendingDeletion"`, `deletionRequestedAt`, `deletionReason` | `{status, deletionRequestedAt}` — lo usa el job diario |
-| `openiddict.tokens` | Revoca todas las familias salvo la sesión actual | `subject` |
+| `openiddict.tokens` | Revoca todas las familias; incrementa `auth_epoch` para rechazar JWT anteriores incluso tras cancelar | `subject` |
 | `devices` | `deleteMany({ accountId })` | `accountId` |
 
 Escrituras derivadas:
@@ -108,13 +110,19 @@ resueltos y opiniones, ya anonimizados.
 
 ## 8. Seguridad y privacidad
 
+Alcance de este [incremento](implementacion.md): solicitud/cancelación local y eventos durables.
+Los efectos en pedidos/perfiles, anonimización final, eliminación de medios y prueba de plazos
+pertenecen a nv-12. No hay operaciones de pedidos implementadas actualmente; no se simula una
+consulta de pedidos ni se afirma que la saga global esté aceptada. Los consumidores deben
+integrarse antes de habilitar esos dominios junto con baja de cuenta.
+
 1. **Se reexige la contraseña**: un token robado no debe poder borrar la cuenta.
 2. La ventana de 30 días protege del borrado impulsivo o malicioso y es el plazo que fija la
    constitución.
 3. **El borrado es real, no un `status`**: a los 30 días se anonimiza de verdad. Lo que se conserva
    (pedidos y opiniones) va sin dato personal, porque la contraparte tiene derecho a su propio
    historial.
-4. `account.has_active_orders` evita dejar a alguien colgado con un servicio aceptado; no es un
-   obstáculo al derecho ARCO: a los 30 días la baja procede de todos modos.
+4. La coordinación con pedidos aceptados y el plazo global de borrado son aceptación pendiente
+   de nv-12; la solicitud local no prueba esas reglas distribuidas.
 5. El evento queda en `audit_events` con cadena de hash para poder demostrar **cuándo** se pidió y
    **cuándo** se ejecutó.

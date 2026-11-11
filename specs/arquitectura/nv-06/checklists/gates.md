@@ -66,3 +66,18 @@
 - [ ] AC-960 / T-960: perfil propio refinado para la historia, patrones justificados, fallos y suites definidos; T-001 espera esta salida y revisión humana. Sin aprobación por existir documentación.
 
 - [ ] Arquitectura interna corresponde al perfil vigente y sus proyectos reales; reglas/permisos permanecen en el núcleo, adaptadores aislados y ventajas medidas antes de afirmar mejoras de rendimiento.
+
+## Evidencia local parcial — 2026-11-09
+
+Ver [registro de perfiles](../../../endpoints/03-perfil-prestador/implementacion.md) para resultados reales y su correspondencia con T-216 a T-222 y T-706/707/709/710. Rutas actuales en docs/endpoints.md. La evidencia de este subset no cierra AC-603, el catálogo, geocodificación ni la invalidación/propagación cloud de toda nv-06. Revisión humana y aceptación remota pendientes.
+
+Resultado del subset: 127 pruebas aprobadas: 7 arquitectura, 16 Common.Unit, 14 Discovery.Unit, 26 Integration y 64 Seguridad.Tests. Son 30 casos nuevos sobre los 97 anteriores; Identity.Unit y Engagement.Unit siguen sin casos y no se cuentan como cobertura. Comando Release con cobertura y registro enlazado arriba. Sin firma humana ni cierre global.
+
+
+## Incremento 2026-11-10 — correo y ubicación
+- [x] AC-990 verificado mediante T-990 y las suites indicadas. Revisión humana general pendiente.
+
+## Directorio público T-991
+- [ ] AC-991/AC-992/AC-993: ejecutar las suites existentes y conciliar evidencia en implementacion-directorio.md; revisión humana pendiente. No declarar probado Atlas, moderación cloud, feed o solicitudes.
+
+T-991: ejecución local final registrada: AC-991/AC-992/AC-993 con 170 casos aprobados entre suites actuales. Detalle en implementacion-directorio.md; las casillas de revisión humana no se firman automáticamente.

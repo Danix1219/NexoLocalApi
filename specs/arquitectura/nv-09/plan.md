@@ -70,3 +70,11 @@ Validacion: AC-950 se revisa con lista de archivos/dueño/entrada/salida/suites,
 ## Perfiles de arquitectura aplicables
 
 Consultar [S04](../../../docs/arquitectura/servicios/s04-orders.md) y las [políticas comunes](../../../docs/arquitectura/politicas-comunes.md) al concretar la preparación estructural de esta historia. Reutilizar el propietario y su contrato; no crear un servicio por spec. Distinguir diseño propuesto, base física y comprobación de producto.
+
+## Incremento 06-solicitudes
+T-991 implementa FR-991/FR-992/NFR-991 en Discovery: Domain/ServiceRequest, Application/Requests, Infrastructure/Requests y Endpoints/RequestEndpoints dentro de src/Domains/Discovery. Entrada: identidad, perfiles, directorio y Mongo replica set existentes. Identity entrega iniciales por contrato y Engagement resumen de su propia colección; Host compone sin referencias entre internals. No crear otro servicio Orders para estas cuatro fichas.
+Decisiones, rutas, límites y evidencia: [implementacion](../../endpoints/06-solicitudes/implementacion.md). Pruebas AC-991/992/993 en tests/Nexo.Discovery.Unit, tests/Nexo.Integration, tests/Nexo.Seguridad.Tests y tests/Nexo.Architecture.Tests. Imágenes bloqueadas, reseñas no elegibles sin futuro pedido autorizado, eventos durables sin despacho cloud. Revisión humana pendiente.
+
+## Incremento 07-interes
+Dueño Engagement, arquitectura nv-09; Discovery entrega visibilidad/propiedad del pedido y perfil público mediante puertos compuestos por Host. Capas: Application/Interests, Infrastructure/MongoInterestStore y Endpoints/EngagementEndpointMapping; pruebas en Seguridad.Tests usando Mongo replica set/Redis, más pruebas unitarias/persistencia donde se añadan. Los IDs persistidos de prestador son ProviderProfileId, distintos del accountId del JWT. Outbox almacena eventos de transición; no hay consumidores para actualizar estadísticas/push aún. Pedidos activos y conversación solo se reflejan si existen colecciones de los bloques 08/10.
+Decisiones y límites de ejecución: [registro 07-interes](../../endpoints/07-interes/implementacion.md).

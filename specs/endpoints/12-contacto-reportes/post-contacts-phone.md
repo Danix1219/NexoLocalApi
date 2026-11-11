@@ -60,7 +60,7 @@ Content-Type: application/json
 
 | HTTP | `code` | Cuándo |
 |---|---|---|
-| 403 | `contact.phone_not_available` | El prestador **no activó** el canal de llamada (`channels.call: false`) o no tiene celular confirmado |
+| 403 | `contact.phone_not_available` | El prestador **no activó** el canal de llamada (`channels.call: false`) o no tiene correo confirmado y móvil declarado |
 | 403 | `contact.not_allowed` | Un prestador pide el número de un cliente **sin pedido aceptado** |
 | 404 | `resource.not_found` | El objetivo no existe o está despublicado |
 | 429 | `contact.daily_limit` | Política `contact`: **40 al día** |
@@ -74,7 +74,7 @@ Content-Type: application/json
 | `audit_events` | Evento `contact.phone_copied`, **con cadena de hash** | `{actorId, occurredAt}` |
 | `accounts` (Identity) | El teléfono se obtiene **por contrato**: `IPhoneDisclosureContract.GetPhoneAsync(accountId, reason)` | `_id` |
 | `orders` | Si quien pide es el prestador: `countDocuments({ clientId: targetId, providerId: miPerfil, status: { $in: ["accepted", "resolved"] } })` | `{providerId, status, createdAt: -1}` |
-| `provider_profiles` | `channels.call` y `phoneVerified` del objetivo | `_id` |
+| `provider_profiles` | `channels.call` y `emailVerified` del objetivo | `_id` |
 
 El contrato de Identity **registra el motivo**: el número no se puede pedir desde otro módulo sin
 decir para qué, y ese motivo queda en el log de Identity además del de Engagement.
@@ -108,7 +108,7 @@ Escrituras derivadas:
    `accepted` o `resolved` entre ambos. Un prestador no obtiene teléfonos de quienes publican
    solicitudes.
 3. **Para el cliente, la condición es el consentimiento del prestador**: `channels.call` lo activó él
-   y requiere celular confirmado.
+   y requiere correo confirmado y móvil declarado.
 4. **Cada acceso queda registrado dos veces**: en `contact_log` (consultable, con TTL de 1 año) y en
    `audit_events` con cadena de hash (inalterable). Si alguien recibe una llamada no deseada, hay
    rastro de quién obtuvo el número y cuándo.

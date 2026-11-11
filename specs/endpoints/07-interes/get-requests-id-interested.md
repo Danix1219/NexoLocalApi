@@ -54,7 +54,7 @@ Authorization: Bearer <access_token>
       "recs": 34,
       "minPrice": { "fromCents": 35000, "text": "Desde $350" },
       "visit": { "mode": "free", "text": "Visita sin costo" },
-      "badges": ["phoneVerified"],
+      "badges": ["emailVerified"],
       "note": "Puedo pasar hoy por la tarde",
       "interestedAt": "2026-11-05T18:05:00Z",
       "conversationId": null,
@@ -117,7 +117,7 @@ viven allá. Para que el cursor sea estable, el desempate final es `interests._i
 | Pieza | Para qué |
 |---|---|
 | **MongoDB** | `interests` por `{clientId, requestId}` |
-| **Polly v8** | Timeout 2 s + circuit breaker + bulkhead en la llamada a Discovery |
+| **Resiliencia en Host (.NET)** | Timeout de 2 s, circuit breaker de 30 s tras tres fallos y bulkhead de 64 operaciones |
 | **Front Door CDN** | Avatares |
 | Patrón **Strategy** | Un ordenador por criterio, igual que en la búsqueda |
 

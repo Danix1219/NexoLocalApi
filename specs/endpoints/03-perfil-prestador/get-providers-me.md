@@ -1,11 +1,13 @@
 # Mi perfil profesional · `GET /v1/discovery/providers/me`
 
+> Estado ejecutable del incremento 2026-11-09: [implementación, conciliaciones y límites](implementacion.md). La caché y propagación cloud descritas como objetivo abajo no están activadas. Las rutas usan no-store, Identity por contrato y eventos locales durables; no se acredita aceptación cloud.
+
 | Campo | Valor |
 |---|---|
 | Módulo | Discovery |
 | Quién | **Pr** (autenticado, con perfil) |
 | Pantalla de la maqueta | 7.11 Mi perfil / Cuenta → "Ver perfil" · `V.myprofile` |
-| Spec SDD | nv-02 |
+| Spec SDD | nv-06 (función); nv-02 (contratos) |
 | Idempotente | Sí (lectura) |
 
 ## 1. Función
@@ -57,12 +59,13 @@ Authorization: Bearer <access_token>
   "coverUrl": null,
   "portfolio": [],
   "channels": { "chat": true, "call": false },
-  "phoneVerified": false,
+  "emailVerified": true,
   "isNew": true,
   "jobs": 0,
   "recs": 0,
   "rating": { "avg": 0, "count": 0 },
-  "completeness": 45,
+  "completeness": 79,
+  "policyVersion": "provider-completeness/1",
   "todo": [
     { "key": "photo", "label": "Agrega tu foto", "points": 7, "done": true },
     { "key": "schedule", "label": "Publica tu horario", "points": 14, "done": true },

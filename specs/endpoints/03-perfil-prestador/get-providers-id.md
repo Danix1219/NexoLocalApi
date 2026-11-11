@@ -1,11 +1,13 @@
 # Perfil público de un prestador · `GET /v1/discovery/providers/{id}`
 
+> Estado ejecutable del incremento 2026-11-09: [implementación, conciliaciones y límites](implementacion.md). La caché y propagación cloud descritas como objetivo abajo no están activadas. Las rutas usan no-store, Identity por contrato y eventos locales durables; no se acredita aceptación cloud.
+
 | Campo | Valor |
 |---|---|
 | Módulo | Discovery |
 | Quién | **P/C/Pr** (público) |
 | Pantalla de la maqueta | 7.8 Perfil de prestador · `V.profile`, `ACT.open` |
-| Spec SDD | nv-02 |
+| Spec SDD | nv-06 (función); nv-02 (contratos) |
 | Idempotente | Sí (lectura) |
 
 ## 1. Función
@@ -66,12 +68,12 @@ If-None-Match: "a1b2c3d4e5f60718"
   "coverUrl": null,
   "portfolio": [{ "url": "…", "thumbUrl": "…", "w": 1200, "h": 1200 }],
   "badges": [
-    { "key": "phoneVerified", "level": "verifiedByNexo", "label": "Teléfono confirmado" },
+    { "key": "emailVerified", "level": "verifiedByNexo", "label": "Correo confirmado" },
     { "key": "isNew", "level": "declared", "label": "Perfil nuevo" }
   ],
   "trust": {
     "declared": ["experience", "payment", "warranty", "responseTime", "invoice"],
-    "verifiedByNexo": ["phone"],
+    "verifiedByNexo": ["email"],
     "userOpinion": { "rating": { "avg": 4.6, "count": 12 }, "recs": 34 }
   },
   "channels": { "chat": true, "call": true },
@@ -86,7 +88,7 @@ If-None-Match: "a1b2c3d4e5f60718"
 | `attentionText` | string 60 | `attTxt()`: "Va a domicilio" dentro del radio; "Su local está a X km" fuera del radio y a ≤ 10 km |
 | `shopLocation` | Point | **Solo si `attention` es `shop` o `both`.** Es el punto que el negocio publica a propósito, y habilita "Cómo llegar" |
 | `servesYou` | bool | `serves(p, punto)`: `dist ≤ radiusKm`, o con local `dist ≤ LOCAL_KM (10 km)` |
-| `status.text` | string 60 | `status()` de la maqueta: usa el día real y hora fija 9:41 |
+| `status.text` | string 60 | `status()` de la maqueta: usa día y hora reales en America/Mexico_City |
 | `minPrice` | object | `minItem()`: el precio más bajo publicado |
 | `badges[]` | array | Cada insignia **declara su nivel de confianza** |
 | `trust` | object | Los **tres niveles separados** y etiquetados |
@@ -147,7 +149,7 @@ baja a Mongo cada 5 minutos: así una visita no cuesta una escritura en el clust
 ## 8. Seguridad y privacidad
 
 1. **Los tres niveles de confianza van separados y etiquetados** en `trust` y en cada insignia. La API
-   no entrega un "verificado" genérico: el nivel `verifiedByNexo` contiene solo el teléfono
+   no entrega un "verificado" genérico: el nivel `verifiedByNexo` contiene solo el correo confirmado
    (constitución §IV.3).
 2. El **punto exacto** solo sale como `shopLocation` y solo con local. Para los prestadores a
    domicilio se entrega la zona difuminada, nunca el punto.

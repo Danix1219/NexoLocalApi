@@ -1,11 +1,13 @@
 # Publicar una solicitud · `POST /v1/discovery/requests`
 
+> Implementación local: rige el [refinamiento del incremento](implementacion.md) para cuota, búsqueda, contratos y capacidades pendientes. Los ejemplos cloud y de pedidos representan el objetivo posterior.
+
 | Campo | Valor |
 |---|---|
 | Módulo | Discovery |
 | Quién | **C** (autenticado) |
 | Pantalla de la maqueta | 7.10 Publicar → "Busco un servicio" · `ACT.rqsave`, borrador `S.rq` |
-| Spec SDD | nv-06 |
+| Spec SDD | nv-09 (solicitudes; refinamiento local) |
 | Idempotente | Sí — `Idempotency-Key` obligatorio |
 
 ## 1. Función
@@ -48,7 +50,7 @@ Content-Type: application/json
 | `title` | string | **90** | sí | Mínimo 5 caracteres. **Moderado** |
 | `description` | string | **10–600** | sí | **Moderada** |
 | `urgency` | string | enum | sí | `today` \| `week` \| `noRush` |
-| `contact` | string | enum | sí | `chat` \| `chatCall`. `chatCall` **exige celular confirmado** |
+| `contact` | string | enum | sí | `chat` \| `chatCall`. `chatCall` **exige correo confirmado y móvil declarado** |
 | `location.lat` / `.lng` | double | −90..90 / −180..180 | sí | Punto del servicio. Se guarda **privado** y se publica difuminado |
 | `imageUploadId` | uuid | — | no | Una foto del problema, ya aprobada |
 
@@ -86,7 +88,8 @@ Content-Type: application/json
 | HTTP | `code` | Cuándo |
 |---|---|---|
 | 403 | `content.inappropriate` | Content Safety rechazó título, descripción o imagen |
-| 400 | `phone.not_verified` | Pidió `contact: chatCall` sin celular confirmado |
+| 403 | `auth.email_not_verified` | Pidió `contact: chatCall` sin correo confirmado |
+| 400 | `phone.invalid` | Pidió `contact: chatCall` sin móvil declarado válido |
 | 400 | `validation_failed` | Longitudes o enums inválidos |
 | 404 | `upload.not_found` · 409 `upload.not_pending` | Imagen inválida o ajena |
 | 429 | `rate.limit_exceeded` | Política `publish`: **10 solicitudes al día** |
@@ -153,3 +156,6 @@ Escrituras derivadas:
 5. `reachableProviders` es un agregado: no revela **quiénes** son.
 6. El push a los prestadores lleva categoría y zona, nunca la dirección ni el nombre del cliente
    (constitución §7).
+
+## Refinamiento de implementación local (2026-11-10)
+Aplican las [decisiones, límites y evidencia del incremento](implementacion.md), incluida cuota transaccional Mongo, búsqueda normalizada sin Atlas Search, resumen por contratos y bloqueo de imágenes/reseñas sin infraestructura o pedido autorizado. Esta nota concilia los ejemplos históricos; no acredita despliegue.

@@ -1,5 +1,7 @@
 # Recomendar un trabajo · `POST /v1/discovery/works/{id}/recommend`
 
+> Refinamiento ejecutable 2026-11-10: [implementación, decisiones y límites](implementacion.md) prevalece sobre los ejemplos históricos de caché/Redis/medios. Autoridad de arquitectura: nv-08.
+
 | Campo | Valor |
 |---|---|
 | Módulo | Discovery |

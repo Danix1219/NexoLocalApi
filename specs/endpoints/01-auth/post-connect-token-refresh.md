@@ -59,7 +59,7 @@ renovación.
 | 401 | `auth.refresh_reused` | El token ya fue rotado. **Se revoca la familia completa** y la app manda a login |
 | 401 | `auth.token_expired` | Pasaron los 30 días |
 | 401 | `auth.token_revoked` | Hubo logout o revocación administrativa |
-| 403 | `account.pending_deletion` | |
+| 403 | `account.pending_deletion` | OAuth access_denied cuando venció la gracia o falta su fecha; durante la gracia se emite token restringido |
 | 429 | `rate.limit_exceeded` | Política `auth` |
 
 ## 5. Datos
@@ -97,3 +97,8 @@ Poda: un `IHostedService` de OpenIddict borra los tokens caducados a diario.
 3. La renovación **no extiende indefinidamente** la ventana: la familia caduca a los 30 días del
    primer inicio de sesión.
 4. El refresh token no se escribe nunca en logs, ni completo ni truncado.
+
+Desde 02-cuenta (2026-11-09), los tokens llevan `auth_epoch`. Durante baja en gracia añaden
+`recovery_only: true`: solo permiten consultar cuenta, cancelar baja, repetir solicitud pendiente
+con contraseña y cerrar sesión. Después de cancelar se requiere renovar o iniciar sesión para
+acceso normal. La baja incrementa la época; los JWT anteriores no recuperan validez al cancelar.

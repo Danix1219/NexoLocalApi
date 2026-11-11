@@ -149,7 +149,7 @@ Spec→plan→task→tests/gates→Memoria→checklist→revisión→release. No
 
 ## Aprobación
 
-Estado: Borrador documental; sin implementación ni evidencia de producto.
+Estado: Borrador documental; incremento parcial local de perfiles con evidencia registrada por separado, sin aprobación humana.
 - [ ] Revisor humano identificado — nombre y fecha pendientes.
 - [ ] CHECKLIST_PR.md completado con evidencia propia.
 - [ ] Sin conflicto con constitución y requisitos del proyecto.
@@ -220,3 +220,36 @@ Dueño de este incremento: S02 Directory. [Mapa backend](../../../docs/estructur
 |---|---|---|
 | FR-960 | T-960 | AC-960 |
 | NFR-960 | T-960 | AC-960 |
+
+## Incremento ejecutable 2026-11-09 — grupo 03
+
+El encargo del usuario autoriza el subset de perfiles en Discovery: FR-001/002, FR-216 a FR-222 y H06/H07/H09/H10, con límites en [registro del incremento](../../endpoints/03-perfil-prestador/implementacion.md). Las cinco fichas refinadas poseen rutas actuales; no se implementan aliases legacy ni EP-023/024 sin ficha vigente. Comparación integra señales sin ganadores ficticios. Política `provider-completeness/1` única en alta y consulta propia; catálogo público, búsqueda, geocodificación, invalidación distribuida y flujo completo de medios continúan pendientes. La spec completa no está cerrada ni aprobada.
+
+
+## Incremento 2026-11-10 — correo y ubicación
+- FR-990: Buscar direcciones reales e inversa en México, accesibles antes del alta con rate limit.
+- NFR-990: Fallos explícitos sin datos demo, límites de proveedor, privacidad y restore aislado por cuenta.
+- [ ] AC-990: PhotonGeocoderTests, SearchLocationPersistenceTests y GeocodingTests verifican contrato, fallos, coordenadas y aislamiento.
+
+| Requisito | Tarea | Criterio |
+|---|---|---|
+| FR-990 | T-990 | AC-990 |
+| NFR-990 | T-990 | AC-990 |
+
+Estado del incremento: implementación y pruebas registradas en el contrato incremental; aceptación documental/humana pendiente. No supone cerrar el resto del dominio.
+
+## Incremento 2026-11-10 — directorio público
+- FR-991: Catálogo y sugerencias reales con slugs compatibles con perfiles existentes.
+- FR-992: Búsqueda pública con filtros/servicio/expansión/cursor y mapa de prestadores.
+- NFR-991: Proyecciones privadas fuera de Mongo, cuentas activas por contrato, fallos explícitos y consulta acotada.
+- [ ] AC-991: DirectoryTests y DirectoryEndpointsTests comprueban catálogo/ETag, sugerencias ordenadas y consultas cortas.
+- [ ] AC-992: DirectoryTests y DirectoryPersistenceTests comprueban filtros, órdenes, geoespacial, cursor, mapa/conteos.
+- [ ] AC-993: DirectoryEndpointsTests y DirectoryPersistenceTests comprueban bajas, exclusión de home/contacto, 400/401/403/503 y presupuesto.
+
+| Requisito | Tarea | Criterio |
+|---|---|---|
+| FR-991 | T-991 | AC-991 |
+| FR-992 | T-991 | AC-992 |
+| NFR-991 | T-991 | AC-993 |
+
+[Contrato refinado](../../endpoints/04-descubrimiento/implementacion-directorio.md). El incremento no declara Atlas Search, caché distribuida, feed o solicitudes implementados ni aceptación humana.

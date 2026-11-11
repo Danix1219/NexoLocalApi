@@ -1,5 +1,7 @@
 # Catálogo de categorías · `GET /v1/discovery/categories`
 
+> Refinamiento ejecutable 2026-11-10: [contrato y l?mites del incremento](implementacion-directorio.md) prevalece sobre los ejemplos hist?ricos de índices/caché/hora fija y especialidades de esta ficha. Autoridad de arquitectura: nv-06.
+
 | Campo | Valor |
 |---|---|
 | Módulo | Discovery |

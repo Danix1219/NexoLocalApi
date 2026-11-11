@@ -5,7 +5,7 @@
 | Módulo | Identity |
 | Quién | **C/Pr** (autenticado) |
 | Pantalla de la maqueta | Permiso de notificaciones (pantalla previa propia) |
-| Spec SDD | nv-02 |
+| Spec SDD | nv-04 |
 | Idempotente | Sí — el mismo `fcmToken` actualiza en vez de duplicar (`upsert`) |
 
 ## 1. Función

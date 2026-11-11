@@ -5,15 +5,15 @@
 | Módulo | Identity |
 | Quién | **C/Pr** (autenticado, cuenta en `pendingDeletion`) |
 | Pantalla de la maqueta | Cuenta → aviso de baja pendiente con "Cancelar" |
-| Spec SDD | nv-15 |
-| Idempotente | Sí |
+| Spec SDD | nv-12 (coordinación global); nv-04 (cuenta local) |
+| Idempotente | Sí sobre el estado; si ya está activa, responde `409` sin nuevas escrituras |
 
 ## 1. Función
 
 Revierte la baja dentro de los 30 días y devuelve la cuenta a `active`. Es la contraparte obligatoria
 de [`POST /me/deletion`](post-me-deletion.md): sin ella la ventana de gracia no serviría de nada.
 
-Qué se recupera y qué no:
+Resultado global previsto una vez integrados los consumidores de nv-12 (no es la respuesta síncrona actual):
 
 | Se recupera | No se recupera |
 |---|---|
@@ -43,16 +43,14 @@ deshacer un borrado va en contra del usuario.
 {
   "status": "active",
   "cancelledAt": "2026-11-08T10:02:00Z",
-  "restored": { "providerProfile": true, "works": 6, "conversations": 3 },
-  "notRestored": { "requests": 2, "pendingOrders": 1, "devices": 1 }
+  "restorationStatus": "queued"
 }
 ```
 
 | Campo | Tipo | Regla |
 |---|---|---|
 | `status` | string | `active` |
-| `restored` | object | Conteos de lo que volvió a quedar visible |
-| `notRestored` | object | Conteos de lo que se perdió al solicitar la baja |
+| `restorationStatus` | string | `queued`: el evento es durable; no implica que otros dominios hayan restaurado datos |
 
 ## 4. Errores
 

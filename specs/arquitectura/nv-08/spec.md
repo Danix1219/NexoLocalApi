@@ -193,3 +193,19 @@ Dueño de este incremento: S03 Community. [Mapa backend](../../../docs/estructur
 |---|---|---|
 | FR-960 | T-960 | AC-960 |
 | NFR-960 | T-960 | AC-960 |
+
+## Incremento ejecutable 2026-11-10 — cinco operaciones de trabajos
+- FR-991: Publicar, listar y borrar trabajos propios moderados según las fichas vigentes del grupo 05.
+- FR-992: Recomendar y retirar recomendación con estado deseado idempotente y contadores coherentes.
+- NFR-991: Privacidad de terceros, cuota diaria atómica, reintentos, aislamiento y dependencia fallida explícita.
+- [ ] AC-991: WorkRulesTests y WorkEndpointsTests verifican límites, moderación cerrada, JWT, categoría y propiedad.
+- [ ] AC-992: WorkPersistenceTests y WorkEndpointsTests verifican transacciones, concurrencia, cuota, contadores y rollback con Mongo replica set real.
+- [ ] AC-993: WorkPersistenceTests y WorkEndpointsTests verifican punto solo difuminado, marcas por cuenta, cursor y prestadores inactivos invisibles.
+
+| Requisito local | Tarea | Criterio |
+|---|---|---|
+| FR-991 | T-991 | AC-991 |
+| FR-992 | T-991 | AC-992 |
+| NFR-991 | T-991 | AC-993 |
+
+[Refinamiento contractual](../../endpoints/05-trabajos/implementacion.md): título 5..90/texto 20..1000 y hasta 6 IDs según fichas vigentes, en lugar del ejemplo histórico de 4 imágenes/texto 200. Campos problem/did/time/tag opcionales; nunca obligatorios residuales. Imágenes bloqueadas hasta disponer del ciclo real de subida/moderación/purga. No se afirma feed, push, medios cloud o aprobación humana.

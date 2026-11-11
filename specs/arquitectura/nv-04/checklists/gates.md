@@ -61,3 +61,42 @@
 - [ ] AC-960 / T-960: perfil propio refinado para la historia, patrones justificados, fallos y suites definidos; T-001 espera esta salida y revisión humana. Sin aprobación por existir documentación.
 
 - [ ] Arquitectura interna corresponde al perfil vigente y sus proyectos reales; reglas/permisos permanecen en el núcleo, adaptadores aislados y ventajas medidas antes de afirmar mejoras de rendimiento.
+
+
+## Iteracion de conciliacion 2026-11-08
+
+- [ ] AC-970: guardas de changeEmail, proposito publico y confianza por correo; revision humana pendiente.
+- Las pruebas de esta iteracion usan Mongo/Redis efimeros; no acreditan entrega real por Gmail.
+- Las referencias historicas a SMS y telefono unico quedan sustituidas para esta iteracion por el registro vigente.
+
+Evidencia local ejecutada: SDK 10.0.302; build Release, cero errores y advertencias; format
+verify-no-changes sin diferencias; suite con NEXO_DISABLE_DOTENV=1: 56 correctas (16 Common,
+7 arquitectura, 15 seguridad, 18 integracion), cero fallidas/omitidas. Identity/Discovery/Engagement
+Unit no contienen casos y no se cuentan como cobertura. Mongo/Redis de Testcontainers reales;
+SMTP apuntado a localhost en pruebas, sin entrega real Gmail. Wrapper SDD en workspace aislado:
+26 specs, traza e integridad correctas y 8 pruebas del validador correctas. No es aceptacion humana.
+
+
+## Cuenta local — revisión pendiente
+
+- [ ] AC-981: evidencia de CuentaTests, límites externos y revisión humana identificada.
+- [ ] AC-982: evidencia de CuentaTests, límites externos y revisión humana identificada.
+- [ ] AC-983: evidencia de CuentaTests, límites externos y revisión humana identificada.
+- [ ] AC-984: evidencia de CuentaTests, límites externos y revisión humana identificada.
+- [ ] AC-985: evidencia de CuentaTests, límites externos y revisión humana identificada.
+- [ ] AC-986: evidencia de CuentaTests, límites externos y revisión humana identificada.
+- [ ] AC-987: evidencia de CuentaTests, límites externos y revisión humana identificada.
+- [ ] AC-988: evidencia de CuentaTests, límites externos y revisión humana identificada.
+
+Evidencia ejecutada el 2026-11-09: build Release con SDK 10.0.302, cero errores/advertencias;
+format verify-no-changes PASS; suite final con .env desactivado: 96 correctas (16 Common,
+7 arquitectura, 55 seguridad, 18 integración), cero fallidas/omitidas. CuentaTests aporta 40
+casos nuevos. Incluye negativos BOLA, moderación fallida/no configurada, null/ausente, límites,
+CAS, relay repetido, invalidación de JWT/refresh y baja/cancelación/reanudación. Mongo/Redis
+reales; Content Safety HTTP y avisos SMTP con dobles identificados. SDD en copia aislada e
+integridad local verifican 26 specs, 484 tareas, 468 requisitos y 323 criterios; no aceptación cloud.
+Las tres suites Unit sin casos no cuentan como pruebas ejecutadas. Firmas humanas pendientes.
+
+
+## Incremento 2026-11-10 — correo y ubicación
+- [x] AC-990 verificado mediante T-990 y las suites indicadas. Revisión humana general pendiente.
