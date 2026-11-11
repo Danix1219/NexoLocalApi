@@ -9,7 +9,7 @@ namespace Nexo.Integration;
 /// </summary>
 public sealed class InfraFixture : IAsyncLifetime
 {
-    private readonly MongoDbContainer mongo = new MongoDbBuilder("mongo:7.0").Build();
+    private readonly MongoDbContainer mongo = new MongoDbBuilder("mongo:7.0").WithReplicaSet("rs0").Build();
 
     private readonly RedisContainer redis = new RedisBuilder("redis:7.2-alpine").Build();
 
