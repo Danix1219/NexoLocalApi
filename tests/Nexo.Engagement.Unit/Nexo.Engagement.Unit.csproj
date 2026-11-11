@@ -13,5 +13,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="../../src/Domains/Engagement/Nexo.Engagement.Domain/Nexo.Engagement.Domain.csproj" />
+    <ProjectReference Include="../../src/Domains/Engagement/Nexo.Engagement.Application/Nexo.Engagement.Application.csproj" />
+    <ProjectReference Include="../../src/Domains/Engagement/Nexo.Engagement.Infrastructure/Nexo.Engagement.Infrastructure.csproj" />
   </ItemGroup>
 </Project>

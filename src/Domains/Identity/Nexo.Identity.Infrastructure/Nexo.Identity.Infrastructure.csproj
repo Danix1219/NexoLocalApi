@@ -14,6 +14,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="../Nexo.Identity.Application/Nexo.Identity.Application.csproj" />
+    <ProjectReference Include="../Nexo.Identity.Contracts/Nexo.Identity.Contracts.csproj" />
     <ProjectReference Include="../Nexo.Identity.Domain/Nexo.Identity.Domain.csproj" />
     <ProjectReference Include="../../../BuildingBlocks/Nexo.Common/Nexo.Common.csproj" />
     <ProjectReference Include="../../../BuildingBlocks/Nexo.Outbox/Nexo.Outbox.csproj" />

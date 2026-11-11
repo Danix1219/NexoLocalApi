@@ -1,5 +1,7 @@
 # Orden SDD del backend y tareas de estructura
 
+Estado ejecutable por grupo y siguiente bloque: [seguimiento de endpoints](estado-desarrollo-endpoints.md). El incremento local de perfiles se vincula a nv-06; la numeración de carpetas de endpoints no reemplaza las specs de arquitectura.
+
 Revision documental 0.4.1. La arquitectura de carpetas se mantiene en [estructura backend](estructura-backend.md); este documento define como convertirla en trabajo trazable. No crea servicios ni modifica el catalogo de 101 operaciones.
 
 ## Cadena obligatoria de una historia

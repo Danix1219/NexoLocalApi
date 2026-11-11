@@ -207,3 +207,53 @@ El codigo retirado sigue recuperable en el historial de Git; esta retirada se hi
 ### Pendiente
 
 Las specs `specs/endpoints/ep-01` a `ep-07` **siguen en el repositorio y describen las operaciones retiradas**. Quedan obsoletas hasta que se definan las correctas: no implementarlas tal cual. El [inventario de operaciones](../contracts/inventario.json) tampoco se ha revisado contra esta decision.
+
+
+## Decisión vigente — correo SMTP y móvil declarado (2026-11-08)
+
+El usuario confirma que la verificación por SMS se sustituyó por correo, con Gmail mediante
+SMTP/MailKit. El móvil permanece como dato opcional de contacto; no se envían SMS.
+Verificar el buzón acredita control del correo, no posesión del teléfono. Por tanto:
+
+- `emailVerifiedAt` y la insignia `emailVerified` representan correo confirmado.
+- El móvil se declara y normaliza; no habilita login ni recibe OTP. No marcar `phoneVerified`.
+- Mostrar el número exige correo verificado, móvil declarado y consentimiento explícito.
+- Un teléfono no verificado no debe reservarse con unicidad entre cuentas: bloquearía números ajenos.
+- `/me/phone/confirm` se retira del diseño; no está registrada en el host ni se implementa ahora.
+- Comparación, perfiles y relevancia usan correo confirmado como señal, sin afirmar control del teléfono.
+
+El envío público solo admite `signup`/`changeEmail`; `changeEmail` exige sesión válida.
+`resetPassword` entra por `/password/forgot`. El cambio de correo aún no tiene operación que aplique
+el nuevo correo a la cuenta: emitir un ticket no completa ese flujo.
+
+Un único host atiende HTTP y despacha el outbox, sin `NEXO_ROLE`. Los eventos sin consumidor
+funcional siguen siendo deuda, no evidencia de propagación. El SDK queda en 10.0.302 por autorización
+del usuario; se conserva net10.0. Ver [estado de rutas](../endpoints.md).
+
+Compatibilidad: las operaciones de teléfono no estaban implementadas; no hay migración ni borrado
+de datos en esta iteración. El consumidor móvil futuro debe adoptar `emailVerified`. Revertir este diff
+restaura el diseño previo y también los defectos de autorización corregidos; requiere revisión antes
+de publicarlo. No hay despliegue, firmas humanas ni aceptación productiva implícita.
+
+## Cuenta local autorizada — 2026-11-09
+
+El usuario encarga verificar el siguiente incremento e implementar 02-cuenta. Se confirma como
+siguiente conjunto de Identity tras 01-auth: ocho operaciones, sin la confirmación SMS retirada.
+Gobierno funcional en nv-04; baja distribuida completa conserva dueño y aceptación en nv-12.
+Ver [contrato ejecutable, dependencias y reversión](../../specs/endpoints/02-cuenta/implementacion.md).
+
+- Se reutiliza `IDeviceRegistry` para registro, baja individual y logout; no se crean proyectos.
+- La consulta propia proyecta sin hash y no usa L1 para evitar estado obsoleto entre réplicas.
+- Los cambios de cuenta guardan revisión, estado y eventos juntos en Mongo; un relay con ID estable
+  transfiere los eventos al outbox. El consumidor de auditoría persiste sin sobrescribir duplicados.
+- `auth_epoch` invalida JWT y refresh anteriores a la baja. Durante la gracia, `/connect/token`
+  emite recuperación restringida; cancelar no transforma un token restringido en acceso normal.
+- Nombre: adaptador real de Content Safety, cuatro categorías y umbral conservador >=2;
+  configuración o respuesta inválida deniega con 503. Su cloud se prueba aparte.
+- Avatar: consulta única por ID, titular, estado approved y purpose avatar; no aprobado/ajeno
+  comparten 404. La carga y aprobación de medios sigue perteneciendo a nv-05.
+- Baja/cancelación: eventos y avisos SMTP locales; `restorationStatus: queued` sustituye conteos
+  inventados de otros dominios. El plazo y la anonimización final son aceptación pendiente de nv-12.
+
+Costo: una lectura proyectada de estado por petición autenticada y una renovación tras cambiar modo
+o cancelar con recuperación restringida. No hay acceso a bases ajenas, despliegue ni firma de Ready.

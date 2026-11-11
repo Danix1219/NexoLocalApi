@@ -5,12 +5,12 @@
 | Módulo | Identity |
 | Quién | **C/Pr** (autenticado) |
 | Pantalla de la maqueta | 7.13 Cuenta → "Modo de uso" · `ACT.mode` |
-| Spec SDD | nv-02 |
+| Spec SDD | nv-04 |
 | Idempotente | Sí (pedir el modo actual devuelve `200` sin cambios) |
 
 ## 1. Función
 
-Cambia entre **Modo Cliente** y **Modo Proveedor** y emite tokens nuevos con el `mode` actualizado.
+Cambia entre **Modo Cliente** y **Modo Proveedor** y guarda el modo. No emite tokens: el cliente renueva la sesion mediante `/connect/token` (grant `refresh_token`).
 Modelo de cuenta única: las capacidades de cliente están siempre activas y el perfil profesional es
 opcional.
 
@@ -49,9 +49,7 @@ Content-Type: application/json
 {
   "currentMode": "provider",
   "hasProvider": true,
-  "accessToken": "eyJhbGciOi…",
-  "refreshToken": "rt_c71a…",
-  "expiresInSeconds": 600,
+  "tokenRefreshRequired": true,
   "toast": "Modo Proveedor"
 }
 ```
@@ -60,8 +58,7 @@ Content-Type: application/json
 |---|---|---|
 | `currentMode` | string | El modo ya aplicado |
 | `hasProvider` | bool | |
-| `accessToken` | string | **Nuevo**, con el `mode` actualizado |
-| `refreshToken` | string | **Nuevo**: se rota la familia al cambiar el contenido del token |
+| `tokenRefreshRequired` | bool | Renovar via `/connect/token`; comparar el modo persistido con el claim actual, incluso si se repite la peticion |
 | `toast` | string 40 | Texto que la maqueta muestra: "Modo Cliente" / "Modo Proveedor" |
 
 ## 4. Errores
@@ -78,7 +75,8 @@ Content-Type: application/json
 | Colección | Operación | Índice |
 |---|---|---|
 | `accounts` | `updateOne({ _id: sub }, { $set: { currentMode, updatedAt } })` | `_id` |
-| `openiddict.tokens` | Rota la familia del refresh y emite el par nuevo | `authorizationId` |
+
+El endpoint no escribe tokens. El grant de refresco relee la cuenta y rota los tokens mediante OpenIddict.
 
 `hasProvider` se **lee de `accounts`**, no del token: el campo lo actualiza el worker al consumir
 `provider.created` de Discovery.
@@ -94,7 +92,7 @@ Content-Type: application/json
 
 | Pieza | Para qué |
 |---|---|
-| **OpenIddict** | Emisión y rotación del par de tokens |
+| **OpenIddict** | El cliente renueva el par mediante `/connect/token`, después de guardar el modo |
 | **MongoDB** | `accounts.currentMode` |
 | **Redis** | Invalidación de caché |
 
@@ -103,7 +101,11 @@ Content-Type: application/json
 1. **El modo no es un permiso.** Cada endpoint de prestador verifica que exista el perfil profesional
    y que el recurso sea suyo, en la misma consulta. Un token con `mode: provider` falsificado no
    abriría nada.
-2. Se emiten tokens nuevos porque el `mode` viaja como claim; sin rotar, la app tendría hasta 10
-   minutos de desajuste entre lo que cree y lo que el servidor dice.
+2. El access token vigente conserva el claim anterior hasta renovar o vencer. La respuesta no
+   contiene tokens; `tokenRefreshRequired` informa si el claim difiere del modo guardado.
 3. El `409` con `nextStep` evita que la app tenga que adivinar: el servidor le dice qué sigue.
 4. El modo persiste en la cuenta para restaurarse al iniciar sesión, igual que en la maqueta.
+
+
+Decision 2026-11-08: tokens solo en `/connect/token`. Costo: una llamada adicional de refresh;
+si falla, el modo ya esta guardado y se reconcilia al renovar. Ruta de cuenta implementada en este incremento.

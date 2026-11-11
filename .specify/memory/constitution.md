@@ -60,17 +60,19 @@ Un único despliegue con APIs de dominio de frontera estricta:
 
 **Una sola arquitectura interna para todos los módulos**: `Contracts ← Domain ← Application ← Infrastructure ← Endpoints`. Caso de uso y permisos en aplicación; adaptadores de datos e integraciones en infraestructura. Verificado por NetArchTest en CI.
 
-**Un binario, dos roles**: arranca como `api` o `worker` según `NEXO_ROLE`.
+**Un host por réplica**: atiende HTTP y ejecuta el despachador de outbox en segundo plano. No se configura `NEXO_ROLE`. Decisión operativa del 2026-11-06, conciliada el 2026-11-08.
 
-Frontera entre módulos: un módulo solo referencia `*.Contracts` de otro. Lecturas por interfaz de contrato con timeout y circuit breaker; cambios de estado por eventos versionados (outbox → cola → worker), con consumidores idempotentes. **Cada módulo escribe solo su base.** Transacción local en Engagement para pedido y asignación.
+Frontera entre módulos: ningún dominio referencia proyectos de otro dominio. La propagación prevista usa eventos versionados y consumidores idempotentes; un mensaje en outbox no acredita implementación de su consumidor. **Cada módulo escribe solo su base.** Transacción local en Engagement para pedido y asignación.
 
 Los 8 microservicios previos (G01/S01-S08) quedan como **mapa de dominios**, no como unidades de despliegue.
 
 ## 5. Contratos y datos
 
-Autoridad de inventario: `API_NexoLocal/docs/contracts/inventario.json`. OpenAPI/AsyncAPI/SDL formales pendientes por incremento. docs/endpoints indexa, no sustituye los esquemas. IDs y dinero/fechas según contratos de Nexo, sin copiar prefijos SQL ni PascalCase legacy. Regla de teléfono/domicilio por estado y consentimiento.
+`docs/contracts/inventario.json` conserva la línea base histórica de IDs y trazabilidad; sus rutas antiguas no son aliases HTTP. Las fichas vigentes en `specs/endpoints/` gobiernan cada contrato refinado; `docs/endpoints.md` identifica las rutas registradas y sus límites contra el código actual. OpenAPI/AsyncAPI se formalizan por incremento; el índice no sustituye los esquemas ni acredita despliegue. IDs y dinero/fechas según contratos de Nexo, sin copiar prefijos SQL ni PascalCase legacy. Regla de teléfono/domicilio por estado y consentimiento.
 
 ## 6. Configuración y seguridad
+
+Decisión del usuario (2026-11-08): verificación por correo mediante SMTP/MailKit (Gmail configurado por entorno). El móvil es contacto opcional declarado, sin SMS. Correo confirmado no implica teléfono confirmado. Ver el [registro vigente](../../docs/decisions/registro.md).
 
 Sin secretos en archivos, errores o logs. Configuración por entorno. Redis no es historial durable ni una caché expulsable para revocación. Moderar antes de persistir contenido; rechazar por omisión cuando no se puede comprobar autorización. CORS/headers web se aplican a superficies HTTP pertinentes; no inventar antiforgery de Razor para Flutter.
 

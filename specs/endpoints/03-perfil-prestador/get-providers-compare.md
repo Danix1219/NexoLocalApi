@@ -1,11 +1,13 @@
 # Comparar dos prestadores · `GET /v1/discovery/providers/compare`
 
+> Estado ejecutable del incremento 2026-11-09: [implementación, conciliaciones y límites](implementacion.md). La caché y propagación cloud descritas como objetivo abajo no están activadas. Las rutas usan no-store, Identity por contrato y eventos locales durables; no se acredita aceptación cloud.
+
 | Campo | Valor |
 |---|---|
 | Módulo | Discovery |
 | Quién | **C** (autenticado) |
 | Pantalla de la maqueta | 7.9 Comparar · `V.compare`, `ACT.cmp` |
-| Spec SDD | nv-02 |
+| Spec SDD | nv-06 (función); nv-02 (contratos) |
 | Idempotente | Sí (lectura) |
 
 ## 1. Función
@@ -51,7 +53,7 @@ Authorization: Bearer <access_token>
     { "key": "responseTime", "label": "Responde",            "values": ["El mismo día", "En 24 h"],           "best": 0 },
     { "key": "warranty",     "label": "Garantía declarada",  "values": ["30 días en mano de obra", "—"],      "best": null },
     { "key": "payment",      "label": "Formas de pago",      "values": ["Efectivo, transferencia", "Efectivo"], "best": null },
-    { "key": "phoneVerified","label": "Teléfono confirmado", "values": ["Sí", "Sí"],                          "best": null },
+    { "key": "emailVerified","label": "Correo confirmado", "values": ["Sí", "Sí"],                          "best": null },
     { "key": "experience",   "label": "Experiencia",         "values": ["8 años", "15 años"],                 "best": 1 },
     { "key": "jobs",         "label": "Trabajos publicados", "values": ["18", "4"],                           "best": 0 }
   ]
@@ -64,7 +66,7 @@ Authorization: Bearer <access_token>
 | `rows[].values` | array\<string> | Ya formateados para la UI (`es-MX`, `priceTxt`, `kmTxt`, `status`) |
 | `rows[].best` | int32 \| null | Índice del mejor valor, o `null` cuando **no hay mejor objetivo** |
 
-`best: null` en atención, garantía, pago y teléfono confirmado es deliberado: no son mejores ni
+`best: null` en atención, garantía, pago y correo confirmado es deliberado: no son mejores ni
 peores, son distintos, y marcar un ganador ahí sería inventar una recomendación.
 
 **No se devuelve nunca**: teléfono, punto exacto de prestadores a domicilio, ni estadísticas privadas.

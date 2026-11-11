@@ -3,6 +3,7 @@
     <IsTestProject>true</IsTestProject>
   </PropertyGroup>
   <ItemGroup>
+    <ProjectReference Include="../../src/Domains/Discovery/Nexo.Discovery.Infrastructure/Nexo.Discovery.Infrastructure.csproj" />
     <Using Include="Xunit" />
   </ItemGroup>
   <ItemGroup>

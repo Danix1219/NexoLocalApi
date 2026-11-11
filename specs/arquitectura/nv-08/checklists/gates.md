@@ -54,3 +54,8 @@
 - [ ] AC-960 / T-960: perfil propio refinado para la historia, patrones justificados, fallos y suites definidos; T-001 espera esta salida y revisión humana. Sin aprobación por existir documentación.
 
 - [ ] Arquitectura interna corresponde al perfil vigente y sus proyectos reales; reglas/permisos permanecen en el núcleo, adaptadores aislados y ventajas medidas antes de afirmar mejoras de rendimiento.
+
+## Trabajos T-991
+- [ ] AC-991/AC-992/AC-993: ejecución de las suites actuales y evidencia en implementacion.md; revisión humana pendiente. Los dobles de Content Safety no acreditan Azure real. Publicación con imágenes/purga/push/feed no se declaran terminados.
+
+T-991: evidencia local de 197 casos únicos aprobados entre suites y regresión final, incluyendo AC-991/992/993, en implementacion.md. Casillas documentales/humanas permanecen sin firma; no acredita medios cloud o aprobación general de nv-08.

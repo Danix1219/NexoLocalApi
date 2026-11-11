@@ -1,5 +1,7 @@
 # Buscar prestadores · `GET /v1/discovery/search/providers`
 
+> Refinamiento ejecutable 2026-11-10: [contrato y l?mites del incremento](implementacion-directorio.md) prevalece sobre los ejemplos hist?ricos de índices/caché/hora fija y especialidades de esta ficha. Autoridad de arquitectura: nv-06.
+
 | Campo | Valor |
 |---|---|
 | Módulo | Discovery |
@@ -18,7 +20,7 @@ La búsqueda principal del cliente. Reproduce `results()` de la maqueta en cuatr
    propio **Tipo de atención**.
 3. **Solo los que atienden tu punto** (`serves`). Si ninguno cumple y `expanded=true`, se devuelven
    los de fuera ordenados por distancia, con aviso.
-4. **Orden**: Relevancia (teléfono confirmado primero, luego actualizado más recientemente) ·
+4. **Orden**: Relevancia (correo confirmado primero, luego actualizado más recientemente) ·
    Más cercanos · Más recomendados.
 
 ## 2. Petición
@@ -69,7 +71,7 @@ GET /v1/discovery/search/providers?q=fuga+calentador&cat=plomeria&lat=20.0539&ln
       "visit": { "mode": "free", "text": "Visita sin costo" },
       "rating": { "avg": 4.6, "count": 12 },
       "recs": 34,
-      "badges": ["phoneVerified"],
+      "badges": ["emailVerified"],
       "updatedText": "Actualizado hace 2 días"
     }
   ],
@@ -121,7 +123,7 @@ Orden (patrón **Strategy**, una clase por criterio):
 
 | `sort` | Implementación |
 |---|---|
-| `relevance` | `phoneVerified: -1`, luego `updatedAt: -1`, luego `_id: -1` |
+| `relevance` | `emailVerified: -1`, luego `updatedAt: -1`, luego `_id: -1` |
 | `near` | `distM: 1`, luego `_id: -1` |
 | `recs` | `recs: -1`, luego `rating.avg: -1`, luego `_id: -1` |
 

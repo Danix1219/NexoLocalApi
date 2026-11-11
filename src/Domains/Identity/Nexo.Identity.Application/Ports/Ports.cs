@@ -115,5 +115,9 @@ public interface ISessionTerminator
 /// <summary>Baja del dispositivo para que no sigan llegando notificaciones tras cerrar sesion.</summary>
 public interface IDeviceRegistry
 {
+    Task<DeviceRegistration?> RegisterAsync(Guid accountId, string token, string platform, string appVersion, DateTime now, CancellationToken ct);
+
+    Task<bool> DeleteAsync(Guid accountId, Guid deviceId, CancellationToken ct);
+
     Task RemoveAsync(Guid accountId, string? fcmToken, bool allDevices, CancellationToken ct);
 }

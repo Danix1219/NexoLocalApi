@@ -173,3 +173,31 @@ Dueño de este incremento: S04 Orders. [Mapa backend](../../../docs/estructura-b
 |---|---|---|
 | FR-950 | T-950, T-001 | AC-950 |
 | NFR-950 | T-950, T-001 | AC-950 |
+
+## Incremento ejecutable 06-solicitudes
+- FR-991: Publicar solicitudes moderadas y consultar propias/oportunidades reales con filtros de perfil y ubicación.
+- FR-992: Cerrar por propietario e incorporar solicitudes al mapa existente y resumen de intereses por contrato.
+- NFR-991: Privacidad del punto exacto, transacciones/cuota/reintentos atómicos, aislamiento y degradación explícita.
+- [ ] AC-991 → FR-991/NFR-991: RequestRulesTests y RequestEndpointsTests comprueban límites, contacto, JWT y moderación.
+- [ ] AC-992 → FR-991/FR-992/NFR-991: RequestPersistenceTests comprueba concurrencia, rollback, cuota, privacidad y consulta geoespacial.
+- [ ] AC-993 → FR-992/NFR-991: RequestContractsTests y RequestEndpointsTests comprueban resúmenes, iniciales, cursor, mapa y degradación.
+
+| Requisito local | Tareas definidas | Criterios vinculados |
+|---|---|---|
+| FR-991 | T-991 | AC-991, AC-992 |
+| FR-992 | T-991 | AC-992, AC-993 |
+| NFR-991 | T-991 | AC-991, AC-992, AC-993 |
+
+Refinamiento autorizado para este subset: [decisiones y evidencia](../../endpoints/06-solicitudes/implementacion.md). No implementa PATCH/DELETE/detalle ni pedidos; las tareas históricas conservan sus pendientes.
+
+## Incremento ejecutable 07-interes
+- FR-994: El prestador con perfil publicado y solicitud visible puede expresar y retirar interés con reglas idempotentes y transición lógica.
+- NFR-994: La lista de interesados aplica autorización por propietario, expone únicamente datos públicos, pagina de forma estable y persiste eventos junto con la transición.
+- [x] AC-994 → FR-994/NFR-994: RequestEndpointsTests comprueba identidad, idempotencia, nota/moderación, perfil/visibilidad y outbox transaccional.
+- [x] AC-995 → FR-994/NFR-994: RequestEndpointsTests comprueba retirada lógica/idempotente y conflicto ante pedido activo/asignación.
+- [x] AC-996 → FR-994/NFR-994: RequestEndpointsTests comprueba 404 ajeno, filtro activo, datos públicos, cache privada, orden/cursor y degradación de Discovery.
+
+| Requisito local | Tareas definidas | Criterios vinculados |
+|---|---|---|
+| FR-994 | T-992 | AC-994, AC-995 |
+| NFR-994 | T-992 | AC-994, AC-995, AC-996 |

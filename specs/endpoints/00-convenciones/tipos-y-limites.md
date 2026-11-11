@@ -46,8 +46,10 @@
 | `hasProvider` | bool | — | sí | `true` si la cuenta tiene perfil profesional |
 | `status` | string | enum | sí | `active` \| `pendingDeletion` \| `deleted` |
 | `termsAcceptedAt` | date | — | sí | Instante de aceptación de términos y aviso de privacidad |
-| `phone` | string | **13** | **no** | E.164 México: `+52` + 10 dígitos. **Dato opcional del perfil**, ya no es la identidad. Índice único **disperso** |
-| `phoneVerifiedAt` | date | — | no | Enciende la insignia *Teléfono confirmado* |
+| `phone` | string | **13** | **no** | E.164 México: `+52` + 10 dígitos. **Contacto opcional declarado**, no identidad ni número verificado; sin unicidad entre cuentas |
+| `emailVerifiedAt` | date | — | no | Enciende la insignia *Correo confirmado* |
+| `emailVerified` | bool | — | no | Proyección de correo confirmado en perfiles; no demuestra control del móvil |
+| `phoneVerificationStatus` | string | enum | no | `declared` en la captura futura de móvil; sin confirmación SMS |
 | `fcmToken` | string | **4096** | sí | Token de Firebase Cloud Messaging. Índice **único** |
 | `platform` | string | enum | sí | `android` (único valor por ahora) |
 | `appVersion` | string | **20** | sí | SemVer, p. ej. `1.4.2` |
@@ -88,7 +90,7 @@
 | `photoUrl`, `coverUrl` | string | **200** | no | URL de CDN |
 | `portfolio[]` | array | **6** | no | `{ url, thumbUrl, w: int32, h: int32 }` |
 | `channels.chat` | bool | — | sí | Chat en Nexo (por defecto `true`) |
-| `channels.call` | bool | — | no | Mostrar número para llamadas. **Requiere `phoneVerifiedAt`** |
+| `channels.call` | bool | — | no | Mostrar número para llamadas. Requiere correo verificado, móvil declarado y consentimiento explícito |
 | `jobs`, `recs` | int32 | ≥ 0 | sí | Contadores desnormalizados |
 | `rating.avg` | double | **0–5** | sí | Un decimal |
 | `rating.count` | int32 | ≥ 0 | sí | |
@@ -97,7 +99,8 @@
 
 ### Completitud del perfil (`completeness`)
 
-`phone 15 · services 15 · zones 15 · schedule 15 · prices 15 · terms 10 · portfolio (≥3 fotos) 15` = 100.
+`base 35 · photo 7 · schedule 14 · prices 14 · works 14 · terms 9 · cover 7` = 100.
+La misma fórmula se usa al crear y consultar el perfil; los 35 puntos base corresponden a los datos obligatorios validados. Correo confirmado no implica móvil confirmado.
 Se calcula en el servidor y se devuelve como `int32 0–100`.
 
 ---

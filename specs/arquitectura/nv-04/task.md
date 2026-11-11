@@ -57,3 +57,26 @@ Orden aplicable: refinamiento y preparacion de rutas preceden Ready; construccio
 ## Refinamiento del perfil de arquitectura
 
 - [ ] T-960 →FR-960,NFR-960. Refinar el [perfil S01](../../../docs/arquitectura/servicios/s01-identity.md) para la historia seleccionada, sin crear servicios vacíos. Acepta: AC-960 con patrón/motivo, invariantes, contrato, rutas, atomicidad, permisos y fallos comprobables; proveedores y revisión pendientes se registran sin inventarlos. Depende de: T-950.
+
+
+## Correccion de identidad antes de cuenta
+
+- [ ] T-970 ?FR-970,NFR-970. Conciliar correo SMTP/movil declarado; proteger changeEmail y limitar propositos publicos en AuthEndpoints; agregar regresiones de seguridad y registrar build/format/suite aislada/SDD. Acepta: AC-970, con evidencia real y limites de entrega Gmail; ninguna ruta de cuenta nueva. Depende de: T-002.
+
+
+## Construcción autorizada de cuenta local
+
+- [ ] T-981 →FR-981,NFR-981. Implementar y comprobar la operación de cuenta: Consultar exclusivamente la cuenta propia mediante proyección sin hash y respuesta privada sin caché. Acepta: AC-981. Pruebas: Consulta_propia_proyecta_solo_datos_publicables_y_no_acepta_otro_id; además Cada_operacion_exige_autenticacion. Depende de: T-002.
+- [ ] T-982 →FR-982,NFR-981. Implementar y comprobar la operación de cuenta: Editar nombre moderado y avatar aprobado propio; distinguir ausente/null y rechazar propiedades no permitidas. Acepta: AC-982. Pruebas: Nombre_moderado_se_guarda_y_repetir_no_duplica_revision; Foto_exige_propiedad_aprobacion_y_finalidad_y_null_la_borra; Moderacion_fallida_o_rechazada_no_persiste; además Cada_operacion_exige_autenticacion. Depende de: T-002.
+- [ ] T-983 →FR-983,NFR-981. Implementar y comprobar la operación de cuenta: Cambiar modo sin emitir tokens ni conceder perfil; informar si se requiere renovar por /connect/token. Acepta: AC-983. Pruebas: Modo_exige_perfil_y_el_refresco_relee_la_cuenta; además Cada_operacion_exige_autenticacion. Depende de: T-002.
+- [ ] T-984 →FR-984,NFR-981. Implementar y comprobar la operación de cuenta: Normalizar el móvil como dato declarado sin OTP ni verificación de posesión y exigir correo verificado. Acepta: AC-984. Pruebas: Movil_se_normaliza_como_declarado_sin_otp; además Cada_operacion_exige_autenticacion. Depende de: T-002.
+- [ ] T-985 →FR-985,NFR-981. Implementar y comprobar la operación de cuenta: Registrar dispositivo por token único; impedir reasignación activa reciente y expirar tras 90 días. Acepta: AC-985. Pruebas: Dispositivo_repetido_no_duplica_y_borrado_ajeno_no_revela_existencia; Dispositivo_inactivo_se_reasigna_conservando_un_solo_registro; además Cada_operacion_exige_autenticacion. Depende de: T-002.
+- [ ] T-986 →FR-986,NFR-981. Implementar y comprobar la operación de cuenta: Eliminar dispositivo con pertenencia en el mismo filtro; ausente y ajeno devuelven el mismo 404. Acepta: AC-986. Pruebas: Dispositivo_repetido_no_duplica_y_borrado_ajeno_no_revela_existencia; además Cada_operacion_exige_autenticacion. Depende de: T-002.
+- [ ] T-987 →FR-987,NFR-981. Implementar y comprobar la operación de cuenta: Solicitar baja con contraseña, plazo estable de 30 días, evento durable y revocación de sesiones previas. Acepta: AC-987. Pruebas: Solicitud_repetida_no_adelanta_la_baja_y_el_motivo_tiene_limite; Baja_cancelacion_y_refresco_no_reactivan_tokens_anteriores; además Cada_operacion_exige_autenticacion. Depende de: T-002.
+- [ ] T-988 →FR-988,NFR-981. Implementar y comprobar la operación de cuenta: Cancelar baja dentro de gracia; no devolver conteos de otros dominios; recuperación restringida hasta renovar. Acepta: AC-988. Pruebas: Cancelar_sin_baja_es_409_y_ventana_vencida_es_410; Baja_cancelacion_y_refresco_no_reactivan_tokens_anteriores; además Cada_operacion_exige_autenticacion. Depende de: T-002.
+
+
+## Incremento 2026-11-10 — correo y ubicación
+- [ ] T-990 →FR-990,NFR-990. Correo de verificación con identidad visual, alternativa MIME y vencimiento local. Acepta: AC-990. Depende de: T-002. Evidencia en geocodificacion.md y suites existentes.
+
+T-990 permanece pendiente de conciliación y revisión humana de arquitectura. La implementación y sus resultados locales ya están registrados en geocodificacion.md; no se equipara evidencia con aceptación.

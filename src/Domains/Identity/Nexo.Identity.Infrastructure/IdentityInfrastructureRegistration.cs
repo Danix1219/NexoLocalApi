@@ -11,6 +11,7 @@ using Nexo.Identity.Infrastructure.Messaging;
 using Nexo.Identity.Infrastructure.Persistence;
 using Nexo.Identity.Infrastructure.Redis;
 using Nexo.Identity.Infrastructure.Security;
+using Nexo.Identity.Infrastructure.Safety;
 using Nexo.Outbox;
 
 namespace Nexo.Identity.Infrastructure;
@@ -37,6 +38,13 @@ public static class IdentityInfrastructureRegistration
 
         services.AddScoped<IAccountRepository, MongoAccountRepository>();
         services.AddScoped<IDeviceRegistry, MongoDeviceRegistry>();
+        services.AddScoped<IAccountManagementStore, MongoAccountManagementStore>();
+        services.AddScoped<Nexo.Identity.Contracts.IProviderIdentityContract, ProviderIdentityContract>();
+        services.AddScoped<Nexo.Identity.Contracts.IRequestClientContract, RequestClientContract>();
+        services.AddScoped<AccountManagement>();
+        services.Configure<ContentSafetyOptions>(configuration.GetSection("ContentSafety"));
+        services.AddHttpClient<IAccountProfileSafety, AccountProfileSafety>(client => client.Timeout = TimeSpan.FromSeconds(8));
+        services.AddHostedService<AccountEventRelay>();
         services.AddScoped<IEmailVerificationStore, RedisEmailVerificationStore>();
         services.AddScoped<IVerificationTicketStore, RedisVerificationTicketStore>();
         services.AddScoped<IOtpQuota, RedisOtpQuota>();
@@ -57,8 +65,8 @@ public static class IdentityInfrastructureRegistration
     }
 
     /// <summary>
-    /// Consumidor del outbox de Identity. Solo lo registra el worker: es el unico proceso que
-    /// arranca el despachador, y el de API no debe abrir conexiones SMTP.
+    /// Consumidor del outbox de Identity, registrado en el mismo host que atiende HTTP.
+    /// El despachador envia los correos fuera del camino de la peticion.
     /// Va antes de AddOutbox, que registra su handler de registro con TryAdd.
     /// </summary>
     public static IServiceCollection AddIdentityOutboxHandler(

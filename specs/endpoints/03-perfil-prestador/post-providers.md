@@ -1,11 +1,13 @@
 # Crear perfil profesional · `POST /v1/discovery/providers`
 
+> Estado ejecutable del incremento 2026-11-09: [implementación, conciliaciones y límites](implementacion.md). La caché y propagación cloud descritas como objetivo abajo no están activadas. Las rutas usan no-store, Identity por contrato y eventos locales durables; no se acredita aceptación cloud.
+
 | Campo | Valor |
 |---|---|
 | Módulo | Discovery |
 | Quién | **C** (autenticado, sin perfil aún) |
 | Pantalla de la maqueta | 7.3 Registro flujo `pro`: pasos `type → basic → services → zones → ready` · `ACT.obnext`, `ACT.startpro` |
-| Spec SDD | nv-02 |
+| Spec SDD | nv-06 (función); nv-02 (contratos) |
 | Idempotente | Sí — `Idempotency-Key` obligatorio |
 
 ## 1. Función
@@ -89,9 +91,10 @@ Content-Type: application/json
   "attention": "both",
   "publicZone": { "label": "Centro", "point": { "lat": 20.0536, "lng": -99.3398 } },
   "radiusKm": 10,
-  "completeness": 45,
+  "completeness": 42,
+  "policyVersion": "provider-completeness/1",
   "isNew": true,
-  "phoneVerified": false,
+  "emailVerified": true,
   "nextOptionalSteps": ["hours", "prices", "terms", "portfolio"]
 }
 ```
@@ -135,16 +138,15 @@ Campos derivados que **calcula el servidor**, no el cliente:
 | `publicZone.label` | `areaLabel(location)`: zona más cercana, o "Cerca de X" si está a más de 1.2 km |
 | `publicZone.point` | Desplazamiento aleatorio de 500–800 m sobre `location` |
 | `categories` | `inferCats(activity + bio)` en `business` |
-| `phoneVerified` | Copia de `accounts.phoneVerifiedAt` (llega por el evento `account.phone_verified`) |
+| `emailVerified` | `true` según el contrato de Identity vigente; no se infiere del móvil ni de un evento sin consumidor |
 | `isNew` | `true` los primeros 30 días |
 | `rating` | `{ avg: 0, count: 0 }` |
 | `jobs`, `recs` | 0 |
-| `channels` | `{ chat: true, call: false }` — `call` solo se activa con celular confirmado |
+| `channels` | `{ chat: true, call: false }` — `call` solo se activa con correo confirmado y móvil declarado |
 
 Escrituras derivadas:
 
-- `outbox`: **`provider.created`** `{ providerId, accountId, categories, publicZone }` → el worker
-  pone `hasProvider: true` en `accounts` (Identity) e invalida los tags de búsqueda de la zona.
+- `outbox`: **`provider.created`** se conserva con el perfil. Identity confirma `hasProvider` por su contrato idempotente; un reintento o GET propio repara una confirmación interrumpida. Propagación externa e invalidación por tags: pendientes.
 - Invalida `feed:{geohash6}` y `map:providers:*` de la celda.
 
 Validator (`$jsonSchema`): `bio` `minLength 20` / `maxLength 600`, `name` `maxLength 80`,
@@ -176,8 +178,8 @@ Validator (`$jsonSchema`): `bio` `minLength 20` / `maxLength 600`, `name` `maxLe
    interceptar la petición para conocer el punto real.
 3. Las categorías de un negocio se infieren **en el servidor**: si se confiara en el cliente,
    cualquiera se colocaría en todas las categorías.
-4. `channels.call` nace en `false` y solo puede activarse con el celular confirmado: así la insignia
-   y el canal no se pueden falsear.
+4. `channels.call` nace en `false`; activarlo requiere correo confirmado, móvil declarado y consentimiento explícito.
+   La insignia acredita el correo; no garantiza que el número declarado pertenezca al titular.
 5. El `409` por índice único cierra la carrera de dos creaciones simultáneas.
 6. La moderación es **síncrona en el handler**, no diferida: el texto no llega a la base sin revisar
    (constitución §III.5).

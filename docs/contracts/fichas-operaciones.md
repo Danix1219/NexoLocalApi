@@ -1,6 +1,6 @@
 # Cobertura de operaciones — revisión 0.4.0
 
-Vista documental generada del [inventario](inventario.json), autoridad única de rutas/semántica. No es OpenAPI ni segunda autoridad de payloads. Inputs/resultados se transcriben como diseño de la línea base; tipos exactos/nulos/enums/errores/compatibilidad se formalizan antes de implementar cada historia. Cambiar inventario y regenerar esta vista si cambia el diseño.
+Vista histórica generada del [inventario](inventario.json), conservada para trazabilidad de la línea base. No es OpenAPI ni una guía de rutas ejecutables. El [estado real](../endpoints.md) enlaza las fichas vigentes en `specs/endpoints/`; no consumir los antiguos `/auth/*`. Inputs/resultados de esta vista no sustituyen los contratos refinados por incremento.
 
 ## EP-001 — POST /auth/otp
 

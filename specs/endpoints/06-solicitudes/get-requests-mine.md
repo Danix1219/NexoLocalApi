@@ -1,11 +1,13 @@
 # Mis solicitudes · `GET /v1/discovery/requests/mine`
 
+> Implementación local: rige el [refinamiento del incremento](implementacion.md) para cuota, búsqueda, contratos y capacidades pendientes. Los ejemplos cloud y de pedidos representan el objetivo posterior.
+
 | Campo | Valor |
 |---|---|
 | Módulo | Discovery |
 | Quién | **C** (autenticado) |
 | Pantalla de la maqueta | 7.4 Inicio → pestaña "Mis solicitudes" · `myReqFoot` |
-| Spec SDD | nv-06 |
+| Spec SDD | nv-09 (solicitudes; refinamiento local) |
 | Idempotente | Sí (lectura) |
 
 ## 1. Función
@@ -120,3 +122,9 @@ desnormalizado y `interestedPreview: []`. La pantalla funciona, solo sin las fot
    auditada "Copiar número".
 4. La llamada entre módulos es de solo lectura, por contrato, con degradación elegante.
 5. `summaryText` se compone en el servidor para que el texto de la maqueta no se reinvente en la app.
+
+## Refinamiento de implementación local (2026-11-10)
+Aplican las [decisiones, límites y evidencia del incremento](implementacion.md), incluida cuota transaccional Mongo, búsqueda normalizada sin Atlas Search, resumen por contratos y bloqueo de imágenes/reseñas sin infraestructura o pedido autorizado. Esta nota concilia los ejemplos históricos; no acredita despliegue.
+
+
+Refinamiento 2026-11-10: la respuesta de lista incluye `description` completo (hasta 600 caracteres del contrato de creación) junto a `descriptionExcerpt` de hasta 200 para clientes antiguos. La app contrae la vista a tres líneas y ofrece Ver más/Ver menos. No cambia ubicación exacta ni datos privados.
