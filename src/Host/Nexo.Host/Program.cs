@@ -30,14 +30,26 @@ await RunApiAsync(args);
 static async Task RunApiAsync(string[] args)
 {
     var builder = WebApplication.CreateBuilder(args);
+    // Request URLs may contain a private address or precise coordinates.
+    builder.Logging.AddFilter("Microsoft.AspNetCore.Hosting.Diagnostics", LogLevel.Warning);
 
     builder.Services.AddCommon();
+    builder.Services.AddScoped<Nexo.Discovery.Application.Providers.IProviderAccounts, Nexo.Host.ProviderAccountsBridge>();
+    builder.Services.AddScoped<Nexo.Discovery.Application.Requests.IRequestClients, Nexo.Host.RequestClientsBridge>();
+    builder.Services.AddSingleton<Nexo.Discovery.Application.Requests.IRequestInterests, Nexo.Host.RequestInterestsBridge>();
+    builder.Services.AddSingleton<Nexo.Host.InterestDiscoveryResilience>();
+    builder.Services.AddScoped<Nexo.Engagement.Application.Interests.IInterestRequestAccess, Nexo.Host.InterestRequestAccessBridge>();
+    builder.Services.AddScoped<Nexo.Engagement.Application.Interests.IInterestDirectory, Nexo.Host.InterestDirectoryBridge>();
+    builder.Services.AddScoped<Nexo.Engagement.Application.Interests.IInterestSafety, Nexo.Host.InterestSafetyBridge>();
+    builder.Services.AddScoped<Nexo.Engagement.Application.Orders.IOrderProviderAccess, Nexo.Host.OrderProviderAccessBridge>();
+    builder.Services.AddScoped<Nexo.Engagement.Application.Orders.IOrderSafety, Nexo.Host.OrderSafetyBridge>();
     builder.Services.AddSharedRedis(builder.Configuration);
     builder.Services.AddMongoDatabases(builder.Configuration);
     builder.Services.AddProblemDetails();
 
     // OpenIddict registra su esquema; aqui solo hace falta la pieza de autorizacion.
     builder.Services.AddAuthorization();
+    builder.Services.AddHttpClient<Nexo.Identity.Infrastructure.Safety.AccountProfileSafety>(c => c.Timeout = TimeSpan.FromSeconds(8));
 
     // OpenAPI del framework (.NET 10), sin Swashbuckle. Se publica solo fuera de produccion.
     // La version sellada en el ensamblado viaja al documento, de modo que se puede comprobar que
@@ -61,7 +73,6 @@ static async Task RunApiAsync(string[] args)
     builder.Services.ConfigureHttpJsonOptions(options =>
     {
         options.SerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
-        options.SerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
         options.SerializerOptions.TypeInfoResolverChain.Insert(0, Nexo.Host.NexoJsonContext.Default);
     });
 
@@ -72,6 +83,8 @@ static async Task RunApiAsync(string[] args)
     builder.Services.AddRateLimiter(options =>
     {
         options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+        options.OnRejected = async (context, _) =>
+            await NexoProblem.From(NexoCodes.RateLimitExceeded, "Demasiadas solicitudes.", context.HttpContext).ExecuteAsync(context.HttpContext);
 
         AddFixedWindow(options, NexoRateLimits.Public, NexoRateLimits.PublicPerMinute, ByIp);
         AddFixedWindow(options, NexoRateLimits.Auth, NexoRateLimits.AuthPerMinute, ByIp);
@@ -90,7 +103,8 @@ static async Task RunApiAsync(string[] args)
     static string BySubject(HttpContext context) => context.User.FindFirst("sub")?.Value ?? ByIp(context);
 
     builder.Services.AddIdentityInfrastructure(builder.Configuration, builder.Environment.IsDevelopment());
-    builder.Services.AddDiscoveryInfrastructure();
+    builder.Services.AddDiscoveryInfrastructure(builder.Configuration);
+    builder.Services.AddScoped<Nexo.Identity.Application.Ports.IAccountProfileSafety, Nexo.Host.AccountMediaBridge>();
     builder.Services.AddEngagementInfrastructure();
     builder.Services.AddIdentityOutboxHandler(builder.Configuration);
     builder.Services.AddOutbox(NexoDatabaseKeys.Identity);
@@ -103,9 +117,8 @@ static async Task RunApiAsync(string[] args)
 
     app.UseExceptionHandler();
     app.UseResponseCompression();
-    app.UseRateLimiter();
-
     app.UseAuthentication();
+    app.UseRateLimiter();
     app.UseAuthorization();
 
     // Lista negra de `jti`: el access token sigue siendo valido criptograficamente hasta su `exp`,
@@ -129,6 +142,8 @@ static async Task RunApiAsync(string[] args)
     });
 
     // Techos compartidos en Redis para las dos instancias de App Service.
+    app.UseIdentityAccountAccess();
+
     app.Use(async (context, next) =>
     {
         var path = context.Request.Path;
@@ -139,10 +154,14 @@ static async Task RunApiAsync(string[] args)
         }
 
         var limiter = context.RequestServices.GetRequiredService<SharedRateLimiter>();
-        var partition = context.Connection.RemoteIpAddress?.ToString() ?? "desconocida";
-        if (!await limiter.IsAllowedAsync(partition, 60, TimeSpan.FromMinutes(1), context.RequestAborted))
+        var policy = context.GetEndpoint()?.Metadata.GetMetadata<EnableRateLimitingAttribute>()?.PolicyName;
+        var subject = context.User.FindFirst("sub")?.Value;
+        var personal = policy is NexoRateLimits.User or NexoRateLimits.Chat && !string.IsNullOrEmpty(subject);
+        var partition = personal ? $"{policy}:{subject}" : context.Connection.RemoteIpAddress?.ToString() ?? "desconocida";
+        var maximum = personal && policy == NexoRateLimits.User ? NexoRateLimits.UserPerMinute : NexoRateLimits.PublicPerMinute;
+        if (!await limiter.IsAllowedAsync(partition, maximum, TimeSpan.FromMinutes(1), context.RequestAborted))
         {
-            context.Response.StatusCode = StatusCodes.Status429TooManyRequests;
+            await NexoProblem.From(NexoCodes.RateLimitExceeded, "Demasiadas solicitudes.", context).ExecuteAsync(context);
             return;
         }
 

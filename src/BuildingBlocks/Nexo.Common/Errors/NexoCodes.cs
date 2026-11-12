@@ -39,6 +39,13 @@ public static class NexoCodes
     public const string AuthRefreshReused = "auth.refresh_reused";
     public const string AuthEmailNotVerified = "auth.email_not_verified";
     public const string AccountPendingDeletion = "account.pending_deletion";
+    public const string AccountConcurrentUpdate = "account.concurrent_update";
+    public const string AccountAlreadyPendingDeletion = "account.already_pending_deletion";
+    public const string AccountNotPendingDeletion = "account.not_pending_deletion";
+    public const string AccountDeletionAlreadyExecuted = "account.deletion_already_executed";
+    public const string ProviderProfileRequired = "provider.profile_required";
+    public const string DeviceTokenOwnedByOtherAccount = "device.token_owned_by_other_account";
+    public const string PhoneInvalid = "phone.invalid";
     public const string PhoneAlreadyInUse = "phone.already_in_use";
     public const string PhoneNotVerified = "phone.not_verified";
 
@@ -49,10 +56,13 @@ public static class NexoCodes
     public const string ProviderBioTooShort = "provider.bio_too_short";
     public const string ProviderScheduleInvalid = "provider.schedule_invalid";
     public const string ProviderRadiusInvalid = "provider.radius_invalid";
+    public const string ProviderPricesLimit = "provider.prices_limit";
     public const string CompareNeedTwoIds = "compare.need_two_ids";
     public const string ContentInappropriate = "content.inappropriate";
     public const string ContentImagesLimit = "content.images_limit";
     public const string WorkNotFound = "work.not_found";
+    public const string WorkOwnContent = "work.own_content";
+    public const string WorkCategoryNotInProfile = "work.category_not_in_profile";
     public const string WorkAlreadyRecommended = "work.already_recommended";
     public const string RequestNotFound = "request.not_found";
     public const string RequestAlreadyClosed = "request.already_closed";
@@ -62,6 +72,7 @@ public static class NexoCodes
     public const string InterestAlreadyExpressed = "interest.already_expressed";
     public const string InterestOwnRequest = "interest.own_request";
     public const string InterestRequestAssigned = "interest.request_assigned";
+    public const string InterestCannotWithdrawAssigned = "interest.cannot_withdraw_assigned";
     public const string OrderActiveExists = "order.active_exists";
     public const string OrderRequestAlreadyAssigned = "order.request_already_assigned";
     public const string OrderAlreadyAccepted = "order.already_accepted";
@@ -71,6 +82,8 @@ public static class NexoCodes
     public const string OrderAddressRequired = "order.address_required";
     public const string OrderPriceAlreadySet = "order.price_already_set";
     public const string OrderPriceOutOfRange = "order.price_out_of_range";
+    public const string OrderAttentionNotSupported = "order.attention_not_supported";
+    public const string OrderVersionConflict = "order.version_conflict";
 
     // Opiniones, chat y moderacion
     public const string ReviewAlreadyExists = "review.already_exists";

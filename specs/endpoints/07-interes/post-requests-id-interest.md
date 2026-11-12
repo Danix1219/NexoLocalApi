@@ -105,7 +105,7 @@ Escrituras derivadas:
 |---|---|
 | **MongoDB** | `upsert` con índice único |
 | **Azure AI Content Safety** | Moderación de la nota antes de guardar |
-| **Polly v8** | Timeout + circuit breaker en la comprobación de visibilidad |
+| **Resiliencia en Host (.NET)** | Timeout de 2 s, circuit breaker de 30 s tras tres fallos y bulkhead de 64 operaciones |
 | **FirebaseAdmin** (worker) | Push al cliente |
 | Outbox → Storage Queue | Contadores en Discovery y aviso al cliente |
 

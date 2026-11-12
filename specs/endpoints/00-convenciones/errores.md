@@ -84,8 +84,13 @@
 | 401 | `auth.refresh_reused` | Refresh ya rotado: se revoca toda la familia |
 | 403 | `auth.email_not_verified` | |
 | 403 | `account.pending_deletion` | La cuenta está en los 30 días de baja |
-| 409 | `phone.already_in_use` | Ese celular ya está en otra cuenta |
-| 400 | `phone.not_verified` | Se intentó activar el canal de llamada sin confirmar el celular |
+| 409 | `account.concurrent_update` | La revisión cambió durante la escritura; consultar y reintentar |
+| 409 | `account.already_pending_deletion` | Solicitud repetida; se conserva la fecha original |
+| 409 | `account.not_pending_deletion` | No hay una baja que cancelar |
+| 410 | `account.deletion_already_executed` | Venció la ventana para cancelar; un token ya revocado recibe 401 |
+| 409 | `provider.profile_required` | El modo proveedor requiere perfil profesional |
+| 409 | `device.token_owned_by_other_account` | Otra cuenta activa usó recientemente el token, o hubo conflicto de reasignación |
+| 400 | `phone.invalid` | Móvil declarado fuera del formato permitido; no acredita posesión de la línea |
 
 ### Perfil y contenido
 

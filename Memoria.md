@@ -1,5 +1,69 @@
 # Memoria — API_NexoLocal
 
+## Implementación local de 02-cuenta (2026-11-09)
+
+Estado: ocho operaciones vigentes implementadas en Identity, rama `feature/02-cuenta`. Se conserva
+la auditoría anterior y los cambios IDE preexistentes; sin commit, push, despliegue ni datos reales.
+GET/PATCH cuenta, modo, móvil declarado, registro/baja de dispositivos y solicitud/cancelación de
+baja local. La antigua confirmación SMS sigue retirada. Alcance funcional en nv-04; saga global
+permanece en nv-12. Contrato y rollback en `specs/endpoints/02-cuenta/implementacion.md`.
+
+Decisiones: sin L1 para la cuenta propia; proyección sin hash. Se reutiliza IDeviceRegistry para
+registro/borrado/logout. Cambio+revisión+eventos de cuenta atómicos en Mongo, relay idempotente al
+outbox y auditoría persistida con cadena por cuenta. auth_epoch invalida JWT/refresh antiguos;
+gracia con recovery_only, restringido hasta renovar después de cancelar. Modo no emite tokens.
+La política user se aplica tras autenticar y el contador compartido particiona por cuenta.
+
+Verificación final ejecutada con SDK 10.0.302: build Release --no-restore -m:2, cero errores y
+advertencias; dotnet format src/Nexo.sln --verify-no-changes --no-restore PASS. Suite completa
+con NEXO_DISABLE_DOTENV=1 y --no-build: 96 correctas, cero fallidas/omitidas (16 Common,
+7 arquitectura, 55 seguridad incluidas 40 nuevas, 18 integración). Resultados locales en
+`artifacts/cuenta-verified-results`. Las tres suites Unit vacías no se cuentan como cobertura.
+Mongo/Redis reales de Testcontainers; solo HTTP de moderación y captura de avisos son dobles.
+SDD e integridad: 26 specs, 484 tareas, 468 requisitos, 323 criterios; ocho pruebas del validador.
+No se firman casillas de aceptación humana ni aprobación productiva.
+
+Deuda: ContentSafety no está configurado en el .env local; cambio de nombre devuelve 503 antes
+de guardar. El registro de avatar exige propietario, approved y purpose avatar, pero su carga y
+aprobación pertenece a nv-05. nv-12 aún debe ejecutar anonimización, medios externos y efectos
+sobre pedidos/perfiles; no afirmar borrado global por aceptar una solicitud. Avisos SMTP y
+auditoría local tienen consumidor; eventos de otros dominios requieren integración y reentrega
+según su dueño. Persisten deuda de cambio efectivo de correo y retención de códigos del outbox.
+
+A evitar: nuevos proyectos/capas o referencias entre dominios, falsear moderación aprobada,
+tratar el móvil como verificado, devolver conteos inventados o restaurar acceso de JWT antiguos.
+No declarar Gmail/Content Safety/Azure/Flutter aceptados por las pruebas locales.
+
+## Auditoría de endpoints y conciliación de correo (2026-11-08)
+
+Estado: revisión del clon actual en `fix/auditoria-identidad-email`, sin commit, push ni despliegue.
+Siete rutas HTTP de autenticación implementadas; ocho operaciones al separar password/refresh
+en `/connect/token`. Cuenta, Discovery, Engagement y Screens no tienen operaciones registradas.
+El índice `docs/endpoints.md` separa implementación de la línea base histórica de 101 EP.
+
+Decisiones: usuario confirma Gmail vía SMTP/MailKit, sustituyendo SMS; móvil opcional declarado,
+sin afirmar control del número. Fichas conciliadas con `emailVerified` y consentimiento para llamadas.
+Confirmación SMS retirada del diseño, enlaces históricos conservados. `changeEmail` exige sesión;
+la ruta pública rechaza `resetPassword`, que entra por recuperación. SDK fijado en 10.0.302 por
+autorización expresa del usuario; net10.0 conservado. Host unificado conciliado con constitución.
+Modo futuro no emite tokens: respuesta indica renovar en `/connect/token`. Idempotencia de bajas
+y dispositivos se aclara como efecto estable, sin prometer respuestas idénticas al repetir.
+
+Verificación ejecutada: build Release con cero errores/advertencias; format verify-no-changes PASS;
+56 pruebas correctas, cero fallidas/omitidas (16 Common, 7 arquitectura, 15 seguridad, 18 integración).
+NEXO_DISABLE_DOTENV=1 omite incluso el archivo de carpeta padre; suites con Mongo/Redis efímeros.
+Wrapper SDD ejecutado en copia aislada con carpeta API_NexoLocal: 26 specs, traza e integridad PASS,
+8 pruebas del validador PASS. Estas pruebas no acreditan entrega real Gmail ni revisión humana.
+
+Deuda: aplicar cambio de correo aún no tiene endpoint; consumidores de bienvenida/cambio de contraseña
+y propagación no están implementados. Outbox conserva payloads con códigos; falta depuración segura.
+Cancelar baja tras vencer la sesión requiere definir acceso restringido, porque los grants actuales
+rechazan pendingDeletion. No empezar el siguiente incremento dando esos flujos por completos.
+
+A evitar: reintroducir SMS, marcar móvil como verificado por confirmar un correo, consumir rutas
+históricas `/auth/*`, equiparar existencia de ficha con implementación, o presentar pruebas locales
+como Gmail/Azure/Flutter aceptados. No se alteraron secretos ni datos reales.
+
 ## Fase documental — adaptación al profesor (2026-11-02)
 Estado: estructura y borradores documentales creados; sin implementación, compilación, suites de pruebas, CI o despliegue. El lint documental se registra por separado después de ejecutarlo.
 Decisiones: adoptar el formato de API_SDD: specs/arquitectura/nv-XX/spec.md → plan.md → task.md → checklists/gates.md. Mantener requisitos Nexo, Flutter/microservicios/NoSQL y fuente única de contratos. Revisores por asignar.
@@ -373,3 +437,94 @@ en el exigiria su propio perfil.
 
 A evitar: dar por cumplido el requisito de dos instancias porque el codigo lo soporte. Lo soporta
 y hay una prueba que lo acredita, pero en Azure corre una sola.
+
+### 2026-11-09 — Ubicacion de busqueda desde la app
+
+PUT /v1/discovery/me/location implementado en las capas existentes de Discovery.
+Persiste GeoJSON, radio y fecha por sub autenticado en user_profiles de Discovery.
+Validacion Mexico, radio y origen; la autorizacion global conserva baja/revocacion.
+Prueba nueva dentro de CuentaTests: HTTP y Mongo/Redis aislados, 401 anonimo,
+400 fuera del viewbox y coordenadas/radio persistidos bajo la cuenta correcta.
+Regresion backend: 97 pruebas aprobadas (16 Common, 7 Architecture, 18 Integration,
+56 Seguridad). No se cuentan proyectos unitarios vacios como cobertura.
+Ver specs/endpoints/04-descubrimiento/implementacion-ubicacion.md para limites:
+no hay geocodificacion ni conteos ficticios. Fotos continúan pendientes de Blob
+y moderacion no configurados; el usuario autorizo mostrar Proximamente.
+
+
+### 2026-11-09 — Incremento 03-perfil-prestador (nv-06 parcial)
+
+Estado: cinco operaciones de perfil incorporadas en las capas actuales de Discovery: alta, propio, público, edición por siete secciones y comparación. Índice por cuenta, alta idempotente con respuesta original, CAS por revisión, moderación cerrada, subidas propias/aprobadas y GeoJSON con proyección pública sin punto home. Cuenta activa/correo/móvil se consultan por contrato de Identity; solo Identity actualiza hasProvider.
+
+Decisiones: política provider-completeness/1 única para alta y propio; horario real America/Mexico_City; distancias redondeadas; etiquetas de zona genéricas sin geocodificación. Sin caché de perfiles hasta disponer de invalidación real. Visitas agregadas reales; contacto e intereses null cuando no existen. Eventos durables locales con límite, sin despacho cloud ficticio.
+
+Verificación: 127 pruebas aprobadas: 7 arquitectura, 16 Common.Unit, 14 Discovery.Unit, 26 Integration y 64 Seguridad.Tests. Son 30 casos nuevos sobre los 97 anteriores; Identity.Unit y Engagement.Unit siguen sin casos y no se cuentan como cobertura. Ejecución Release con cobertura, TRX en artifacts/profiles-verified. Integridad SDD aprobada; lint de enlaces conserva fallos históricos. Detalle en specs/endpoints/03-perfil-prestador/implementacion.md.
+
+Deuda: Content Safety/Blob/CDN reales, catálogo público y descubrimiento (04), dispatcher/purgas, validator de colección y revisión humana. No es cierre completo de nv-06. No se modificaron secretos ni móvil, ni se publicaron cambios. A evitar: aprobar texto sin moderación, afirmar teléfono verificado o equiparar fotos con trabajos; no confundir prueba aislada con aceptación cloud.
+
+
+### 2026-11-10 — Correo de marca y ubicación real
+Estado: SMTP multipart HTML/texto con identidad, código escapado y fecha en America/Mexico_City; Photon detrás de Discovery con búsqueda/inversa y GET privado de ubicación. Labels genéricos anteriores se resuelven al leer. Sin logs de direcciones ni fallback ficticio. Contrato/evidencia en specs/endpoints/04-descubrimiento/geocodificacion.md.
+Verificación: 139 casos únicos por capas (7/16/19/4/27/66), regresiones del contrato null y nombres corregidas; build final Release sin errores/advertencias. Búsqueda e inversa reales de Tula HTTP200 y ready200. Vista previa de correo inspeccionada en Chrome, sin enviar SMTP real. Docker requiere ejecución fuera del sandbox para acceso al daemon.
+Decisiones/deuda: lang=es no admitido por instancia pública; usar nombres locales. Photon público sin SLA, solo uso moderado; Geocoding__BaseUrl permite sustitución HTTPS. Sin catálogo/búsqueda de prestadores, despliegue ni aprobación humana total. .env operativo intacto; valores de Mail en .env.example sustituidos por placeholders. Evitar equiparar Testcontainers, preview o APK con aceptación cloud completa.
+
+### 2026-11-10 — Directorio público del grupo 04
+Estado: GET categories, search/suggest, search/providers y map/nearby providers implementados en Discovery. Catálogo Mongo versionado con slugs ya aceptados, colores/etiquetas de maqueta; búsqueda AND sin acentos, filtros, estrategias, radio/serves, expansión y cursor compacto por ancla/filtros. Mapa con puntos difuminados persistidos para home; locales publicados exactos. Identity aporta estado mínimo por lote, solo su adaptador lee su base. Cuenta inactiva no aparece, sin caché de resultados obsoletos.
+Verificación: 170 casos aprobados con cobertura en las capas actuales (7 arquitectura, 16 comunes, 34 Discovery, 4 Identity, 30 integración y 79 seguridad). 31 nuevos; Engagement sin casos. Integridad SDD local aprobada, enlaces históricos pendientes. Evidencia, decisiones y límites en specs/endpoints/04-descubrimiento/implementacion-directorio.md; aceptación humana/cloud no inferida.
+Decisiones: se refinan fichas históricas a nv-06, no se añaden cinco especialidades ficticias a otros ni cambian slugs existentes. Hora real México, distancias aproximadas 0.5 km. Sin Atlas Search/caché Redis de consultas aún: presupuesto 1000 candidatos/5 s Mongo y 503 explícito al superar, nunca total truncado. Catálogo ETag; búsquedas/mapa/sugerencias private no-store.
+Deuda: proyección/índice especializado y caché con invalidación antes de escalar; feed y kind=requests esperan grupos 05/06. requests controla 401/403 y devuelve 503 hasta disponer de la fuente. Siguiente grupo independiente: 05-trabajos con moderación y subidas aprobadas. Sin cambios móviles, secretos, commits/push, despliegue o Terraform. Evitar llamar a resultados vacíos error si no hay perfiles reales; no sembrar perfiles demo.
+
+Cierre operativo: build Release sin errores/advertencias y diff-check 0. API local reiniciada en 5188; ready y las cuatro rutas nuevas respondieron 200 con configuración existente. La regresión de seguridad requirió aislar la dirección de cada HostDeSeguridad mediante TestClientAddress ya existente: evita interferencias de la cuota Redis entre pruebas, sin alterar límites del producto. Resultado final 79/79 en seguridad con cobertura; el primer log con 12 fallos de aislamiento se conserva y no se presenta como verde.
+
+### 2026-11-10 — Trabajos del grupo 05
+Estado: cinco operaciones en Discovery: publicar, listado por prestador, borrar propio y POST/DELETE recomendación. Categoría contra perfil y cuenta activa por contrato. Moderación de todos los textos previa a persistir, ubicación solo difuminada 500–800 m, cursores compactos ligados al prestador y marcas por usuario sin caché compartida. Reintento de alta conserva el resultado; clave reusada con otro payload 409; no resucita trabajo borrado. Retirado por moderación puede borrarlo su autor.
+Decisiones: cuota durable 30 publicaciones por día UTC dentro de la misma transacción Mongo que trabajo, contador jobs, recibo mínimo y evento. Recomendaciones únicas actualizan trabajo/prestador atómicamente, sin autobombo ni autores públicos; borrado elimina relaciones y decrementa contadores sin negativos. Tests existentes usan Mongo replica set real. Fichas vigentes 90/1000/6 prevalecen sobre ejemplos históricos nv-08 60/200/4; sin paquete/proyecto nuevo.
+Verificación: 197 casos únicos por capas con cobertura, 27 nuevos (13 unitarios, 6 persistencia y 8 HTTP/seguridad), mediante solución completa 196 y regresión final de borrado. Integridad SDD aprobada; enlaces históricos pendientes. Registro en specs/endpoints/05-trabajos/implementacion.md. No equivale a moderación Azure real ni aprobación humana.
+Deuda y a evitar: Blob/CDN/subida/moderación/purga reales ausentes: no publicar imágenes y no simular borrado de un legacy con medios. Content Safety sin configurar devuelve 503 para publicación; doble solo en pruebas. Eventos Discovery durables, sin despacho cloud ni push acreditados. Feed, guardados y solicitudes no implementados por este incremento. Sin móvil, secretos, commits/push, despliegue o Terraform. Siguiente grupo: 06-solicitudes. No confundir logs/TRX con aceptación cloud.
+
+Cierre operativo: build Release sin errores/advertencias, diff-check 0, API local en 5188 lista (ready 200); OpenAPI registra cinco operaciones works. Comprobación anónima: mutaciones 401 y listado de prestador inexistente 404. No se crearon cuentas/trabajos reales para verificar esas rutas.
+
+### 2026-11-10 — Solicitudes del grupo 06
+Estado: POST requests, GET requests/mine, GET requests/opportunities y POST requests/{id}/close en Discovery, más fuente real para map/nearby?kind=requests. Pruebas en las capas existentes: 228 aprobadas con cobertura, 31 nuevas (14 unitarias, 8 integración/contratos, 9 HTTP/seguridad). Regresión completa salida 0; compilación sin errores/advertencias. Ver specs/endpoints/06-solicitudes/implementacion.md y docs/estado-desarrollo-endpoints.md.
+Decisiones: propietario nv-09; cuatro fichas refinadas sin implementar detalle/PATCH/DELETE ni grupo 07. Punto exacto solo en location privado de Mongo, excluido antes de materializar; público difuminado una vez. Cuota 10/día UTC, solicitud, recibo mínimo y evento en transacción local; reintento estable y rollback real. Filtros de perfil/categoría/radio, cursor compacto y búsqueda normalizada sin Atlas Search. Contratos mínimos Identity (iniciales) y Engagement (resumen real); Host compone, circuito/timeout con disponibilidad explícita. Cierre solo del propietario, fecha estable, declaración de prestador no habilita reseñas.
+Deuda: Content Safety real requerido; fotos bloqueadas hasta almacenamiento/moderación/purga. Eventos durables sin despacho/push/pedidos distribuidos acreditados. canReview false hasta flujo autorizado de pedidos. Interés y su mantenimiento de contadores son el siguiente grupo 07. SDD-INTEGRITY-OK, pero check_sdd.ps1 conserva enlaces externos históricos rotos; revisión humana pendiente.
+A evitar: confundir dobles de moderación con nube o pruebas con aceptación. Sin cambios móviles, secretos, commits/push, despliegue ni Terraform. API iniciada en 5188; live 200, OpenAPI cuatro rutas y consultas privadas anónimas 401. Se encendieron Redis/colas locales existentes; ready no aprobado porque Mongo no responde con la configuración actual. No se cambió la conexión ni se sembraron datos reales.
+
+
+### 2026-11-10 ? Medios Azure reales y consumo Flutter
+Estado: intenci?n/complete/estado/retirada de uploads, lectura WebP/miniatura, portada personal y v?nculo de avatar/perfil profesional/trabajos/solicitudes implementados en las capas actuales. Regresi?n completa Release 236/236; despu?s, suite MediaPipelineTests 6/6 (incluye una prueba adicional) y MediaEndpointsTests 3/3 ampliada con portada, solicitud y trabajo. Son 237 casos distintos cubiertos entre las ejecuciones. Flutter267/267 con cobertura; analyze0errores/0warnings y13infos previos. APK construido, instalado -r y abierto en tel?fono096fd2cc784f sin borrar datos. API5188 reiniciada, ready200 y ocho operaciones de medios presentes en OpenAPI.
+Decisiones: Discovery es due?o de uploads; contrato m?nimo enlaza Identity mediante Host. SAS create-only15min sin Bearer, privados incoming/public, cola image-processing, byte/mime/dimensiones reales, EXIF/orientaci?n corregidos, WebP1600 y miniatura400. Azure Content Safety real antes de aprobar. Fase verificada durable permite recuperaci?n tras borrar fuente; limpieza caducados y auditor?a de referencias respetan borrado reversible. No secretos en Flutter ni SAS en logs.
+Evidencia cloud: SAS PUT, cola, Content Safety imagen, codec/miniatura y borrado con imagen sint?tica y DBAtlas aislada; todo limpiado (artifacts/media-cloud-check.txt). No se cre? publicaci?n ni cambi? foto de usuario real para esa prueba. NuGet audit sin vulnerabilidades conocidas en dependencias Discovery.Infrastructure. Evidencia de pruebas en artifacts/media-tests.txt,media-pipeline-final.txt,media-http-final.txt y media-flutter-tests-final.txt de la carpeta de trabajo.
+Deuda: recorrido f?sico de galer?a/c?mara y cada pantalla por usuario; CDN/FrontDoor y chat privado fuera. Configurar MediaStorage__PublicBaseUrl HTTPS con URL de API al desplegar; desarrollo actual usa127.0.0.1:5188 con adb reverse. SDD-INTEGRITY-OK26specs; check_sdd.ps1 a?n falla por enlaces hist?ricos externos a antiguos checkouts. Revisi?n humana no firmada.
+A evitar: confundir pruebas HTTP con nube, prueba sint?tica cloud con aceptaci?n de todos los recorridos, o instalaci?n local con despliegue. .env no cambiado ni expuesto; sin nuevos recursos, Terraform, commits ni push.
+
+### 2026-11-10 — Edición de publicaciones y galería de solicitudes
+Estado: PATCH de solicitud propia abierta y PATCH de trabajo propio, con nueva moderación de texto, comprobación de medios aprobados y actualización parcial de campos editables en Mongo. Solicitudes admiten hasta seis imágenes y conservan compatibilidad con `imageUrl` anterior. Fichas nuevas en los grupos 05 y 06.
+Decisiones: actualizar campos individuales evita sobrescribir contadores y estado concurrente. `checkedAt` dentro de `data` se mantiene como cadena ISO, igual que en el documento original; el valor BSON de fecha ocasionaba HTTP 500 al deserializar y se corrigió.
+Verificación: regresión previa al último ajuste de fecha, 246/246 pruebas .NET. Después de ese ajuste, las dos pruebas HTTP de edición que habían fallado pasaron 2/2. Integridad documental local 26 specs OK; `check_sdd.ps1` sigue fallando por enlaces externos históricos. Falta repetir la regresión .NET completa después de la corrección de fecha y comprobar la API en ejecución. No equivale a prueba con Atlas ni aceptación humana.
+Deuda: recorrido manual de edición con imágenes reales en la cuenta del usuario. Sin secretos, commit ni despliegue. Evitar declarar la regresión completa verde después del último parche basándose solo en las dos pruebas focalizadas.
+
+
+### 2026-11-10 ? Corrección de fotos y publicaciones extensas
+Estado: filtro de imágenes ahora admite nivel bajo 2 y bloquea medio/alto 4/6; respuesta incompleta o fallo Azure no aprueba. Estado de upload rechazado expone el código de formato/dimensiones separado del rechazo de contenido. Listas mine/opportunities devuelven description completa junto al excerpt previo. Flutter usa Ver más/Ver menos en tarjetas de solicitudes y trabajos con medición real del desbordamiento.
+Decisiones: el umbral del texto moderado permanece independiente. No se exige detectar rostro ni se comparan identidades. No se guarda la imagen ni las puntuaciones de categoría en logs. El rechazo específico informado por el usuario no se puede atribuir a una categoría sin evidencia de su análisis.
+Verificación: .NET Release 242/242, Flutter 269/269 con cobertura, analyze 0 errores/0 advertencias y 13 avisos informativos anteriores. APK debug/live instalado -r conservando datos, app abierta. API local ready 200. Integridad SDD 26 specs OK; check_sdd.ps1 móvil aún falla por problemas documentales históricos fuera de 057.
+Deuda: recorrido manual con la foto real del usuario tras reinstalación, aprobación humana y limpieza documental histórica. A evitar: declarar que la foto anterior se aprobó o que la suite prueba visualmente la galería.
+
+### 2026-11-10 — Zona pública del prestador y caché de medios
+Estado: Discovery resuelve etiqueta de localidad con Photon para el prestador sin exponer su punto exacto; repara etiquetas genéricas anteriores al consultar el perfil propio. Las imágenes aprobadas usan caché privada de 5 minutos. Prueba de zona y prueba de seguridad de medios pasan; suite .NET: arquitectura 7/7, Common 16/16, Discovery 63/63, Identity 4/4, Integration 54/54; Seguridad 103/103 tras ajustar expectativa de caché. SDD-INTEGRITY-OK 26 specs; API local /health/ready 200. Aceptación física pendiente.
+
+### Incremento 07-interes (2026-11-10)
+Estado local: POST/DELETE interest y GET interested conectados a Engagement; el HTTP valida auth, perfil publicado y visibilidad por cuenta/radio desde Discovery compuesto por Host. Persistencia usa `interests` con índice único, soft withdraw y eventos `interest.expressed`/`interest.withdrawn` en colección `outbox` del dominio Engagement. En GET, propietario recibe solamente interesados activos con tarjeta pública, orden/cursor, acciones y `private, no-store`; ID de perfil separado de ID de cuenta.
+Prueba de seguridad/HTTP `Interes_se_expresa_lista_retirada_y_deja_eventos_durables` pasó 1/1 con Mongo replica set y Redis en Testcontainers: requiere autorización, idempotencia POST, no distingue recurso ajeno, GET propietario, no expone teléfono/correo/punto exacto, cache privado, retiro lógico y ambos eventos. Fallos revelaron y corrigieron mapping de ID perfil y colección modificada durante enumeración. Suites completas aún no ejecutadas en este incremento.
+Límites: el outbox ya persiste, pero no hay consumidores para push/estadísticas/contador en Discovery. Dependencias de pedidos y conversaciones representan valores disponibles en sus colecciones y quedan sujetas a los bloques 08/10. Puente local a Discovery no tiene timeout/circuit breaker Polly del contrato; tratarlo como pendiente antes de declarar el bloque conforme completo. La prueba usa doble controlado para Content Safety y no demuestra Azure real. Aceptación humana pendiente.
+
+### Incremento 07-interes (2026-11-10)
+Estado local: POST/DELETE interest y GET interested conectados a Engagement; Host valida perfil, visibilidad/radio, propiedad y proyección pública mediante puertos de Discovery. Los IDs de interés son IDs de perfil prestador; JWT usa ID de cuenta. Mongo persiste `interests` con índice único/retirada lógica y guarda eventos `interest.expressed`/`interest.withdrawn` en el outbox compartido dentro de transacción local.
+Evidencia: `RequestEndpointsTests` 12/12 aprobadas con Mongo replica set y Redis Testcontainers. Incluye idempotencia, GET propietario/ajeno, privacidad, cache `private, no-store`, retirada y eventos. Prueba focalizada repetida después del cambio transaccional: 1/1 aprobada. Build Host Release: 0 warnings/errors.
+Límites: no hay consumidores outbox para push/estadísticas/contador; integración con pedidos/conversaciones depende de bloques 08/10. Falta Polly timeout/circuit breaker de 2 s para puente Discovery. La moderación se sustituye por fake en la prueba, Azure no validado. Quedan negativos de visibilidad/perfil/nota/orden/cursor/dependencia y aceptación humana; T-992 sigue abierto.
+
+### Feed comunitario (2026-11-11)
+Estado local: `GET /v1/discovery/feed` integrado a trabajos y perfiles de Discovery. Combina publicaciones aprobadas a <=3 km o de prestadores activos que atienden el punto; cursor ligado a coordenadas, orden UUID v7, marcas personales solo autenticado y salida pública sin coordenadas exactas ni datos del cliente. La app ya consume esta ruta.
+Verificación: Release build de solución 0 errores/0 advertencias; `FeedTests` 4/4. Prueba Mongo/Testcontainers agregada y compiló, pero su ejecución fue bloqueada por Docker no disponible (`npipe://./pipe/docker_engine`, acceso denegado). Sin prueba real de Atlas/Azure ni despliegue.
+Deuda: caché Redis/L2; ejecución de prueba Mongo cuando Docker esté disponible. El botón Guardar requiere grupo 11 (`GET saved`, `POST/DELETE saved/{kind}/{id}`); contacto y reporte dependen del grupo 12. Recomendación ya existe en grupo 05. No confundir implementación local con prueba end-to-end productiva.

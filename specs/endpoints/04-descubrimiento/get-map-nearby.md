@@ -1,5 +1,7 @@
 # Puntos del mapa · `GET /v1/discovery/map/nearby`
 
+> Refinamiento ejecutable 2026-11-10: [contrato y l?mites del incremento](implementacion-directorio.md) prevalece sobre los ejemplos hist?ricos de índices/caché/hora fija y especialidades de esta ficha. Autoridad de arquitectura: nv-06.
+
 | Campo | Valor |
 |---|---|
 | Módulo | Discovery |
@@ -142,3 +144,6 @@ que hace coincidir el "Abierto ahora" con la barra de estado del prototipo.
    solicitudes de rubros que no le corresponden.
 5. El `limit` alto es seguro porque la respuesta no lleva datos personales; aun así, el tope de 100
    evita volcados masivos del directorio.
+
+## Fuente real de solicitudes (2026-11-10)
+kind=requests queda habilitado por el [incremento 06](../06-solicitudes/implementacion.md), sustituyendo el 503 temporal del directorio inicial. Exige JWT/perfil publicado activo; categorías propias, cobertura real, solicitudes abiertas moderadas y cuentas activas, sin propias ni cerradas. Solo punto difuminado y distancia aproximada, sin caché compartida.

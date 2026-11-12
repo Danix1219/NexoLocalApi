@@ -1,11 +1,13 @@
 # Editar una sección del perfil · `PATCH /v1/discovery/providers/me/{seccion}`
 
+> Estado ejecutable del incremento 2026-11-09: [implementación, conciliaciones y límites](implementacion.md). La caché y propagación cloud descritas como objetivo abajo no están activadas. Las rutas usan no-store, Identity por contrato y eventos locales durables; no se acredita aceptación cloud.
+
 | Campo | Valor |
 |---|---|
 | Módulo | Discovery |
 | Quién | **Pr** (autenticado, con perfil) |
 | Pantalla de la maqueta | 7.3 pasos opcionales `hours`, `prices`, `terms`, `portfolio`; y 7.11 edición · `ACT.edsave` |
-| Spec SDD | nv-02 |
+| Spec SDD | nv-06 (función); nv-02 (contratos) |
 | Idempotente | Sí (mismo cuerpo, mismo resultado) |
 
 ## 1. Función
@@ -60,7 +62,7 @@ Content-Type: application/json
 | `responseTime` | string | enum | no | `sameDay`\|`h24`\|`h48`\|`week` |
 | `warranty` | string | **120** | no | **Moderada**. Declarada, nunca "verificada" |
 | `web` | string | **200** | no | Debe empezar con `https://`. Solo `business` |
-| `channels.call` | bool | — | no | `true` **solo si** el celular está confirmado |
+| `channels.call` | bool | — | no | `true` **solo si** hay correo confirmado, móvil declarado válido y consentimiento explícito |
 | `portfolioUploadIds[]` | array\<uuid> | **6** | no | Subidas aprobadas y propias. El array **reemplaza** el portafolio completo |
 | `location`, `radiusKm`, `attention` | ver [tipos](../00-convenciones/tipos-y-limites.md) | | en `zone` | Recalcula `publicZone` |
 | `bio` | string | **20–600** | en `services` | **Moderada**. Recalcula categorías en `business` |
@@ -82,7 +84,8 @@ app no tenga que pedirlo otra vez. Incluye el `completeness` recalculado.
 | 400 | `provider.categories_required` | Tras recalcular no quedó ninguna categoría |
 | 400 | `provider.prices_limit` | Más de 3 servicios con precio |
 | 400 | `content.images_limit` | Más de 6 fotos de portafolio |
-| 400 | `phone.not_verified` | Intentó activar `channels.call` sin celular confirmado |
+| 403 | `auth.email_not_verified` | Intentó activar `channels.call` sin correo confirmado |
+| 400 | `phone.invalid` | Intentó activar `channels.call` sin móvil declarado válido |
 | 403 | `content.inappropriate` | Content Safety rechazó `bio`, `warranty` o el nombre de un servicio |
 | 404 | `upload.not_found` · 409 `upload.not_pending` | Subidas inválidas o ajenas |
 
@@ -128,8 +131,8 @@ Escrituras derivadas:
 1. El recurso se resuelve por `accountId: sub`: **no se puede editar el perfil de otro**.
 2. Las subidas se validan con `_id` + `ownerId` + `status` **en una sola consulta**: no se puede
    adjuntar la imagen de otra persona ni una que la moderación rechazó.
-3. `channels.call` no se puede activar sin celular confirmado: el canal de llamada y la insignia no
-   se falsean desde el cliente.
+3. Activar `channels.call` requiere correo confirmado, móvil declarado y consentimiento explícito.
+   El servidor calcula la insignia de correo; no afirma posesión del teléfono declarado.
 4. `warranty`, `payment` y `responseTime` son **declarados**; la API y la UI nunca los presentan como
    comprobados por Nexo Local (constitución §IV.3).
 5. Cambiar la zona recalcula el punto difuminado en el servidor; el cliente nunca decide el

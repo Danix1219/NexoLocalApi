@@ -11,7 +11,7 @@ def inspect(folder):
     errors = []
     definitions = {
         "requirements": re.findall(r"^- ((?:FR|NFR)-\d{3}):", spec, re.M),
-        "criteria": re.findall(r"^- \[ \] (AC-\d{3})\b", spec, re.M),
+        "criteria": re.findall(r"^- \[[ xX]\] (AC-\d{3})\b", spec, re.M),
         "tasks": re.findall(r"^- \[ \] (T-\d{3})\b", tasks, re.M),
     }
     for kind, values in definitions.items():

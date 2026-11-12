@@ -61,3 +61,16 @@ Orden aplicable: refinamiento y preparacion de rutas preceden Ready; construccio
 ## Refinamiento del perfil de arquitectura
 
 - [ ] T-960 →FR-960,NFR-960. Refinar el [perfil S02](../../../docs/arquitectura/servicios/s02-directory.md) para la historia seleccionada, sin crear servicios vacíos. Acepta: AC-960 con patrón/motivo, invariantes, contrato, rutas, atomicidad, permisos y fallos comprobables; proveedores y revisión pendientes se registran sin inventarlos. Depende de: T-950.
+
+## Ejecución parcial autorizada: perfiles 2026-11-09
+
+T-216/217/218: alta y lecturas propia/pública; T-219/220/221/222: siete secciones, modalidad, horarios y precios. T-706/707/709/710: política única/versionada, privacidad, contadores y edición. Preparación T-950/T-960 concretada para este subset en el plan y registro, no para toda la fase. Evidencia de producto separada en [incremento](../../endpoints/03-perfil-prestador/implementacion.md); casillas documentales permanecen pendientes de revisión. No se ejecutan T-223/224 ni se declara catálogo/geocodificación/caché distribuidos implementados.
+
+
+## Incremento 2026-11-10 — correo y ubicación
+- [ ] T-990 →FR-990,NFR-990. Geocodificación real anónima para alta y restauración privada de ubicación. Acepta: AC-990. Depende de: T-002. Evidencia en geocodificacion.md y suites existentes.
+
+T-990 permanece pendiente de conciliación y revisión humana de arquitectura. La implementación y sus resultados locales ya están registrados en geocodificacion.md; no se equipara evidencia con aceptación.
+
+## Tarea de directorio público
+- [ ] T-991 →FR-991,FR-992,NFR-991. Refinar catálogo compatible, sugerencias, búsqueda y mapa de prestadores en capas Discovery existentes. Acepta: AC-991/AC-992/AC-993 mediante DirectoryTests, DirectoryPersistenceTests y DirectoryEndpointsTests; errores explícitos, privacidad y bajas. Depende de: T-002. Registro de implementación separado de aceptación humana.

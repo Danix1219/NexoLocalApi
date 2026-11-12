@@ -62,3 +62,11 @@ Validacion: AC-950 se revisa con lista de archivos/dueño/entrada/salida/suites,
 ## Perfiles de arquitectura aplicables
 
 Consultar [S01](../../../docs/arquitectura/servicios/s01-identity.md) y las [políticas comunes](../../../docs/arquitectura/politicas-comunes.md) al concretar la preparación estructural de esta historia. Reutilizar el propietario y su contrato; no crear un servicio por spec. Distinguir diseño propuesto, base física y comprobación de producto.
+
+
+## Entrada de Identity disponible — 2026-11-09
+
+[Cuenta local](../../endpoints/02-cuenta/implementacion.md) implementa solicitud/cancelación,
+eventos durables, auditoría y aviso SMTP, con recuperación restringida. No equivale a cierre de
+nv-12: quedan consumidores por dominio, coordinación con pedidos, anonimización final, medios
+externos, tiempos y aceptación end-to-end. No escribir en bases ajenas ni inventar conteos.

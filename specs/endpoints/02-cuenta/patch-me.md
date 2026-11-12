@@ -5,7 +5,7 @@
 | Módulo | Identity |
 | Quién | **C/Pr** (autenticado) |
 | Pantalla de la maqueta | 7.13 Cuenta → editar datos personales · `ACT.edsave` |
-| Spec SDD | nv-02 |
+| Spec SDD | nv-04 |
 | Idempotente | Sí (mismo cuerpo, mismo resultado) |
 
 ## 1. Función
@@ -45,8 +45,9 @@ Al menos un campo debe venir; un cuerpo vacío → `400`.
 |---|---|---|
 | 400 | `validation_failed` | Cuerpo vacío, nombre de menos de 2 caracteres o de más de 80 |
 | 403 | `content.inappropriate` | Content Safety rechazó el nombre |
-| 404 | `upload.not_found` | El `photoUploadId` no existe o no es de esta cuenta |
-| 409 | `upload.not_pending` | La subida no está aprobada por moderación |
+| 404 | `upload.not_found` | Subida inexistente, ajena, no aprobada o con finalidad distinta de avatar; no se distinguen |
+| 409 | `account.concurrent_update` | Otra petición cambió la cuenta; consultar y reintentar |
+| 503 | `server.dependency_unavailable` | Moderación no configurada, caída o respuesta no verificable |
 | 401 | `auth.token_expired` | |
 
 ## 5. Datos
@@ -81,6 +82,6 @@ Escrituras derivadas:
 
 1. El `sub` fija el recurso: no hay id en la ruta, no hay BOLA.
 2. La subida se valida con **propiedad y estado en la misma consulta**
-   (`_id` + `ownerId` + `status`), nunca con dos llamadas (constitución §III.2).
+   (`_id` + `ownerId` + `status` + `purpose: avatar`), nunca con dos llamadas (constitución §III.2).
 3. El nombre pasa por moderación: es texto que otras personas verán en el chat y en las opiniones.
 4. El nombre viaja a otros módulos **por evento**, nunca escribiendo en su base directamente.

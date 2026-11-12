@@ -1,8 +1,11 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <ItemGroup>
+    <ProjectReference Include="../Nexo.Engagement.Contracts/Nexo.Engagement.Contracts.csproj" />
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="Azure.Identity" />
+    <PackageReference Include="Azure.Security.KeyVault.Keys" />
     <PackageReference Include="MongoDB.Driver" />
     <PackageReference Include="StackExchange.Redis" />
   </ItemGroup>
@@ -10,5 +13,6 @@
     <ProjectReference Include="../Nexo.Engagement.Application/Nexo.Engagement.Application.csproj" />
     <ProjectReference Include="../Nexo.Engagement.Domain/Nexo.Engagement.Domain.csproj" />
     <ProjectReference Include="../../../BuildingBlocks/Nexo.Common/Nexo.Common.csproj" />
+    <ProjectReference Include="../../../BuildingBlocks/Nexo.Outbox/Nexo.Outbox.csproj" />
   </ItemGroup>
 </Project>

@@ -60,7 +60,8 @@ public sealed class SignInService(
             return Invalid();
         }
 
-        if (account.Status == AccountStatus.PendingDeletion)
+        if (account.Status == AccountStatus.PendingDeletion &&
+            (account.DeletionRequestedAt is null || account.DeletionRequestedAt + AccountManagement.DeletionGrace <= clock.UtcNow))
         {
             return Result<Account>.Failure(
                 NexoCodes.AccountPendingDeletion,

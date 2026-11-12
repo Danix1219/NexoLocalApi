@@ -65,19 +65,19 @@ Content-Type: application/json
 | 400 | `validation_failed` | Falta `email` o `purpose` fuera del enum |
 | 401 | `auth.token_expired` | Solo con `purpose = changeEmail` |
 | 429 | `email.too_many_codes` | Política `otp`: 3 cada 15 min, 10 al día |
-| 503 | `server.dependency_unavailable` | Redis o el SMTP no responden. **No se finge éxito**: sin Redis no se puede contar el intento |
+| 503 | `server.dependency_unavailable` | Redis o la persistencia de outbox no responden. Un fallo SMTP posterior no cambia el `202`; el despachador reintenta hasta que vence el código |
 
 ## 5. Datos
 
-**No escribe en MongoDB.** Todo el estado vive en Redis (es desechable y de vida corta):
+Redis guarda el estado de comprobación. MongoDB recibe el mensaje de outbox para envío asíncrono:
 
 | Clave | Estructura | TTL | Contenido |
 |---|---|---|---|
 | `nexo:otp:email:{sha256(email)[0..16]}` | hash | **900 s** | `codeHash` (HMAC-SHA256 del código con llave de Key Vault), `attempts` (int, 0), `purpose`, `sentAt` |
-| `nexo:otp:resend:{emailHash}` | string | **60 s** | Marca de reenvío; si existe → `429` |
+| `nexo:otp:resend:{emailHash}` | string | **60 s** | Marca de reenvío; si existe → `202` uniforme sin generar otro código; la cuota sí se consume |
 | `nexo:rl:otp:{emailHash}:{ip}:{ventana}` | counter | 15 min / 24 h | Contadores de la política `otp` |
 
-- El código en claro **nunca** se guarda ni se escribe en logs: se genera, se envía y se descarta.
+- Redis guarda solo el HMAC. El outbox contiene correo y código en claro para su envío; no se devuelve por HTTP ni se escribe en logs. La depuración automática de payloads procesados sigue pendiente y exige acceso restringido a la colección.
 - Un envío nuevo **sobrescribe** la clave, con lo que el código anterior deja de servir.
 - Escribe un `audit_events` solo si `purpose = changeEmail` (acción sensible sobre una cuenta viva).
 
@@ -91,13 +91,13 @@ Content-Type: application/json
 
 | Pieza | Para qué |
 |---|---|
-| **MailKit** (`MailKit` + `MimeKit`) | Envío SMTP del correo con el código. Plantilla HTML + texto plano |
+| **MailKit** (`MailKit` + `MimeKit`) | Envío SMTP del correo con el código. Plantilla actual de texto plano |
 | **Redis** | Código hasheado, ventana de reenvío y contadores exactos |
 | **Azure Key Vault** | Llave HMAC del código y credenciales SMTP |
-| Outbox → Storage Queue | El envío se **encola**: el handler responde `202` y el worker manda el correo. Así un SMTP lento no bloquea la petición |
+| Outbox MongoDB → despachador del mismo host (sin Storage Queue en el flujo actual) | El envío se **encola**: el handler responde `202` y el worker manda el correo. Así un SMTP lento no bloquea la petición |
 | OpenTelemetry | Traza `email.verification.sent` con `emailHash`, nunca el correo en claro |
 
-Plantilla del correo: asunto "Tu código de Nexo Local: 123456", cuerpo con el código, el tiempo de
+Plantilla actual: asunto por propósito, sin código en el asunto; cuerpo con el código, el tiempo de
 vigencia y la advertencia de no compartirlo. Remitente verificado del dominio; `List-Unsubscribe` no
 aplica (es transaccional, no mercadotecnia).
 
@@ -105,7 +105,7 @@ aplica (es transaccional, no mercadotecnia).
 
 1. **Respuesta uniforme**: el mismo `202` y el mismo tiempo de respuesta exista o no la cuenta. El
    trabajo de envío va al worker precisamente para que el tiempo no delate nada.
-2. El código se guarda **solo como HMAC**; una fuga de Redis no permite iniciar sesión.
+2. Redis guarda el HMAC; el outbox necesita el código para enviarlo. No confundir estas garantías: la retención del payload requiere tratamiento propio.
 3. `attempts` arranca en 0 y lo incrementa el endpoint de confirmación: 5 intentos fallidos queman el
    código.
 4. El correo en los logs va siempre como `sha256(email)[0..16]`.

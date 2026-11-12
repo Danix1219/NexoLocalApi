@@ -57,3 +57,11 @@
 - [ ] AC-960 / T-960: perfil propio refinado para la historia, patrones justificados, fallos y suites definidos; T-001 espera esta salida y revisión humana. Sin aprobación por existir documentación.
 
 - [ ] Arquitectura interna corresponde al perfil vigente y sus proyectos reales; reglas/permisos permanecen en el núcleo, adaptadores aislados y ventajas medidas antes de afirmar mejoras de rendimiento.
+
+## Incremento medios
+- [ ] T-991 / AC-991: contratos de subida y vinculación por dueño, aprobación real, EXIF eliminado, blob privado y retirada comprobados.
+- [ ] Revisión humana identificada; evidencia local/cloud acotada no equivale a despliegue ni ratificación global.
+
+Consultar [registro de implementación](../../../endpoints/14-imagenes-cdn/implementacion.md).
+
+Ejecuci?n t?cnica de T-991 acreditada en implementaci?n y Memoria; la casilla documental espera revisi?n humana de esta fase, sin cambiarla a Ready autom?ticamente.

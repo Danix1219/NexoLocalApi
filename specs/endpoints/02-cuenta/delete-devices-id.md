@@ -5,8 +5,8 @@
 | Módulo | Identity |
 | Quién | **C/Pr** (autenticado, dueño del dispositivo) |
 | Pantalla de la maqueta | Cuenta → desactivar notificaciones; también en logout |
-| Spec SDD | nv-02 |
-| Idempotente | Sí — borrar lo ya borrado responde `204` |
+| Spec SDD | nv-04 |
+| Idempotente | Sí sobre el estado: primer borrado `204`; si ya no existe, `404` |
 
 ## 1. Función
 
