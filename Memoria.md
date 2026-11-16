@@ -1,5 +1,190 @@
 # Memoria — API_NexoLocal
 
+## Estado del consumo API ↔ app móvil (2026-11-16)
+
+Conectado: la app (`NexoLocalApp`, `HybridNexoApi.remoteGroups`) consume siempre la API real en 14
+de 15 grupos: cuenta, perfil, dispositivos, descubrimiento, trabajos, solicitudes, interés, pedidos,
+opiniones, mensajes, guardados, contacto, notificaciones e imágenes. Ante un fallo muestran el error
+real; ya no caen a datos de ejemplo. Contratos revisados contra `http_nexo_api.dart` y `models.dart`
+en cada grupo; ajustes hechos en la app: copiar número desde el pedido (tipos client/provider).
+
+Sin backend: `asistente` (`POST /v1/assist/draft`), sin ficha en `specs/endpoints`; la app sigue con
+datos de ejemplo y aviso "demo". `15-pantallas` no tiene consumidor en la app.
+
+Limitaciones que la app ve aunque esté conectada: fotos en el chat fallan al subir (`purpose=chat`
+no admitido, falta media privada); sin SignalR, chat y campana se actualizan al refrescar; push
+depende del despliegue y de probarlo en Android físico.
+
+Ramas: API `feature/08-pedidos` y app `feature/conectar-pedidos-chat`, ambas subidas. Orden de
+fusión: primero la API (y desplegarla), luego la app; si no, la app pediría rutas que Azure aún no
+tiene. Hasta desplegar, la API en Azure es la versión anterior.
+
+## 13-notificaciones: campana real, worker de outbox de Engagement y push FCM listo (2026-11-16)
+
+Estado: `GET /v1/engagement/notifications` y `POST /v1/engagement/notifications/read`. Las filas solo
+las escribe `EngagementOutboxHandler` al consumir el outbox de la base Engagement, que hasta hoy no
+leía nadie (el `OutboxDispatcher` existente solo drenaba Identity). Se hizo `OutboxDispatcher`
+extensible (`Resolve`) y `EngagementOutboxDispatcher` drena Engagement con la misma lógica de
+reclamo. Eventos con aviso: pedido creado/aceptado/rechazado/cancelado/resuelto/domicilio, mensaje
+(una fila por conversación, sin texto), opinión recibida e interés ("N prestadores interesados",
+agrupado por solicitud). Upsert por (cuenta, tipo, grupo): idempotente ante reintentos y vuelve a
+no leída. TTL 90 días. Los enlaces usan solo secciones que la app acepta (orders, requests, chat,
+provider). Marcar leídas ignora ids ajenos sin error.
+
+Push: `FcmPushSender` con FirebaseAdmin (ya estaba en Directory.Packages.props) envía a todos los
+dispositivos de la cuenta y borra tokens que FCM declara muertos. Apagado mientras
+`Firebase__CredentialsJson` esté vacío; la campana funciona igual. Un fallo de push no reprocesa el
+evento.
+
+App: notificaciones pasa a `remoteGroups`; solo el asistente sigue con datos de ejemplo.
+
+Verificación: build 0/0, format PASS; Common 37, Discovery 67, Engagement 45, Identity 4, Architecture 7,
+Integration 57 y Seguridad 120/120 (prueba nueva: evento de pedido → aviso solo al destinatario,
+push invocado, ids ajenos ignorados). Flutter 276/276.
+
+Ojo al desplegar: el worker procesará también los eventos de outbox ya acumulados en producción, así
+que pueden aparecer avisos de hechos anteriores.
+
+Firebase local (2026-11-16): proyecto `nexo-local-2f3d3`; `google-services.json` en la app (paquete
+`mx.nexolocal.app`, ignorado por git) y cuenta de servicio en `.env`. Envío en simulación a un token
+inventado respondió `InvalidArgument`: credenciales y API de FCM correctas. Falta Azure, el secreto de CI
+y la prueba en teléfono físico.
+
+## 12-contacto-reportes implementado y app conectada a 08–12 (2026-11-16)
+
+Estado: `POST /v1/engagement/contacts/phone` y `POST /v1/engagement/reports` en Engagement
+(ContactReportService, MongoContactReportStore, colecciones `contact_log` con TTL de 1 año y
+`reports`). Celular: única salida de un número; prestador solo si activó `channels.call`, cliente solo
+para el prestador con pedido aceptado/resuelto (`403 contact.not_allowed`); 40 al día
+(`429 contact.daily_limit`); se registra en `contact_log` y outbox `contact.phone_copied`. El número
+sale por `IPhoneDisclosureContract` de Identity, que existía pero no estaba registrado en DI (se
+registró). Reportes: 202, uno por objetivo (`409 report.already_reported`), nunca contenido propio
+(`403 report.own_content`), evidencia de conversación solo si es parte, tope de 20 al día; el motivo
+se modera pero no se rechaza (`reasonFlagged`). Dueño de proveedor/trabajo/solicitud vía
+`ISavedStore.TargetOwnerAsync` (reutiliza la búsqueda de guardados).
+
+App (repo NexoLocalApp, rama `feature/conectar-pedidos-chat`): "Copiar número" desde el pedido
+mandaba `targetType: order` con el id del pedido, fuera del contrato; ahora manda `client`/`provider`
+con el id de la contraparte. Pedidos, opiniones, mensajes y contacto pasan a `remoteGroups`: ya no
+caen a datos de ejemplo si la red falla, muestran el error real. Prueba de resiliencia ajustada para
+usar notificaciones como grupo aún sin API. Flutter 276/276.
+
+Verificación API: build 0/0; Common 37/37, Engagement 45/45, Discovery 67/67; prueba de punta a punta
+nueva de celular y reportes; Architecture 7/7, Integration 57/57, Seguridad 119/119 con Docker.
+
+Deuda: worker de `report.created` (aviso por correo y ocultar tras 3 reportes) y de
+`contact.phone_copied` (estadística de clics); sin auditoría con cadena de hash en `audit_events`.
+
+## Filtro de groserías con lista de bloqueo de Content Safety (2026-11-15)
+
+Estado: los moderadores de texto (`ProviderSafety`, que cubre perfiles, trabajos, solicitudes,
+interés, pedidos, opiniones y chat; y `AccountProfileSafety` para nombres) envían
+`blocklistNames` + `haltOnBlocklistHit` cuando existe `ContentSafety__Blocklist`, y rechazan con
+`content.inappropriate` si hay `blocklistsMatch` aunque no vengan categorías. Sin la variable se
+comporta como antes. Lista editable en `scripts/blocklist/groserias-es.txt` (redactada en el repo,
+sin descargar listas externas) y `sync_blocklist.py` la crea/actualiza en Azure en lotes de 100.
+
+Actualización 2026-11-16: lista `nexo-groserias-es` creada en Azure (160 entradas) y comprobada:
+bloquea "pendejo", "pinche", "hijo de puta", "vete a la verga"; permite "película" y textos normales.
+Variable puesta en el `.env` local; falta en el App Service. Integration 57/57 con dos casos nuevos. La coincidencia es literal: variantes como "p3ndejo" requieren entradas
+propias.
+
+## 10-mensajes implementado por HTTP (2026-11-15)
+
+Estado: misma rama `feature/08-pedidos`. Seis rutas en Engagement (ConversationService,
+MongoConversationStore, colecciones `conversations` y `messages`): abrir/recuperar, bandeja, mensajes,
+enviar, marcar leídos y bloquear. Regla central: el cliente inicia con `providerId`; el prestador solo
+con `clientId` o `requestId` si tiene un pedido (pending/accepted/resolved) con ese cliente; si no,
+`403 conversation.not_allowed`. Una conversación por par (índice único + upsert; 201 nueva, 200 si
+existía). Participación en el filtro de cada consulta (404 a terceros). Envío: texto 1–1000 moderado,
+bloqueo comprobado en la misma escritura condicional que sube el no leído del receptor, idempotencia
+por `{senderId, idempotencyKey}`, outbox `message.sent` sin texto. Leídos: se recuentan (no se ponen a
+cero) para respetar `upToMessageId`. Bloqueo unilateral: cada parte levanta solo el suyo (`403
+conversation.blocked_by_other`). El prestador ve "Nombre I." del cliente hasta que hay pedido aceptado.
+El detalle de pedido ahora devuelve `conversationId` real. Errores nuevos mapeados (404/403/400).
+
+Decisiones: sin hub SignalR (`ws-hubs-chat`): la app actual no lo usa y consulta por HTTP;
+`deliveredToSocket` siempre false. Fotos en chat: la app sube con `purpose=chat`, que la API de
+imágenes no admite y además publicaría la foto en URL pública; queda pendiente de diseñar media
+privada, así que hoy enviar foto en el chat falla con 400 al subir.
+
+Verificación: build 0/0; Common 31/31, Engagement 43/43, Architecture 7/7; pruebas de punta a punta
+nuevas `ChatAndReviewEndpointsTests` (chat completo y opiniones tras pedido resuelto) con Mongo/Redis
+reales en Docker.
+
+Deuda: SignalR y push (outbox sin consumidor); media privada para fotos de chat; `alsoReport` se
+ignora hasta el grupo 12; bandeja sin caché.
+
+Todo lo pendiente o parcial de la API se concentra en `docs/pendientes-api.md`; actualizarlo en
+cada entrega.
+
+## 11-guardados auditado y corregido; códigos de error sin mapear (2026-11-15)
+
+Estado: misma rama `feature/08-pedidos`. Las tres rutas de guardados ya existían (commit 49b85d0) pero
+no estaban registradas. Correcciones: `GET /saved` devolvía el `data` completo del objetivo (solo
+quitaba `location`), filtrando `owner` (nombre completo del dueño) del prestador y `contact` y
+`assignedProviderId` de solicitudes; ahora proyecta una lista blanca de campos públicos por tipo.
+Guardar lo propio responde `403 saved.own_content` (antes 404). Además, `NexoProblem.Describe` no
+tenía los códigos de pedidos y opiniones, que caían en 500: se mapearon (409 active_exists,
+request_already_assigned, invalid_transition, review.already_exists; 412 version_conflict según
+ficha; 400 precio/atención/estrellas; 403 order_not_resolved, saved.own_content). La app ya trataba
+409/412 refrescando el pedido.
+
+Verificación: build 0/0; Common 26/26 (NexoProblemTests nuevas), Discovery 67/67, Engagement 39/39,
+Architecture 7/7, Integration 55/55 y Seguridad 116/116 con Docker (prueba nueva de privacidad y
+propio contenido en guardados).
+
+Deuda: `unavailableReason` siempre `unpublished` (la ficha distingue deleted/closed); códigos de 10,
+12 y upload sin mapear (sin uso aún); sin caché de guardados.
+
+## 09-opiniones implementado (2026-11-15)
+
+Estado: misma rama `feature/08-pedidos` (sin commit). `POST /v1/engagement/reviews` y
+`GET /v1/engagement/providers/{id}/reviews` en Engagement (ReviewService, MongoReviewStore,
+colección `reviews`). Solo el cliente de un pedido `resolved` opina (404 si no es suyo, 403
+review.order_not_resolved si no está resuelto); una por pedido con índice único disperso en `orderId`
+(409 review.already_exists; reintento idéntico con la misma Idempotency-Key devuelve 200). Estrellas
+1–5, texto opcional 10–500 moderado, tope de 20 al día por cliente contado en Mongo. Outbox
+`review.created` en la misma transacción. Autor público "Nombre I."; nunca salen clientId ni orderId.
+El detalle de pedido ya devuelve `canReview` real y `myReviewStars`. App ya consumía ambas rutas.
+
+Decisiones: el promedio del prestador se recalcula completo ($group sobre aprobadas) y se escribe en
+`provider_profiles.data.ratingAverage/ratingCount` por contrato síncrono (`IReviewDirectory`, puente en
+Host); si Discovery falla la opinión queda y el promedio se corrige con la siguiente. Lectura pública
+con `Cache-Control: public, max-age=60` en vez de Redis L2 + ETag de la ficha.
+
+Verificación: build 0/0, format PASS, Engagement.Unit 39/39 (12 nuevas), Discovery.Unit 67/67,
+Architecture 7/7. Con Docker (Testcontainers Mongo/Redis): Integration 55/55 y Seguridad 115/115,
+incluye OrderEndpointsTests; opiniones sin casos de integración propios.
+
+Deuda: sin caché L2/ETag ni invalidación; sin push al prestador (outbox sin consumidor); moderación
+retirada no implementada (todas nacen approved).
+
+## 08-pedidos: asignación desde solicitud y categoría (2026-11-15)
+
+Estado: rama `feature/08-pedidos` desde develop (sin commit al registrar). `origin=post` ya funciona: antes
+toda creación con solicitud daba 400 porque se comparaba `requestId` contra un parámetro siempre nulo.
+Ahora valida solicitud propia (404 request.not_found) y abierta (409 order.request_already_assigned),
+inserta el pedido, asigna en Discovery con findOneAndUpdate condicional y compensa borrando pedido,
+evento, recibo y outbox `order.created` si pierde la carrera o falla. Rechazo y cancelación del
+prestador reabren la solicitud solo si sigue asignada a ese prestador (`requestReopened`); resolver la
+cierra con solvedHere. La categoría del pedido se guarda: la enviada por la app si el prestador la
+ofrece, si no la primera del prestador. App revisada: rutas, cuerpos, Idempotency-Key, If-Match y
+lectura de respuestas compatibles; no requiere cambios.
+
+Decisiones: contrato síncrono Engagement→Discovery (`IOrderRequestLink`, puente en Host), sin
+transacción entre bases; la sincronización posterior a una transición nunca deshace el pedido. No se
+exige interés activo para `origin=post` (la ficha no lo pide).
+
+Verificación: build Release de la solución 0 errores/0 advertencias; dotnet format verify PASS;
+Engagement.Unit 27/27 (9 nuevas con dobles) y Discovery.Unit 67/67. Sin Mongo real ni Docker: la
+suite de integración/seguridad no se ejecutó. Se compiló con SDK 10.0.403 cambiando temporalmente
+`global.json` (pide 10.0.302, no instalado) y se restauró.
+
+Deuda: `Orders__KeyVaultKeyId` (o llave local) no configurado → pedidos a domicilio responden 503;
+outbox sin consumidores (notificación, conversación, reintento de sincronización con solicitud);
+pedidos previos conservan `category` vacía; rama sin clave Jira.
+
 ## Implementación local de 02-cuenta (2026-11-09)
 
 Estado: ocho operaciones vigentes implementadas en Identity, rama `feature/02-cuenta`. Se conserva

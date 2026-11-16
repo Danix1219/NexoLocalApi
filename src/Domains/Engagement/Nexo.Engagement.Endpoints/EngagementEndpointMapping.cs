@@ -9,6 +9,10 @@ using Nexo.Common.Errors;
 using Nexo.Common.RateLimiting;
 using Nexo.Engagement.Application.Interests;
 using Nexo.Engagement.Application.Orders;
+using Nexo.Engagement.Application.Reviews;
+using Nexo.Engagement.Application.Conversations;
+using Nexo.Engagement.Application.Safety;
+using Nexo.Engagement.Application.Notifications;
 
 namespace Nexo.Engagement.Endpoints;
 
@@ -112,6 +116,68 @@ public static class EngagementEndpointMapping
             catch (Exception e) when (e is OrderUnavailableException || DependencyErrors.IsUnavailable(e)) { return Dependency(http); }
         }).RequireAuthorization().RequireRateLimiting(NexoRateLimits.User).Produces(200).ProducesProblem(401).ProducesProblem(404).ProducesProblem(503)
             .WithSummary("Comprobar la elegibilidad interna de reseña sin exponer el domicilio");
+
+        group.MapPost("/reviews", async (ReviewService.CreateReviewBody? body, ReviewService service, HttpContext http, CancellationToken ct) =>
+        {
+            http.Response.Headers.CacheControl = "private, no-store";
+            try
+            {
+                var result = await service.CreateAsync(User(http), http.Request.Headers["Idempotency-Key"].FirstOrDefault(), body, ct);
+                return result.Match(value => Results.Json(value.Body, statusCode: value.Status), error => NexoProblem.From(error, http));
+            }
+            catch (Exception e) when (ReviewDown(e)) { return Dependency(http); }
+        }).RequireAuthorization().RequireRateLimiting(NexoRateLimits.User).Produces(201).Produces(200).ProducesProblem(400).ProducesProblem(401).ProducesProblem(403).ProducesProblem(404).ProducesProblem(409).ProducesProblem(429).ProducesProblem(503)
+            .WithSummary("Calificar un pedido resuelto");
+
+        group.MapGet("/providers/{id:guid}/reviews", async (Guid id, HttpRequest request, ReviewService service, HttpContext http, CancellationToken ct) =>
+        {
+            if (request.Query.Any(q => q.Value.Count != 1) || !Int(request.Query, "limit", 20, out var limit)) return Invalid(http);
+            var cursor = request.Query.TryGetValue("cursor", out var cv) ? cv.ToString() : null;
+            try
+            {
+                var result = await service.ListAsync(id, cursor, limit, ct);
+                // shortcut: plain HTTP cache of 60 s instead of the spec's Redis L2 + ETag; upgrade when traffic needs it.
+                if (result.IsSuccess) http.Response.Headers.CacheControl = "public, max-age=60";
+                return result.Match(Results.Ok, error => NexoProblem.From(error, http));
+            }
+            catch (Exception e) when (ReviewDown(e)) { return Dependency(http); }
+        }).AllowAnonymous().RequireRateLimiting(NexoRateLimits.Public).Produces(200).ProducesProblem(400).ProducesProblem(404).ProducesProblem(429).ProducesProblem(503)
+            .WithSummary("Listar opiniones aprobadas de un prestador");
+
+        MapChat(group);
+
+        group.MapPost("/contacts/phone", async (ContactReportService.PhoneBody? body, ContactReportService service, HttpContext http, CancellationToken ct) =>
+        {
+            http.Response.Headers.CacheControl = "private, no-store";
+            try { return (await service.RevealPhoneAsync(User(http), body, ct)).Match(Results.Ok, e => NexoProblem.From(e, http)); }
+            catch (Exception e) when (e is ContactReportUnavailableException || ReviewDown(e) || e is ConversationUnavailableException) { return Dependency(http); }
+        }).RequireAuthorization().RequireRateLimiting(NexoRateLimits.User).WithSummary("Revelar un celular (acción deliberada, limitada y registrada)");
+
+        group.MapPost("/reports", async (ContactReportService.ReportBody? body, ContactReportService service, HttpContext http, CancellationToken ct) =>
+        {
+            http.Response.Headers.CacheControl = "private, no-store";
+            try
+            {
+                return (await service.ReportAsync(User(http), http.Request.Headers["Idempotency-Key"].FirstOrDefault(), body, ct))
+                    .Match(v => Results.Json(v, statusCode: StatusCodes.Status202Accepted), e => NexoProblem.From(e, http));
+            }
+            catch (Exception e) when (e is ContactReportUnavailableException || ReviewDown(e) || e is ConversationUnavailableException) { return Dependency(http); }
+        }).RequireAuthorization().RequireRateLimiting(NexoRateLimits.User).WithSummary("Reportar para revisión humana");
+
+        group.MapGet("/notifications", async (HttpRequest request, NotificationService service, HttpContext http, CancellationToken ct) =>
+        {
+            http.Response.Headers.CacheControl = "private, no-store";
+            if (request.Query.Any(q => q.Value.Count != 1) || !Int(request.Query, "limit", 20, out var limit)) return Invalid(http);
+            try { return (await service.ListAsync(User(http), request.Query["filter"].FirstOrDefault(), request.Query["cursor"].FirstOrDefault(), limit, ct)).Match(Results.Ok, e => NexoProblem.From(e, http)); }
+            catch (Exception e) when (ReviewDown(e)) { return Dependency(http); }
+        }).RequireAuthorization().RequireRateLimiting(NexoRateLimits.User).WithSummary("Historial de notificaciones");
+
+        group.MapPost("/notifications/read", async (NotificationService.ReadBody? body, NotificationService service, HttpContext http, CancellationToken ct) =>
+        {
+            http.Response.Headers.CacheControl = "private, no-store";
+            try { return (await service.ReadAsync(User(http), body, ct)).Match(Results.Ok, e => NexoProblem.From(e, http)); }
+            catch (Exception e) when (ReviewDown(e)) { return Dependency(http); }
+        }).RequireAuthorization().RequireRateLimiting(NexoRateLimits.User).WithSummary("Marcar notificaciones como leídas");
         return app;
 
         void MapTransition(RouteGroupBuilder routes, string pattern, string target)
@@ -127,6 +193,49 @@ public static class EngagementEndpointMapping
     }
 
     private static bool Unavailable(Exception e) => e is InterestUnavailableException || DependencyErrors.IsUnavailable(e);
+    private static void MapChat(RouteGroupBuilder group)
+    {
+        static async Task<IResult> Run(HttpContext http, Func<Task<IResult>> action)
+        {
+            http.Response.Headers.CacheControl = "private, no-store";
+            try { return await action(); }
+            catch (Exception e) when (e is ConversationUnavailableException || ReviewDown(e)) { return Dependency(http); }
+        }
+
+        group.MapPost("/conversations", (ConversationService.OpenBody? body, ConversationService service, HttpContext http, CancellationToken ct) => Run(http, async () =>
+            (await service.OpenAsync(User(http), body, ct)).Match(v => Results.Json(v.Body, statusCode: v.Status), e => NexoProblem.From(e, http))))
+            .RequireAuthorization().RequireRateLimiting(NexoRateLimits.User).WithSummary("Abrir o recuperar la conversación con un prestador o cliente elegido");
+
+        group.MapGet("/conversations", (HttpRequest request, ConversationService service, HttpContext http, CancellationToken ct) => Run(http, async () =>
+        {
+            if (request.Query.Any(q => q.Value.Count != 1) || !Int(request.Query, "limit", 20, out var limit)) return Invalid(http);
+            return (await service.InboxAsync(User(http), request.Query["role"].FirstOrDefault(), request.Query["filter"].FirstOrDefault(),
+                request.Query["cursor"].FirstOrDefault(), limit, ct)).Match(Results.Ok, e => NexoProblem.From(e, http));
+        })).RequireAuthorization().RequireRateLimiting(NexoRateLimits.User).WithSummary("Bandeja de conversaciones");
+
+        group.MapGet("/conversations/{id:guid}/messages", (Guid id, HttpRequest request, ConversationService service, HttpContext http, CancellationToken ct) => Run(http, async () =>
+        {
+            if (request.Query.Any(q => q.Value.Count != 1) || !Int(request.Query, "limit", 30, out var limit)) return Invalid(http);
+            return (await service.ThreadAsync(User(http), id, request.Query["before"].FirstOrDefault(), request.Query["after"].FirstOrDefault(), limit, ct))
+                .Match(Results.Ok, e => NexoProblem.From(e, http));
+        })).RequireAuthorization().RequireRateLimiting(NexoRateLimits.User).WithSummary("Mensajes de una conversación propia");
+
+        group.MapPost("/conversations/{id:guid}/messages", (Guid id, ConversationService.SendBody? body, ConversationService service, HttpContext http, CancellationToken ct) => Run(http, async () =>
+            (await service.SendAsync(User(http), id, http.Request.Headers["Idempotency-Key"].FirstOrDefault(), body, ct))
+                .Match(v => Results.Json(v, statusCode: StatusCodes.Status201Created), e => NexoProblem.From(e, http))))
+            .RequireAuthorization().RequireRateLimiting(NexoRateLimits.Chat).WithSummary("Enviar un mensaje");
+
+        group.MapPost("/conversations/{id:guid}/read", (Guid id, [FromBody(EmptyBodyBehavior = EmptyBodyBehavior.Allow)] ConversationService.ReadBody? body,
+            ConversationService service, HttpContext http, CancellationToken ct) => Run(http, async () =>
+            (await service.ReadAsync(User(http), id, body?.UpToMessageId, ct)).Match(Results.Ok, e => NexoProblem.From(e, http))))
+            .RequireAuthorization().RequireRateLimiting(NexoRateLimits.User).WithSummary("Marcar mensajes como leídos");
+
+        group.MapPost("/conversations/{id:guid}/block", (Guid id, ConversationService.BlockBody? body, ConversationService service, HttpContext http, CancellationToken ct) => Run(http, async () =>
+            (await service.BlockAsync(User(http), id, body, ct)).Match(Results.Ok, e => NexoProblem.From(e, http))))
+            .RequireAuthorization().RequireRateLimiting(NexoRateLimits.User).WithSummary("Bloquear o desbloquear la conversación");
+    }
+
+    private static bool ReviewDown(Exception e) => e is ReviewUnavailableException or OrderUnavailableException || DependencyErrors.IsUnavailable(e);
     private static IResult Dependency(HttpContext http) => NexoProblem.From(NexoCodes.ServerDependencyUnavailable, null, http);
     private static IResult Invalid(HttpContext http) => NexoProblem.From(NexoCodes.ValidationFailed, "Revisa los parámetros de consulta.", http);
     private static Guid User(HttpContext http) => Guid.TryParse(http.User.FindFirst("sub")?.Value, out var id) ? id : Guid.Empty;

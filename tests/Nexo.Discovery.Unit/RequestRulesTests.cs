@@ -83,6 +83,9 @@ public sealed class RequestRulesTests
         public Task<ServiceRequest[]> MineAsync(Guid owner, string status, Guid? after, int limit, CancellationToken ct) => Task.FromResult(Value == null ? Array.Empty<ServiceRequest>() : new[] { Value });
         public Task<IReadOnlyList<RequestCandidate>> CandidatesAsync(Guid viewer, ProviderPoint point, double? radius, string[]? cats, string text, bool today, CancellationToken ct) => throw new NotSupportedException();
         public Task<Result<RequestClosure>> CloseAsync(Guid owner, Guid id, string outcome, Guid? declaredProvider, DateTime now, CancellationToken ct) => throw new NotSupportedException();
+        public Task<bool> AssignAsync(Guid owner, Guid id, Guid providerId, CancellationToken ct) => throw new NotSupportedException();
+        public Task<bool> ReleaseAsync(Guid id, Guid providerId, CancellationToken ct) => throw new NotSupportedException();
+        public Task<bool> CompleteAsync(Guid id, Guid providerId, DateTime now, CancellationToken ct) => throw new NotSupportedException();
         public Task<StoredProvider?> OwnAsync(Guid id, CancellationToken ct) => Task.FromResult<StoredProvider?>(null);
         public Task<IReadOnlyList<StoredProvider>> PublicAsync(Guid[] ids, ProviderPoint? from, CancellationToken ct) => Task.FromResult<IReadOnlyList<StoredProvider>>([]);
         public Task<bool> InsertAsync(StoredProvider p, CancellationToken ct) => throw new NotSupportedException();

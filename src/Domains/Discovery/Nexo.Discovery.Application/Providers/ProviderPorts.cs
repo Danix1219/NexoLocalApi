@@ -24,6 +24,8 @@ public interface IProviderStore
     Task<bool> InsertAsync(StoredProvider profile, CancellationToken ct);
     Task RecordViewAsync(Guid providerId, CancellationToken ct);
     Task<bool> PatchAsync(StoredProvider expected, ProviderProfile profile, string section, string[] fields, CancellationToken ct);
+    /// <summary>Read model of user opinions, recomputed by Engagement after each review.</summary>
+    Task SetRatingAsync(Guid providerId, double average, int count, CancellationToken ct) => throw new NotSupportedException();
 }
 public interface IProviderSafety
 {

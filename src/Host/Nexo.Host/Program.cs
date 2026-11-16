@@ -43,6 +43,10 @@ static async Task RunApiAsync(string[] args)
     builder.Services.AddScoped<Nexo.Engagement.Application.Interests.IInterestSafety, Nexo.Host.InterestSafetyBridge>();
     builder.Services.AddScoped<Nexo.Engagement.Application.Orders.IOrderProviderAccess, Nexo.Host.OrderProviderAccessBridge>();
     builder.Services.AddScoped<Nexo.Engagement.Application.Orders.IOrderSafety, Nexo.Host.OrderSafetyBridge>();
+    builder.Services.AddScoped<Nexo.Engagement.Application.Orders.IOrderRequestLink, Nexo.Host.OrderRequestLinkBridge>();
+    builder.Services.AddScoped<Nexo.Engagement.Application.Reviews.IReviewDirectory, Nexo.Host.ReviewDirectoryBridge>();
+    builder.Services.AddScoped<Nexo.Engagement.Application.Conversations.IConversationDirectory, Nexo.Host.ConversationDirectoryBridge>();
+    builder.Services.AddScoped<Nexo.Engagement.Application.Safety.IContactDirectory, Nexo.Host.ContactDirectoryBridge>();
     builder.Services.AddSharedRedis(builder.Configuration);
     builder.Services.AddMongoDatabases(builder.Configuration);
     builder.Services.AddProblemDetails();
@@ -112,6 +116,8 @@ static async Task RunApiAsync(string[] args)
     // Un solo proceso: el despachador vive dentro de la API. El reclamo en Mongo es atomico,
     // asi que varias replicas no procesan el mismo mensaje.
     builder.Services.AddHostedService<OutboxDispatcher>();
+    // Engagement keeps its own outbox: this worker turns its events into notifications and push.
+    builder.Services.AddHostedService<Nexo.Engagement.Infrastructure.Notifications.EngagementOutboxDispatcher>();
 
     var app = builder.Build();
 

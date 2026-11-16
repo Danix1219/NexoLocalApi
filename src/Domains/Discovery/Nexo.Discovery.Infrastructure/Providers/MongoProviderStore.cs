@@ -126,6 +126,9 @@ public sealed class MongoProviderStore([FromKeyedServices(NexoDatabaseKeys.Disco
         var update = new BsonDocument { ["$set"] = set, ["$inc"] = new BsonDocument("revision", 1L), ["$push"] = new BsonDocument("events", Event(profile, "provider.updated", section)) };
         return (await profiles.UpdateOneAsync(filter, update, cancellationToken: ct)).ModifiedCount == 1;
     }
+    public async Task SetRatingAsync(Guid providerId, double average, int count, CancellationToken ct) =>
+        await profiles.UpdateOneAsync(new BsonDocument("_id", Id(providerId)),
+            new BsonDocument("$set", new BsonDocument { ["data.ratingAverage"] = average, ["data.ratingCount"] = count }), cancellationToken: ct);
     public async Task RecordViewAsync(Guid providerId, CancellationToken ct) =>
         await profiles.UpdateOneAsync(new BsonDocument { ["_id"] = Id(providerId), ["published"] = true }, new BsonDocument("$inc", new BsonDocument("views", 1L)), cancellationToken: ct);
     private static BsonDocument Event(ProviderProfile p, string type, string section) => new()

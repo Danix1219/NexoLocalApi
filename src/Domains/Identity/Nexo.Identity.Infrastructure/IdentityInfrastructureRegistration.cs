@@ -40,6 +40,7 @@ public static class IdentityInfrastructureRegistration
         services.AddScoped<IDeviceRegistry, MongoDeviceRegistry>();
         services.AddScoped<IAccountManagementStore, MongoAccountManagementStore>();
         services.AddScoped<Nexo.Identity.Contracts.IProviderIdentityContract, ProviderIdentityContract>();
+        services.AddScoped<Nexo.Identity.Contracts.IPhoneDisclosureContract, ProviderIdentityContract>();
         services.AddScoped<Nexo.Identity.Contracts.IRequestClientContract, RequestClientContract>();
         services.AddScoped<AccountManagement>();
         services.Configure<ContentSafetyOptions>(configuration.GetSection("ContentSafety"));

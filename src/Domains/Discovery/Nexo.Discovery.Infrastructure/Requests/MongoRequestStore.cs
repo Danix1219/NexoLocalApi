@@ -210,6 +210,41 @@ public sealed class MongoRequestStore([FromKeyedServices(NexoDatabaseKeys.Discov
         await EmitAsync(session, request, "request.closed", token);
         return Result<RequestClosure>.Success(new(request, false));
     }, ct);
+    public Task<bool> AssignAsync(Guid owner, Guid id, Guid providerId, CancellationToken ct)
+    {
+        var filter = Own(owner, id); filter["status"] = "open";
+        return MoveAsync(filter, new BsonDocument
+        {
+            ["status"] = "assigned",
+            ["data.status"] = "assigned",
+            ["pickedProviderId"] = Id(providerId),
+            ["data.assignedProviderId"] = providerId.ToString("D")
+        }, "request.assigned", ct);
+    }
+    public Task<bool> ReleaseAsync(Guid id, Guid providerId, CancellationToken ct) => MoveAsync(
+        new BsonDocument { ["_id"] = id.ToString("D"), ["status"] = "assigned", ["pickedProviderId"] = Id(providerId) },
+        new BsonDocument { ["status"] = "open", ["data.status"] = "open", ["pickedProviderId"] = BsonNull.Value, ["data.assignedProviderId"] = BsonNull.Value },
+        "request.reopened", ct);
+    public Task<bool> CompleteAsync(Guid id, Guid providerId, DateTime now, CancellationToken ct) => MoveAsync(
+        new BsonDocument { ["_id"] = id.ToString("D"), ["status"] = "assigned", ["pickedProviderId"] = Id(providerId) },
+        new BsonDocument
+        {
+            ["status"] = "closed",
+            ["data.status"] = "closed",
+            ["outcome"] = "solvedHere",
+            ["data.closedAt"] = now.ToUniversalTime().ToString("O", System.Globalization.CultureInfo.InvariantCulture)
+        }, "request.closed", ct);
+    private async Task<bool> MoveAsync(BsonDocument filter, BsonDocument set, string type, CancellationToken ct)
+    {
+        var moved = await TransactionAsync(async (session, token) =>
+        {
+            var doc = await requests.FindOneAndUpdateAsync(session, filter, new BsonDocument("$set", set),
+                new FindOneAndUpdateOptions<BsonDocument> { ReturnDocument = ReturnDocument.After, Projection = Safe }, token);
+            if (doc != null) await EmitAsync(session, Read(doc), type, token);
+            return Result<bool>.Success(doc != null);
+        }, ct);
+        return moved.Value;
+    }
     private Task EmitAsync(IClientSessionHandle session, ServiceRequest request, string type, CancellationToken ct) => events.InsertOneAsync(session, new BsonDocument
     {
         ["_id"] = Id(Guid.CreateVersion7()),

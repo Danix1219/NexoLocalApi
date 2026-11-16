@@ -27,5 +27,11 @@ public interface IRequestStore
     Task<ServiceRequest[]> MineAsync(Guid owner, string status, Guid? after, int limit, CancellationToken ct);
     Task<IReadOnlyList<RequestCandidate>> CandidatesAsync(Guid viewer, ProviderPoint point, double? radiusKm, string[]? cats, string text, bool today, CancellationToken ct);
     Task<Result<RequestClosure>> CloseAsync(Guid owner, Guid id, string outcome, Guid? declaredProvider, DateTime now, CancellationToken ct);
+    /// <summary>open → assigned only if still open and owned; false means another order won the race.</summary>
+    Task<bool> AssignAsync(Guid owner, Guid id, Guid providerId, CancellationToken ct);
+    /// <summary>assigned → open only while still assigned to that provider.</summary>
+    Task<bool> ReleaseAsync(Guid id, Guid providerId, CancellationToken ct);
+    /// <summary>assigned → closed (solvedHere) only while still assigned to that provider.</summary>
+    Task<bool> CompleteAsync(Guid id, Guid providerId, DateTime now, CancellationToken ct);
 }
 public sealed class RequestUnavailableException : Exception;
