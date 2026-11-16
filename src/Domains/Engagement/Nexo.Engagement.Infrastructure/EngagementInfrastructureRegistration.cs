@@ -16,6 +16,8 @@ public static class EngagementInfrastructureRegistration
         services.AddScoped<Nexo.Engagement.Application.Orders.OrderService>();
         services.AddSingleton<Nexo.Engagement.Application.Reviews.IReviewStore, MongoReviewStore>();
         services.AddScoped<Nexo.Engagement.Application.Reviews.ReviewService>();
+        services.AddSingleton<Nexo.Engagement.Application.Conversations.IConversationStore, MongoConversationStore>();
+        services.AddScoped<Nexo.Engagement.Application.Conversations.ConversationService>();
         return services;
     }
 }

@@ -45,6 +45,7 @@ static async Task RunApiAsync(string[] args)
     builder.Services.AddScoped<Nexo.Engagement.Application.Orders.IOrderSafety, Nexo.Host.OrderSafetyBridge>();
     builder.Services.AddScoped<Nexo.Engagement.Application.Orders.IOrderRequestLink, Nexo.Host.OrderRequestLinkBridge>();
     builder.Services.AddScoped<Nexo.Engagement.Application.Reviews.IReviewDirectory, Nexo.Host.ReviewDirectoryBridge>();
+    builder.Services.AddScoped<Nexo.Engagement.Application.Conversations.IConversationDirectory, Nexo.Host.ConversationDirectoryBridge>();
     builder.Services.AddSharedRedis(builder.Configuration);
     builder.Services.AddMongoDatabases(builder.Configuration);
     builder.Services.AddProblemDetails();

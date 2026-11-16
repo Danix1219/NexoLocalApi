@@ -81,7 +81,7 @@ public sealed class OrderRequestLinkTests
         public int Assigns;
         public OrderSnapshot? Created, Existing;
         public Guid? Deleted;
-        public OrderService Service => new(this, this, this, this, this, null!, TimeProvider.System);
+        public OrderService Service => new(this, this, this, this, this, null!, null!, TimeProvider.System);
 
         public OrderSnapshot Snapshot(string status) => new(Guid.CreateVersion7(), Client, Provider, Request, "post", "", "Fuga debajo del lavabo.",
             "shop", "Centro", null, null, status, DateTime.UtcNow, null, null, null, null, 1, null, null);

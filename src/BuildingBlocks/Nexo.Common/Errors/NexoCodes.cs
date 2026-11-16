@@ -63,6 +63,8 @@ public static class NexoCodes
     public const string WorkNotFound = "work.not_found";
     public const string WorkOwnContent = "work.own_content";
     public const string SavedOwnContent = "saved.own_content";
+    public const string ConversationSelf = "conversation.self";
+    public const string ConversationBlockedByOther = "conversation.blocked_by_other";
     public const string WorkCategoryNotInProfile = "work.category_not_in_profile";
     public const string WorkAlreadyRecommended = "work.already_recommended";
     public const string RequestNotFound = "request.not_found";

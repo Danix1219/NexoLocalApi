@@ -16,5 +16,10 @@ public sealed class NexoProblemTests
     [InlineData(NexoCodes.ReviewOrderNotResolved, 403)]
     [InlineData(NexoCodes.ReviewStarsInvalid, 400)]
     [InlineData(NexoCodes.SavedOwnContent, 403)]
+    [InlineData(NexoCodes.ConversationNotFound, 404)]
+    [InlineData(NexoCodes.ConversationNotAllowed, 403)]
+    [InlineData(NexoCodes.ConversationBlocked, 403)]
+    [InlineData(NexoCodes.ConversationBlockedByOther, 403)]
+    [InlineData(NexoCodes.ConversationSelf, 400)]
     public void Codigo_de_negocio_no_cae_en_500(string code, int status) => Assert.Equal(status, NexoProblem.Describe(code).Status);
 }

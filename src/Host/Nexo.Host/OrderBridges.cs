@@ -59,3 +59,21 @@ public sealed class ReviewDirectoryBridge(Nexo.Discovery.Application.Requests.IR
 
     public Task SetRatingAsync(Guid providerId, double average, int count, CancellationToken ct) => providers.SetRatingAsync(providerId, average, count, ct);
 }
+
+public sealed class ConversationDirectoryBridge(IProviderStore providers, Nexo.Discovery.Application.Requests.IRequestClients clients,
+    Nexo.Discovery.Application.Media.IMediaService media) : Nexo.Engagement.Application.Conversations.IConversationDirectory
+{
+    public async Task<IReadOnlyDictionary<Guid, Nexo.Engagement.Application.Conversations.ChatParty>> ProvidersAsync(Guid[] ids, CancellationToken ct) =>
+        (await providers.PublicAsync(ids, null, ct)).ToDictionary(p => p.Profile.ProviderId,
+            p => new Nexo.Engagement.Application.Conversations.ChatParty(p.Profile.Name, p.Profile.PhotoUrl));
+
+    public async Task<IReadOnlyDictionary<Guid, Nexo.Engagement.Application.Conversations.ChatParty>> ClientsAsync(Guid[] ids, CancellationToken ct) =>
+        (await clients.ReadAsync(ids, ct)).Where(p => p.Value.Active)
+            .ToDictionary(p => p.Key, p => new Nexo.Engagement.Application.Conversations.ChatParty(p.Value.DisplayName, p.Value.PhotoUrl));
+
+    public async Task<Nexo.Engagement.Application.Conversations.ChatImage?> ImageAsync(Guid owner, Guid id, CancellationToken ct)
+    {
+        var state = await media.StateAsync(owner, id, ct);
+        return state.IsSuccess && state.Value is { Status: "approved", Url: { } url } s ? new(url, s.ThumbUrl, s.Width, s.Height) : null;
+    }
+}

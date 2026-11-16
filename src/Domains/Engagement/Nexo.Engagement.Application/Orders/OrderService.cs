@@ -8,7 +8,7 @@ using Nexo.Engagement.Domain.Orders;
 namespace Nexo.Engagement.Application.Orders;
 
 public sealed class OrderService(IOrderStore store, IOrderProviderAccess providers, IOrderAddressProtection addresses,
-    IOrderSafety safety, IOrderRequestLink requests, Reviews.IReviewStore reviews, TimeProvider clock)
+    IOrderSafety safety, IOrderRequestLink requests, Reviews.IReviewStore reviews, Conversations.IConversationStore chats, TimeProvider clock)
 {
     public async Task<Result<OrderResult>> CreateAsync(Guid client, Guid? requestId, string? idempotencyKey,
         CreateOrderBody? body, CancellationToken ct)
@@ -159,7 +159,7 @@ public sealed class OrderService(IOrderStore store, IOrderProviderAccess provide
             location = plaintext?.Point,
             agreedPrice = order.PriceCents is { } cents ? new { amountCents = cents, text = $"${cents / 100m:0.00}", includes = order.PriceIncludes } : null,
             requestId = order.RequestId,
-            conversationId = (Guid?)null,
+            conversationId = await chats.PairAsync(order.ClientId, order.ProviderId, ct),
             timeline = timeline.Select(e => new { version = e.Version, type = e.Type, actor = e.ActorId == order.ClientId ? "client" : "provider", at = e.At }),
             version = order.Version,
             allowedActions = Actions(order.Status, role),

@@ -13,7 +13,7 @@ Revisión de código local: 2026-11-10. No equivale a despliegue ni aceptación 
 | 07-interés | Implementado localmente (T-992); 19 pruebas de endpoints y resiliencia aprobadas | Outbox durable sin consumidores; pedidos/chat dependen de 08/10; Azure real y aceptación humana pendientes. Ver registro de implementación |
 | 08-pedidos | Parcial local; asignación/compensación desde solicitud y categoría implementadas (2026-11-15) | Falta Key Vault en App Service (domicilio da 503 sin llave), consumidores de outbox y pruebas de integración con Mongo real; ver `specs/endpoints/08-pedidos/implementacion.md` |
 | 09-opiniones | Implementado localmente (2026-11-15): calificar pedido resuelto y listar opiniones con resumen | Sin caché L2/ETag, push al prestador ni retiro por moderación; ver Memoria |
-| 10-mensajes | Pendiente | Elegibilidad de conversación y pedidos/participantes |
+| 10-mensajes | Implementado por HTTP (2026-11-15): abrir, bandeja, mensajes, enviar, leídos y bloqueo | Sin SignalR ni push; fotos de chat pendientes de media privada; ver Memoria |
 | 11-guardados | Implementado y auditado (2026-11-15): guardar, quitar y listar con lista blanca de campos | `unavailableReason` sin distinguir borrado/cerrado; ver Memoria |
 | 12-contacto-reportes | Pendiente | Canales consentidos, auditoría y moderación |
 | 13-notificaciones | Pendiente | Eventos reales de los grupos anteriores |
