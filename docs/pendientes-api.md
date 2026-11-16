@@ -14,7 +14,7 @@ está en [Memoria.md](../Memoria.md) y el estado por grupo en [estado-desarrollo
 
 | 3 | Poner `ContentSafety__Blocklist=nexo-groserias-es` en el App Service. La lista ya existe en Azure (160 entradas, creada y probada el 2026-11-16) y la variable ya está en el `.env` local. Para cambiar palabras: editar `scripts/blocklist/groserias-es.txt` y correr `python -I scripts/blocklist/sync_blocklist.py` (`--check "texto"` para probar) | En Azure las groserías leves seguirán pasando hasta configurarla | `scripts/blocklist/` |
 
-| 4 | **Push FCM.** Crear/usar el proyecto de Firebase, registrar la app Android, poner `google-services.json` en la app y la cuenta de servicio en `Firebase__CredentialsJson` (App Service y `.env`) | Sin esto no llegan avisos al teléfono; la campana sí funciona | `FcmPushSender.cs`, app `android/app/` |
+| 4 | **Push FCM en Azure y CI.** Local listo el 2026-11-16: proyecto Firebase `nexo-local-2f3d3`, `google-services.json` en la app y cuenta de servicio en el `.env` (verificada con envío en simulación). Falta: `Firebase__CredentialsJson` en el App Service y el secreto `GOOGLE_SERVICES_JSON` en GitHub Actions del repo de la app. Probar en un Android físico | En Azure no saldrán push; la campana sí funciona | `FcmPushSender.cs`, app `android/app/` |
 
 ## Grupos sin implementar (la app muestra datos de ejemplo)
 

@@ -26,6 +26,11 @@ push invocado, ids ajenos ignorados). Flutter 276/276.
 Ojo al desplegar: el worker procesará también los eventos de outbox ya acumulados en producción, así
 que pueden aparecer avisos de hechos anteriores.
 
+Firebase local (2026-11-16): proyecto `nexo-local-2f3d3`; `google-services.json` en la app (paquete
+`mx.nexolocal.app`, ignorado por git) y cuenta de servicio en `.env`. Envío en simulación a un token
+inventado respondió `InvalidArgument`: credenciales y API de FCM correctas. Falta Azure, el secreto de CI
+y la prueba en teléfono físico.
+
 ## 12-contacto-reportes implementado y app conectada a 08–12 (2026-11-16)
 
 Estado: `POST /v1/engagement/contacts/phone` y `POST /v1/engagement/reports` en Engagement
