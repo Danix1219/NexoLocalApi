@@ -151,7 +151,6 @@ public sealed class WorkEndpointsTests(InfraDeSeguridad infra)
         Assert.Contains("Plomería Privada", raw);
         Assert.DoesNotContain("Juan Pérez Secreto", raw);
         Assert.DoesNotContain("20.053912345", raw);
-        Assert.DoesNotContain("\"channels\"", raw);
     }
 
     [Fact]

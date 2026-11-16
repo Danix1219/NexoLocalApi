@@ -124,7 +124,7 @@ public sealed class MongoSavedStore([FromKeyedServices(NexoDatabaseKeys.Discover
     private static readonly Dictionary<string, string[]> PublicFields = new()
     {
         ["provider"] = ["providerId", "kind", "name", "bio", "activity", "trades", "categories", "specialties", "attention", "radiusKm",
-            "publicZone", "schedule", "visit", "prices", "photoUrl", "coverUrl", "jobs", "recs", "ratingAverage", "ratingCount", "createdAt", "updatedAt"],
+            "publicZone", "schedule", "visit", "prices", "photoUrl", "coverUrl", "jobs", "responseTime", "channels", "recs", "ratingAverage", "ratingCount", "createdAt", "updatedAt"],
         ["work"] = ["workId", "providerId", "category", "title", "text", "problem", "did", "time", "tag", "publicPoint", "zoneLabel", "images", "recs", "createdAt"],
         ["request"] = ["requestId", "category", "title", "description", "urgency", "publicPoint", "zoneLabel", "imageUrl", "imageUrls", "status", "interestCount", "createdAt", "closedAt"]
     };
