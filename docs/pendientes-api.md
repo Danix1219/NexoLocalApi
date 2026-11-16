@@ -9,12 +9,11 @@ está en [Memoria.md](../Memoria.md) y el estado por grupo en [estado-desarrollo
 
 | # | Qué | Efecto si no se hace | Dónde |
 |---|---|---|---|
-| 1 | Configurar `Orders__KeyVaultKeyId` en el App Service `nexolocal` (identificador versionado de `orders-address-kek-dev`; la identidad administrada con `Key Vault Crypto User`). En local: `Orders__AddressEncryptionKeyBase64` en `.env` | **Todo pedido a domicilio responde 503**; los pedidos en el local del prestador sí funcionan | `OrderAddressProtection.cs`, `.env.example` |
+| 1 | Variables ya en el App Service (2026-11-16): `Orders__KeyVaultKeyId`, `ContentSafety__Blocklist`, `Firebase__CredentialsJson`. Falta **desplegar** la rama con los cambios y comprobar en Azure: pedido a domicilio sin 503 (confirma rol `Key Vault Crypto User` de la identidad de `nexolocal`), una groseria rechazada y un push real | Hasta desplegar, la API en Azure es la version anterior y no usa estas variables | `OrderAddressProtection.cs`, `ProviderSafety.cs`, `FcmPushSender.cs` |
 | 2 | SDK .NET: `global.json` pide 10.0.302 y la máquina de desarrollo tiene 10.0.403 | No compila sin cambiar temporalmente `rollForward`; instalar 10.0.302 o acordar subir la versión | `global.json` |
 
-| 3 | Poner `ContentSafety__Blocklist=nexo-groserias-es` en el App Service. La lista ya existe en Azure (160 entradas, creada y probada el 2026-11-16) y la variable ya está en el `.env` local. Para cambiar palabras: editar `scripts/blocklist/groserias-es.txt` y correr `python -I scripts/blocklist/sync_blocklist.py` (`--check "texto"` para probar) | En Azure las groserías leves seguirán pasando hasta configurarla | `scripts/blocklist/` |
 
-| 4 | **Push FCM en Azure y CI.** Local listo el 2026-11-16: proyecto Firebase `nexo-local-2f3d3`, `google-services.json` en la app y cuenta de servicio en el `.env` (verificada con envío en simulación). Falta: `Firebase__CredentialsJson` en el App Service y el secreto `GOOGLE_SERVICES_JSON` en GitHub Actions del repo de la app. Probar en un Android físico | En Azure no saldrán push; la campana sí funciona | `FcmPushSender.cs`, app `android/app/` |
+| 4 | Push: `GOOGLE_SERVICES_JSON` ya en GitHub Actions de la app y credenciales en Azure. Falta probar en un Android fisico | Sin prueba real no se sabe si llegan al telefono | app `android/app/` |
 
 ## Grupos sin implementar (la app muestra datos de ejemplo)
 
