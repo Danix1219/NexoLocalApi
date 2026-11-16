@@ -125,6 +125,35 @@ public sealed class WorkEndpointsTests(InfraDeSeguridad infra)
         Assert.False(list.TryGetProperty("location", out _));
     }
     [Fact]
+    public async Task Guardados_no_exponen_datos_privados_y_rechazan_lo_propio()
+    {
+        using var host = Host(); using var author = host.CreateClient(); using var viewer = host.CreateClient();
+        var owner = await Login(host, author); await Login(host, viewer);
+        var provider = Guid.CreateVersion7();
+        using (var scope = host.Services.CreateScope())
+        {
+            var profile = new ProviderProfile
+            {
+                ProviderId = provider,
+                Name = "Plomería Privada",
+                Owner = "Juan Pérez Secreto",
+                Categories = ["plomeria"],
+                Location = new(20.053912345, -99.340312345),
+                PublicZone = new("Centro", new(20.056, -99.346)),
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow
+            };
+            Assert.True(await scope.ServiceProvider.GetRequiredService<IProviderStore>().InsertAsync(new(owner, profile, 0, Guid.NewGuid().ToString(), "hash", true), default));
+        }
+        await Error(await author.PostAsync($"/v1/discovery/saved/provider/{provider}", null), HttpStatusCode.Forbidden, NexoCodes.SavedOwnContent);
+        Assert.Equal(HttpStatusCode.OK, (await viewer.PostAsync($"/v1/discovery/saved/provider/{provider}", null)).StatusCode);
+        var raw = await (await viewer.GetAsync("/v1/discovery/saved")).Content.ReadAsStringAsync();
+        Assert.Contains("Plomería Privada", raw);
+        Assert.DoesNotContain("Juan Pérez Secreto", raw);
+        Assert.DoesNotContain("20.053912345", raw);
+    }
+
+    [Fact]
     public async Task Ciclo_real_idempotencia_recomendacion_privacidad_y_borrado_por_propietario()
     {
         using var host = Host(); using var author = host.CreateClient(); using var viewer = host.CreateClient(); using var anonymous = host.CreateClient();

@@ -7,6 +7,7 @@ using MongoDB.Driver;
 using Nexo.Common.Errors;
 using Nexo.Common.Mongo;
 using Nexo.Common.Results;
+using Nexo.Common.Safety;
 using Nexo.Discovery.Application.Providers;
 using Nexo.Discovery.Domain;
 
@@ -16,6 +17,7 @@ public sealed class ProviderSafetyOptions
 {
     public string Endpoint { get; set; } = "";
     public string ApiKey { get; set; } = "";
+    public string Blocklist { get; set; } = "";
 }
 public sealed class ProviderSafety(HttpClient client, IOptions<ProviderSafetyOptions> options,
     [FromKeyedServices(NexoDatabaseKeys.Discovery)] IMongoDatabase database) : IProviderSafety
@@ -29,10 +31,13 @@ public sealed class ProviderSafety(HttpClient client, IOptions<ProviderSafetyOpt
         {
             using var request = new HttpRequestMessage(HttpMethod.Post, new Uri(endpoint, "/contentsafety/text:analyze?api-version=2024-09-01"));
             request.Headers.Add("Ocp-Apim-Subscription-Key", config.ApiKey);
-            request.Content = JsonContent.Create(new { text, categories = Categories, outputType = "FourSeverityLevels" });
+            request.Content = JsonContent.Create(ContentSafetyRequest.Text(text, Categories, config.Blocklist));
             using var response = await client.SendAsync(request, ct);
             if (!response.IsSuccessStatusCode) return Unavailable<bool>();
             using var document = JsonDocument.Parse(await response.Content.ReadAsStringAsync(ct));
+            // Profanity blocklist (ContentSafety__Blocklist): with haltOnBlocklistHit the categories may come back empty.
+            if (document.RootElement.TryGetProperty("blocklistsMatch", out var hits) && hits.ValueKind == JsonValueKind.Array && hits.GetArrayLength() > 0)
+                return Result<bool>.Failure(NexoCodes.ContentInappropriate, "El contenido no puede publicarse.");
             if (!document.RootElement.TryGetProperty("categoriesAnalysis", out var analysis) || analysis.ValueKind != JsonValueKind.Array) return Unavailable<bool>();
             var found = new HashSet<string>(StringComparer.Ordinal);
             var rejected = false;

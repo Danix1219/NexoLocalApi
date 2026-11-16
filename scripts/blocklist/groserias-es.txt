@@ -1,0 +1,163 @@
+# Lista de bloqueo de Content Safety (ContentSafety__Blocklist). Una entrada por línea; # comenta.
+# Se compara sin distinguir mayúsculas. Evitar palabras ambiguas de uso normal (cola, huevo, leche...).
+# Tras editar: python scripts/blocklist/sync_blocklist.py
+pendejo
+pendeja
+pendejos
+pendejas
+pendejada
+pendejadas
+pendejete
+pinche
+pinches
+chingar
+chingada
+chingado
+chingados
+chingadera
+chingaderas
+chingón
+chingona
+chingue
+chinga
+chingas
+chingues
+chingate
+chíngate
+chingatumadre
+chinga tu madre
+hijo de la chingada
+hija de la chingada
+hijo de puta
+hija de puta
+hijueputa
+hijoputa
+hdp
+puta
+puto
+putos
+putas
+putazo
+putazos
+putita
+putito
+putero
+puñal
+pucha
+verga
+vergas
+vergazo
+vergazos
+vergudo
+culero
+culera
+culeros
+culeras
+cabrón
+cabrona
+cabrones
+cabronas
+cabron
+cabronazo
+mamón
+mamona
+mamones
+mamada
+mamadas
+mamar
+mámala
+mamala
+ojete
+ojetes
+joto
+jotos
+maricón
+maricon
+marica
+mayate
+naco
+naca
+gilipollas
+imbécil
+imbecil
+idiota
+estúpido
+estupido
+estúpida
+estupida
+tarado
+tarada
+retrasado
+retrasada
+mongol
+mongólico
+babosa
+baboso
+güey pendejo
+cagada
+cagadas
+cagar
+cágate
+mierda
+mierdas
+mierdero
+carajo
+coño
+cojones
+cojudo
+cojuda
+gonorrea
+malparido
+malparida
+pajero
+pajera
+panocha
+pucha madre
+chupapitos
+chupamela
+chúpamela
+chupala
+chúpala
+mecos
+cogida
+cogerte
+te voy a coger
+zorra
+zorras
+perra
+perras
+prostituta
+ramera
+golfa
+nalgas
+tetas
+pito
+pitos
+huevón
+huevona
+huevones
+güevón
+güevona
+lambiscón
+lamehuevos
+mamaguevo
+mamagüevo
+malnacido
+malnacida
+desgraciado
+desgraciada
+infeliz
+cerdo asqueroso
+vete a la verga
+vete a la mierda
+vales verga
+me vale verga
+valemadre
+valemadres
+a la verga
+alv
+ptm
+ctm
+chtm
+ntp
+hdtpm

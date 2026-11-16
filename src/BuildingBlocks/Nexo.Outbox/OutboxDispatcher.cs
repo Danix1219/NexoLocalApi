@@ -5,7 +5,7 @@ using Microsoft.Extensions.Logging;
 namespace Nexo.Outbox;
 
 /// <summary>Worker unico: reclama, entrega y marca; nunca procesa dos veces el mismo MessageId.</summary>
-public sealed class OutboxDispatcher : BackgroundService
+public class OutboxDispatcher : BackgroundService
 {
     public static readonly TimeSpan PollInterval = TimeSpan.FromSeconds(5);
     public static readonly TimeSpan StaleAfter = TimeSpan.FromMinutes(5);
@@ -28,8 +28,7 @@ public sealed class OutboxDispatcher : BackgroundService
     public async Task<int> DispatchOnceAsync(CancellationToken cancellationToken = default)
     {
         using var scope = _scopeFactory.CreateScope();
-        var repository = scope.ServiceProvider.GetRequiredService<IOutboxRepository>();
-        var handler = scope.ServiceProvider.GetRequiredService<IOutboxHandler>();
+        var (repository, handler) = Resolve(scope.ServiceProvider);
         var pending = await repository.GetPendingAsync(BatchSize, cancellationToken);
         var delivered = 0;
 
@@ -60,6 +59,10 @@ public sealed class OutboxDispatcher : BackgroundService
 
         return delivered;
     }
+
+    /// <summary>Which outbox and consumer this worker drains; a domain with its own database overrides it.</summary>
+    protected virtual (IOutboxRepository Repository, IOutboxHandler Handler) Resolve(IServiceProvider services) =>
+        (services.GetRequiredService<IOutboxRepository>(), services.GetRequiredService<IOutboxHandler>());
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {

@@ -7,7 +7,7 @@ public sealed record OrderProvider(Guid ProviderId, Guid OwnerId, string Name, s
 public sealed record OrderClient(string Name, string? PhotoUrl);
 public sealed record OrderAddress(string Address, string? Note, OrderPoint Point);
 public sealed record OrderDraft(Guid Id, Guid ClientId, Guid ProviderId, Guid ProviderAccountId, Guid? RequestId, string Origin, string Description,
-    string Attention, string PlaceZone, string? AddressCipher, OrderPoint? Point, DateTime CreatedAt);
+    string Attention, string PlaceZone, string? AddressCipher, OrderPoint? Point, DateTime CreatedAt, string Category = "");
 public sealed record OrderSnapshot(Guid Id, Guid ClientId, Guid ProviderId, Guid? RequestId, string Origin, string Category,
     string Description, string Attention, string PlaceZone, string? AddressCipher, OrderPoint? Point, string Status,
     DateTime CreatedAt, DateTime? AcceptedAt, DateTime? CancelledAt, string? CancelledBy, DateTime? ResolvedAt,
@@ -36,9 +36,22 @@ public interface IOrderStore
     Task<OrderMutationResult> ChangeAddressAsync(Guid id, Guid clientId, int? expectedVersion, OrderAddress address,
         string cipher, string placeZone, CancellationToken ct);
     Task<OrderEvent[]> EventsAsync(Guid id, CancellationToken ct);
+    /// <summary>Compensation: removes a just-created order (and its event, receipt and outbox row) when the request assignment lost.</summary>
+    Task DeleteCreatedAsync(Guid id, CancellationToken ct);
 }
 
 public sealed record OrderMutationResult(OrderSnapshot? Order, bool NotFound, bool InvalidTransition, bool VersionConflict, bool ActiveExists = false);
+
+public enum OrderRequestState { Missing, Open, Taken }
+
+/// <summary>Discovery contract for the request an order comes from. No cross-database transaction: callers compensate.</summary>
+public interface IOrderRequestLink
+{
+    Task<OrderRequestState> StateAsync(Guid clientId, Guid requestId, CancellationToken ct);
+    Task<bool> AssignAsync(Guid clientId, Guid requestId, Guid providerId, CancellationToken ct);
+    Task<bool> ReleaseAsync(Guid requestId, Guid providerId, CancellationToken ct);
+    Task<bool> CompleteAsync(Guid requestId, Guid providerId, DateTime now, CancellationToken ct);
+}
 
 public interface IOrderAddressProtection
 {
