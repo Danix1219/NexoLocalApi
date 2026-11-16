@@ -1,5 +1,24 @@
 # Memoria — API_NexoLocal
 
+## Estado del consumo API ↔ app móvil (2026-11-16)
+
+Conectado: la app (`NexoLocalApp`, `HybridNexoApi.remoteGroups`) consume siempre la API real en 14
+de 15 grupos: cuenta, perfil, dispositivos, descubrimiento, trabajos, solicitudes, interés, pedidos,
+opiniones, mensajes, guardados, contacto, notificaciones e imágenes. Ante un fallo muestran el error
+real; ya no caen a datos de ejemplo. Contratos revisados contra `http_nexo_api.dart` y `models.dart`
+en cada grupo; ajustes hechos en la app: copiar número desde el pedido (tipos client/provider).
+
+Sin backend: `asistente` (`POST /v1/assist/draft`), sin ficha en `specs/endpoints`; la app sigue con
+datos de ejemplo y aviso "demo". `15-pantallas` no tiene consumidor en la app.
+
+Limitaciones que la app ve aunque esté conectada: fotos en el chat fallan al subir (`purpose=chat`
+no admitido, falta media privada); sin SignalR, chat y campana se actualizan al refrescar; push
+depende del despliegue y de probarlo en Android físico.
+
+Ramas: API `feature/08-pedidos` y app `feature/conectar-pedidos-chat`, ambas subidas. Orden de
+fusión: primero la API (y desplegarla), luego la app; si no, la app pediría rutas que Azure aún no
+tiene. Hasta desplegar, la API en Azure es la versión anterior.
+
 ## 13-notificaciones: campana real, worker de outbox de Engagement y push FCM listo (2026-11-16)
 
 Estado: `GET /v1/engagement/notifications` y `POST /v1/engagement/notifications/read`. Las filas solo
