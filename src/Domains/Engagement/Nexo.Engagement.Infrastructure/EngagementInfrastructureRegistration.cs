@@ -14,6 +14,8 @@ public static class EngagementInfrastructureRegistration
         services.AddSingleton<IOrderAddressKeyWrapper, AzureOrderAddressKeyWrapper>();
         services.AddSingleton<Nexo.Engagement.Application.Orders.IOrderAddressProtection, OrderAddressProtection>();
         services.AddScoped<Nexo.Engagement.Application.Orders.OrderService>();
+        services.AddSingleton<Nexo.Engagement.Application.Reviews.IReviewStore, MongoReviewStore>();
+        services.AddScoped<Nexo.Engagement.Application.Reviews.ReviewService>();
         return services;
     }
 }

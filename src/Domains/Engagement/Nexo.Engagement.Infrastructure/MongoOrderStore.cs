@@ -152,6 +152,26 @@ public sealed class MongoOrderStore([FromKeyedServices(NexoDatabaseKeys.Engageme
         return docs.Select(d => new OrderEvent(d["version"].AsInt32, d["type"].AsString, d["actorId"].AsBsonBinaryData.ToGuid(), d["at"].ToUniversalTime(), d.GetValue("data", BsonNull.Value).IsBsonNull ? null : d["data"].AsString)).ToArray();
     }
 
+    public async Task DeleteCreatedAsync(Guid id, CancellationToken ct)
+    {
+        await EnsureAsync(ct);
+        try
+        {
+            using var session = await database.Client.StartSessionAsync(cancellationToken: ct);
+            await session.WithTransactionAsync<bool>(async (s, token) =>
+            {
+                await orders.DeleteOneAsync(s, new BsonDocument { ["_id"] = Id(id), ["status"] = "pending", ["version"] = 1 }, cancellationToken: token);
+                await eventRows.DeleteManyAsync(s, new BsonDocument("streamId", Id(id)), cancellationToken: token);
+                await idempotency.DeleteManyAsync(s, new BsonDocument("orderId", Id(id)), cancellationToken: token);
+                // Payload is serialized JSON; the order id is a unique UUID so a substring match is exact enough.
+                var f = Builders<OutboxMessage>.Filter;
+                await outbox.DeleteManyAsync(s, f.Eq(m => m.Type, "order.created") & f.Regex(m => m.Payload, new BsonRegularExpression(id.ToString("D"))), cancellationToken: token);
+                return true;
+            }, cancellationToken: ct);
+        }
+        catch (MongoException e) { throw new OrderUnavailableException(e); }
+    }
+
     private async Task AppendEvent(IClientSessionHandle s, Guid id, Guid actor, int version, string type, DateTime at, string? data, CancellationToken ct)
     {
         var prev = await eventRows.Find(s, new BsonDocument("streamId", Id(id))).Sort(new BsonDocument("version", -1)).FirstOrDefaultAsync(ct);
@@ -195,7 +215,7 @@ public sealed class MongoOrderStore([FromKeyedServices(NexoDatabaseKeys.Engageme
         ["requestId"] = d.RequestId is { } request ? Id(request) : BsonNull.Value,
         ["origin"] = d.Origin,
         ["description"] = d.Description,
-        ["category"] = "",
+        ["category"] = d.Category,
         ["attention"] = d.Attention,
         ["placeZone"] = d.PlaceZone,
         ["addressCipher"] = d.AddressCipher == null ? BsonNull.Value : d.AddressCipher,

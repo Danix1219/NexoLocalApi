@@ -1,5 +1,53 @@
 # Memoria — API_NexoLocal
 
+## 09-opiniones implementado (2026-11-15)
+
+Estado: misma rama `feature/08-pedidos` (sin commit). `POST /v1/engagement/reviews` y
+`GET /v1/engagement/providers/{id}/reviews` en Engagement (ReviewService, MongoReviewStore,
+colección `reviews`). Solo el cliente de un pedido `resolved` opina (404 si no es suyo, 403
+review.order_not_resolved si no está resuelto); una por pedido con índice único disperso en `orderId`
+(409 review.already_exists; reintento idéntico con la misma Idempotency-Key devuelve 200). Estrellas
+1–5, texto opcional 10–500 moderado, tope de 20 al día por cliente contado en Mongo. Outbox
+`review.created` en la misma transacción. Autor público "Nombre I."; nunca salen clientId ni orderId.
+El detalle de pedido ya devuelve `canReview` real y `myReviewStars`. App ya consumía ambas rutas.
+
+Decisiones: el promedio del prestador se recalcula completo ($group sobre aprobadas) y se escribe en
+`provider_profiles.data.ratingAverage/ratingCount` por contrato síncrono (`IReviewDirectory`, puente en
+Host); si Discovery falla la opinión queda y el promedio se corrige con la siguiente. Lectura pública
+con `Cache-Control: public, max-age=60` en vez de Redis L2 + ETag de la ficha.
+
+Verificación: build 0/0, format PASS, Engagement.Unit 39/39 (12 nuevas), Discovery.Unit 67/67,
+Architecture 7/7. Con Docker (Testcontainers Mongo/Redis): Integration 55/55 y Seguridad 115/115,
+suites previas sin casos propios de pedidos/opiniones.
+
+Deuda: sin caché L2/ETag ni invalidación; sin push al prestador (outbox sin consumidor); moderación
+retirada no implementada (todas nacen approved).
+
+## 08-pedidos: asignación desde solicitud y categoría (2026-11-15)
+
+Estado: rama `feature/08-pedidos` desde develop (sin commit al registrar). `origin=post` ya funciona: antes
+toda creación con solicitud daba 400 porque se comparaba `requestId` contra un parámetro siempre nulo.
+Ahora valida solicitud propia (404 request.not_found) y abierta (409 order.request_already_assigned),
+inserta el pedido, asigna en Discovery con findOneAndUpdate condicional y compensa borrando pedido,
+evento, recibo y outbox `order.created` si pierde la carrera o falla. Rechazo y cancelación del
+prestador reabren la solicitud solo si sigue asignada a ese prestador (`requestReopened`); resolver la
+cierra con solvedHere. La categoría del pedido se guarda: la enviada por la app si el prestador la
+ofrece, si no la primera del prestador. App revisada: rutas, cuerpos, Idempotency-Key, If-Match y
+lectura de respuestas compatibles; no requiere cambios.
+
+Decisiones: contrato síncrono Engagement→Discovery (`IOrderRequestLink`, puente en Host), sin
+transacción entre bases; la sincronización posterior a una transición nunca deshace el pedido. No se
+exige interés activo para `origin=post` (la ficha no lo pide).
+
+Verificación: build Release de la solución 0 errores/0 advertencias; dotnet format verify PASS;
+Engagement.Unit 27/27 (9 nuevas con dobles) y Discovery.Unit 67/67. Sin Mongo real ni Docker: la
+suite de integración/seguridad no se ejecutó. Se compiló con SDK 10.0.403 cambiando temporalmente
+`global.json` (pide 10.0.302, no instalado) y se restauró.
+
+Deuda: `Orders__KeyVaultKeyId` (o llave local) no configurado → pedidos a domicilio responden 503;
+outbox sin consumidores (notificación, conversación, reintento de sincronización con solicitud);
+pedidos previos conservan `category` vacía; rama sin clave Jira.
+
 ## Implementación local de 02-cuenta (2026-11-09)
 
 Estado: ocho operaciones vigentes implementadas en Identity, rama `feature/02-cuenta`. Se conserva

@@ -28,3 +28,34 @@ public sealed class OrderSafetyBridge(IInterestSafety safety) : IOrderSafety
 {
     public Task<Nexo.Common.Results.Result<bool>> ModerateAsync(string text, CancellationToken ct) => safety.ModerateAsync(text, ct);
 }
+
+public sealed class OrderRequestLinkBridge(Nexo.Discovery.Application.Requests.IRequestStore requests) : IOrderRequestLink
+{
+    public Task<OrderRequestState> StateAsync(Guid clientId, Guid requestId, CancellationToken ct) => Guard(async () =>
+        await requests.OwnAsync(clientId, requestId, ct) switch
+        {
+            null => OrderRequestState.Missing,
+            { Status: "open" } => OrderRequestState.Open,
+            _ => OrderRequestState.Taken
+        });
+    public Task<bool> AssignAsync(Guid clientId, Guid requestId, Guid providerId, CancellationToken ct) => Guard(() => requests.AssignAsync(clientId, requestId, providerId, ct));
+    public Task<bool> ReleaseAsync(Guid requestId, Guid providerId, CancellationToken ct) => Guard(() => requests.ReleaseAsync(requestId, providerId, ct));
+    public Task<bool> CompleteAsync(Guid requestId, Guid providerId, DateTime now, CancellationToken ct) => Guard(() => requests.CompleteAsync(requestId, providerId, now, ct));
+
+    private static async Task<T> Guard<T>(Func<Task<T>> call)
+    {
+        try { return await call(); }
+        catch (Nexo.Discovery.Application.Requests.RequestUnavailableException e) { throw new OrderUnavailableException(e); }
+    }
+}
+
+public sealed class ReviewDirectoryBridge(Nexo.Discovery.Application.Requests.IRequestClients clients, IProviderStore providers)
+    : Nexo.Engagement.Application.Reviews.IReviewDirectory
+{
+    public async Task<IReadOnlyDictionary<Guid, Nexo.Engagement.Application.Reviews.ReviewAuthor>> AuthorsAsync(Guid[] ids, CancellationToken ct) =>
+        ids.Length == 0 ? new Dictionary<Guid, Nexo.Engagement.Application.Reviews.ReviewAuthor>()
+            : (await clients.ReadAsync(ids, ct)).Where(p => p.Value.Active)
+                .ToDictionary(p => p.Key, p => new Nexo.Engagement.Application.Reviews.ReviewAuthor(p.Value.DisplayName, p.Value.PhotoUrl));
+
+    public Task SetRatingAsync(Guid providerId, double average, int count, CancellationToken ct) => providers.SetRatingAsync(providerId, average, count, ct);
+}

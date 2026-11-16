@@ -9,6 +9,7 @@ using Nexo.Common.Errors;
 using Nexo.Common.RateLimiting;
 using Nexo.Engagement.Application.Interests;
 using Nexo.Engagement.Application.Orders;
+using Nexo.Engagement.Application.Reviews;
 
 namespace Nexo.Engagement.Endpoints;
 
@@ -112,6 +113,33 @@ public static class EngagementEndpointMapping
             catch (Exception e) when (e is OrderUnavailableException || DependencyErrors.IsUnavailable(e)) { return Dependency(http); }
         }).RequireAuthorization().RequireRateLimiting(NexoRateLimits.User).Produces(200).ProducesProblem(401).ProducesProblem(404).ProducesProblem(503)
             .WithSummary("Comprobar la elegibilidad interna de reseña sin exponer el domicilio");
+
+        group.MapPost("/reviews", async (ReviewService.CreateReviewBody? body, ReviewService service, HttpContext http, CancellationToken ct) =>
+        {
+            http.Response.Headers.CacheControl = "private, no-store";
+            try
+            {
+                var result = await service.CreateAsync(User(http), http.Request.Headers["Idempotency-Key"].FirstOrDefault(), body, ct);
+                return result.Match(value => Results.Json(value.Body, statusCode: value.Status), error => NexoProblem.From(error, http));
+            }
+            catch (Exception e) when (ReviewDown(e)) { return Dependency(http); }
+        }).RequireAuthorization().RequireRateLimiting(NexoRateLimits.User).Produces(201).Produces(200).ProducesProblem(400).ProducesProblem(401).ProducesProblem(403).ProducesProblem(404).ProducesProblem(409).ProducesProblem(429).ProducesProblem(503)
+            .WithSummary("Calificar un pedido resuelto");
+
+        group.MapGet("/providers/{id:guid}/reviews", async (Guid id, HttpRequest request, ReviewService service, HttpContext http, CancellationToken ct) =>
+        {
+            if (request.Query.Any(q => q.Value.Count != 1) || !Int(request.Query, "limit", 20, out var limit)) return Invalid(http);
+            var cursor = request.Query.TryGetValue("cursor", out var cv) ? cv.ToString() : null;
+            try
+            {
+                var result = await service.ListAsync(id, cursor, limit, ct);
+                // shortcut: plain HTTP cache of 60 s instead of the spec's Redis L2 + ETag; upgrade when traffic needs it.
+                if (result.IsSuccess) http.Response.Headers.CacheControl = "public, max-age=60";
+                return result.Match(Results.Ok, error => NexoProblem.From(error, http));
+            }
+            catch (Exception e) when (ReviewDown(e)) { return Dependency(http); }
+        }).AllowAnonymous().RequireRateLimiting(NexoRateLimits.Public).Produces(200).ProducesProblem(400).ProducesProblem(404).ProducesProblem(429).ProducesProblem(503)
+            .WithSummary("Listar opiniones aprobadas de un prestador");
         return app;
 
         void MapTransition(RouteGroupBuilder routes, string pattern, string target)
@@ -127,6 +155,7 @@ public static class EngagementEndpointMapping
     }
 
     private static bool Unavailable(Exception e) => e is InterestUnavailableException || DependencyErrors.IsUnavailable(e);
+    private static bool ReviewDown(Exception e) => e is ReviewUnavailableException or OrderUnavailableException || DependencyErrors.IsUnavailable(e);
     private static IResult Dependency(HttpContext http) => NexoProblem.From(NexoCodes.ServerDependencyUnavailable, null, http);
     private static IResult Invalid(HttpContext http) => NexoProblem.From(NexoCodes.ValidationFailed, "Revisa los parámetros de consulta.", http);
     private static Guid User(HttpContext http) => Guid.TryParse(http.User.FindFirst("sub")?.Value, out var id) ? id : Guid.Empty;

@@ -8,7 +8,7 @@ using Nexo.Engagement.Domain.Orders;
 namespace Nexo.Engagement.Application.Orders;
 
 public sealed class OrderService(IOrderStore store, IOrderProviderAccess providers, IOrderAddressProtection addresses,
-    IOrderSafety safety, TimeProvider clock)
+    IOrderSafety safety, IOrderRequestLink requests, Reviews.IReviewStore reviews, TimeProvider clock)
 {
     public async Task<Result<OrderResult>> CreateAsync(Guid client, Guid? requestId, string? idempotencyKey,
         CreateOrderBody? body, CancellationToken ct)
@@ -16,7 +16,6 @@ public sealed class OrderService(IOrderStore store, IOrderProviderAccess provide
         if (body == null || !Guid.TryParse(idempotencyKey, out var key) ||
             OrderRules.Validate(body.Origin, body.Description, body.Attention, body.Address, body.AddressNote,
                 body.Location?.Lat, body.Location?.Lng) is not null ||
-            (body.RequestId is not null && (body.RequestId != requestId || body.Origin != "post")) ||
             (body.Origin == "post" && body.RequestId is null) ||
             (body.Origin == "direct" && body.RequestId != null)) return Fail<OrderResult>(NexoCodes.ValidationFailed);
         var provider = await providers.GetAsync(body.ProviderId, ct);
@@ -24,6 +23,12 @@ public sealed class OrderService(IOrderStore store, IOrderProviderAccess provide
         if (provider.OwnerId == client) return Fail<OrderResult>(NexoCodes.ValidationFailed);
         if (body.Attention == "home" && provider.Attention is not ("home" or "both") ||
             body.Attention == "shop" && provider.Attention is not ("shop" or "both")) return Fail<OrderResult>(NexoCodes.OrderAttentionNotSupported);
+        if (body.Origin == "post")
+        {
+            var state = await requests.StateAsync(client, body.RequestId!.Value, ct);
+            if (state == OrderRequestState.Missing) return Fail<OrderResult>(NexoCodes.RequestNotFound);
+            if (state == OrderRequestState.Taken) return Fail<OrderResult>(NexoCodes.OrderRequestAlreadyAssigned);
+        }
         var moderated = await safety.ModerateAsync(body.Description.Trim(), ct);
         if (moderated.IsFailure) return Result<OrderResult>.Failure(moderated.Error!);
         if (!moderated.Value) return Fail<OrderResult>(NexoCodes.ContentInappropriate);
@@ -32,11 +37,25 @@ public sealed class OrderService(IOrderStore store, IOrderProviderAccess provide
         if (privateAddress != null) cipher = await addresses.EncryptAsync(privateAddress, ct);
         var now = clock.GetUtcNow().UtcDateTime;
         var draft = new OrderDraft(Guid.CreateVersion7(), client, body.ProviderId, provider.OwnerId, body.RequestId, body.Origin,
-            body.Description.Trim(), body.Attention, provider.Zone, cipher, null, now);
+            body.Description.Trim(), body.Attention, provider.Zone, cipher, null, now,
+            // The app sends the category it shows; only one the provider actually offers is kept.
+            body.Category is { } c && provider.Categories.Contains(c) ? c : provider.Categories.FirstOrDefault() ?? "");
         var hash = Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(JsonSerializer.Serialize(body))));
         var created = await store.CreateAsync(draft, key, hash, ct);
         if (created == null) return Fail<OrderResult>(NexoCodes.OrderActiveExists);
         var sameRequest = created.Id != draft.Id;
+        if (!sameRequest && created.RequestId is { } requestToAssign)
+        {
+            // Two databases, no shared transaction: insert first, assign conditionally, undo the insert if the request was taken.
+            bool assigned;
+            try { assigned = await requests.AssignAsync(client, requestToAssign, created.ProviderId, ct); }
+            catch { await store.DeleteCreatedAsync(created.Id, CancellationToken.None); throw; }
+            if (!assigned)
+            {
+                await store.DeleteCreatedAsync(created.Id, CancellationToken.None);
+                return Fail<OrderResult>(NexoCodes.OrderRequestAlreadyAssigned);
+            }
+        }
         return Result<OrderResult>.Success(new(new
         {
             orderId = created.Id,
@@ -114,6 +133,7 @@ public sealed class OrderService(IOrderStore store, IOrderProviderAccess provide
         var canSee = role == "client" || order.Status is "accepted" or "resolved" || order.Status == "cancelled" && order.AcceptedAt != null;
         var plaintext = canSee && order.AddressCipher != null ? await addresses.DecryptAsync(order.AddressCipher, ct) : null;
         var timeline = await store.EventsAsync(id, ct);
+        var review = role == "client" && order.Status == "resolved" ? await reviews.ByOrderAsync(id, ct) : null;
         var provider = role == "client" ? await providers.GetAsync(order.ProviderId, ct) : null;
         var client = role == "provider" ? await providers.GetClientAsync(order.ClientId, ct) : null;
         return Result<object>.Success(new
@@ -143,7 +163,8 @@ public sealed class OrderService(IOrderStore store, IOrderProviderAccess provide
             timeline = timeline.Select(e => new { version = e.Version, type = e.Type, actor = e.ActorId == order.ClientId ? "client" : "provider", at = e.At }),
             version = order.Version,
             allowedActions = Actions(order.Status, role),
-            canReview = false
+            canReview = role == "client" && order.Status == "resolved" && review == null,
+            myReviewStars = review?.Stars
         });
     }
 
@@ -173,6 +194,7 @@ public sealed class OrderService(IOrderStore store, IOrderProviderAccess provide
         if (changed.VersionConflict) return Fail<object>(NexoCodes.OrderVersionConflict);
         if (changed.InvalidTransition) return Fail<object>(NexoCodes.OrderInvalidTransition);
         if (changed.Order == null) return Fail<object>(NexoCodes.ServerDependencyUnavailable);
+        var requestReopened = await SyncRequestAsync(changed.Order, target, role, now, ct);
         var releasedAddress = target == "accepted" && changed.Order.AddressCipher != null
             ? await addresses.DecryptAsync(changed.Order.AddressCipher, ct) : null;
         return Result<object>.Success(new
@@ -187,7 +209,7 @@ public sealed class OrderService(IOrderStore store, IOrderProviderAccess provide
             resolvedAt = target == "resolved" ? now : (DateTime?)null,
             cancelledBy = target == "cancelled" ? role : null,
             clientCanReview = target == "resolved",
-            requestReopened = false,
+            requestReopened,
             address = releasedAddress?.Address,
             addressNote = releasedAddress?.Note,
             location = releasedAddress?.Point,
@@ -223,6 +245,20 @@ public sealed class OrderService(IOrderStore store, IOrderProviderAccess provide
         });
     }
 
+    /// <summary>Keeps the Discovery request in step after the order change committed; a failure here never undoes the order.</summary>
+    private async Task<bool> SyncRequestAsync(OrderSnapshot order, string target, string role, DateTime now, CancellationToken ct)
+    {
+        if (order.RequestId is not { } requestId) return false;
+        try
+        {
+            if (target == "rejected" || target == "cancelled" && role == "provider") return await requests.ReleaseAsync(requestId, order.ProviderId, ct);
+            if (target == "resolved") await requests.CompleteAsync(requestId, order.ProviderId, now, ct);
+        }
+        // shortcut: a failed sync is left to the persisted outbox event; no consumer replays it yet (pending outbox worker).
+        catch (Exception e) when (e is OrderUnavailableException || DependencyErrors.IsUnavailable(e)) { }
+        return false;
+    }
+
     private static string StatusText(string s, string role) => s switch { "pending" => role == "provider" ? "Esperando tu respuesta" : "Esperando respuesta", "accepted" => "Aceptado", "rejected" => "Rechazado", "cancelled" => "Cancelado", "resolved" => "Resuelto", _ => s };
     private string Ago(DateTime createdAt)
     {
@@ -240,7 +276,7 @@ public sealed class OrderService(IOrderStore store, IOrderProviderAccess provide
         _ => []
     };
     private static Result<T> Fail<T>(string code) => Result<T>.Failure(code, "No se pudo completar la operación del pedido.");
-    public sealed record CreateOrderBody(Guid ProviderId, Guid? RequestId, string Origin, string Description, string Attention, string? Address, string? AddressNote, OrderLocation? Location);
+    public sealed record CreateOrderBody(Guid ProviderId, Guid? RequestId, string Origin, string Description, string Attention, string? Address, string? AddressNote, OrderLocation? Location, string? Category = null);
     public sealed record OrderPriceBody(int? AmountCents = null, string? Includes = null);
     public sealed record TransitionBody(OrderPriceBody? AgreedPrice = null, string? Reason = null, string? Note = null, OrderPriceBody? FinalPrice = null);
     public sealed record ChangeAddressBody(string Address, string? AddressNote, OrderLocation? Location);
