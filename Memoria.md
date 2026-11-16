@@ -1,5 +1,48 @@
 # Memoria — API_NexoLocal
 
+## Filtro de groserías con lista de bloqueo de Content Safety (2026-11-15)
+
+Estado: los moderadores de texto (`ProviderSafety`, que cubre perfiles, trabajos, solicitudes,
+interés, pedidos, opiniones y chat; y `AccountProfileSafety` para nombres) envían
+`blocklistNames` + `haltOnBlocklistHit` cuando existe `ContentSafety__Blocklist`, y rechazan con
+`content.inappropriate` si hay `blocklistsMatch` aunque no vengan categorías. Sin la variable se
+comporta como antes. Lista editable en `scripts/blocklist/groserias-es.txt` (redactada en el repo,
+sin descargar listas externas) y `sync_blocklist.py` la crea/actualiza en Azure en lotes de 100.
+
+Actualización 2026-11-16: lista `nexo-groserias-es` creada en Azure (160 entradas) y comprobada:
+bloquea "pendejo", "pinche", "hijo de puta", "vete a la verga"; permite "película" y textos normales.
+Variable puesta en el `.env` local; falta en el App Service. Integration 57/57 con dos casos nuevos. La coincidencia es literal: variantes como "p3ndejo" requieren entradas
+propias.
+
+## 10-mensajes implementado por HTTP (2026-11-15)
+
+Estado: misma rama `feature/08-pedidos`. Seis rutas en Engagement (ConversationService,
+MongoConversationStore, colecciones `conversations` y `messages`): abrir/recuperar, bandeja, mensajes,
+enviar, marcar leídos y bloquear. Regla central: el cliente inicia con `providerId`; el prestador solo
+con `clientId` o `requestId` si tiene un pedido (pending/accepted/resolved) con ese cliente; si no,
+`403 conversation.not_allowed`. Una conversación por par (índice único + upsert; 201 nueva, 200 si
+existía). Participación en el filtro de cada consulta (404 a terceros). Envío: texto 1–1000 moderado,
+bloqueo comprobado en la misma escritura condicional que sube el no leído del receptor, idempotencia
+por `{senderId, idempotencyKey}`, outbox `message.sent` sin texto. Leídos: se recuentan (no se ponen a
+cero) para respetar `upToMessageId`. Bloqueo unilateral: cada parte levanta solo el suyo (`403
+conversation.blocked_by_other`). El prestador ve "Nombre I." del cliente hasta que hay pedido aceptado.
+El detalle de pedido ahora devuelve `conversationId` real. Errores nuevos mapeados (404/403/400).
+
+Decisiones: sin hub SignalR (`ws-hubs-chat`): la app actual no lo usa y consulta por HTTP;
+`deliveredToSocket` siempre false. Fotos en chat: la app sube con `purpose=chat`, que la API de
+imágenes no admite y además publicaría la foto en URL pública; queda pendiente de diseñar media
+privada, así que hoy enviar foto en el chat falla con 400 al subir.
+
+Verificación: build 0/0; Common 31/31, Engagement 43/43, Architecture 7/7; pruebas de punta a punta
+nuevas `ChatAndReviewEndpointsTests` (chat completo y opiniones tras pedido resuelto) con Mongo/Redis
+reales en Docker.
+
+Deuda: SignalR y push (outbox sin consumidor); media privada para fotos de chat; `alsoReport` se
+ignora hasta el grupo 12; bandeja sin caché.
+
+Todo lo pendiente o parcial de la API se concentra en `docs/pendientes-api.md`; actualizarlo en
+cada entrega.
+
 ## 11-guardados auditado y corregido; códigos de error sin mapear (2026-11-15)
 
 Estado: misma rama `feature/08-pedidos`. Las tres rutas de guardados ya existían (commit 49b85d0) pero

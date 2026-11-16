@@ -14,6 +14,7 @@ public sealed class ContentSafetyOptions
 {
     public string Endpoint { get; set; } = string.Empty;
     public string ApiKey { get; set; } = string.Empty;
+    public string Blocklist { get; set; } = string.Empty;
 }
 
 /// <summary>No aprueba nombres si la configuracion, respuesta o dependencia no es verificable.</summary>
@@ -32,10 +33,13 @@ public sealed class AccountProfileSafety(HttpClient client, IOptions<ContentSafe
             using var request = new HttpRequestMessage(HttpMethod.Post,
                 new Uri(endpoint, "/contentsafety/text:analyze?api-version=2024-09-01"));
             request.Headers.Add("Ocp-Apim-Subscription-Key", settings.ApiKey);
-            request.Content = JsonContent.Create(new { text = name, categories = Categories, outputType = "FourSeverityLevels" });
+            request.Content = JsonContent.Create(Nexo.Common.Safety.ContentSafetyRequest.Text(name, Categories, settings.Blocklist));
             using var response = await client.SendAsync(request, ct);
             if (!response.IsSuccessStatusCode) return Unavailable<bool>();
             using var document = JsonDocument.Parse(await response.Content.ReadAsStringAsync(ct));
+            // Profanity blocklist (ContentSafety__Blocklist): with haltOnBlocklistHit the categories may come back empty.
+            if (document.RootElement.TryGetProperty("blocklistsMatch", out var hits) && hits.ValueKind == JsonValueKind.Array && hits.GetArrayLength() > 0)
+                return Result<bool>.Failure(NexoCodes.ContentInappropriate, "El nombre no puede publicarse.");
             if (document.RootElement.ValueKind != JsonValueKind.Object ||
                 !document.RootElement.TryGetProperty("categoriesAnalysis", out var analysis) || analysis.ValueKind != JsonValueKind.Array)
                 return Unavailable<bool>();

@@ -40,6 +40,30 @@ public sealed class ProviderSafetyTests(InfraFixture infra)
         Assert.Equal(NexoCodes.ServerDependencyUnavailable, (await unconfigured.ModerateAsync("Nombre", default)).Error!.Code);
         Assert.Equal(1, handler.Calls);
     }
+    private sealed class BlocklistHandler(string body) : HttpMessageHandler
+    {
+        public string Sent { get; private set; } = "";
+        protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken ct)
+        {
+            Sent = await request.Content!.ReadAsStringAsync(ct);
+            return new(HttpStatusCode.OK) { Content = new StringContent(body, Encoding.UTF8, "application/json") };
+        }
+    }
+
+    [Theory]
+    // haltOnBlocklistHit: Azure may return no categories at all when a listed word matches.
+    [InlineData("{\"blocklistsMatch\":[{\"blocklistName\":\"nexo-groserias-es\",\"blocklistItemText\":\"pendejo\"}],\"categoriesAnalysis\":[]}", NexoCodes.ContentInappropriate)]
+    [InlineData("{\"blocklistsMatch\":[],\"categoriesAnalysis\":[{\"category\":\"Hate\",\"severity\":0},{\"category\":\"Sexual\",\"severity\":0},{\"category\":\"Violence\",\"severity\":0},{\"category\":\"SelfHarm\",\"severity\":0}]}", null)]
+    public async Task Lista_de_groserias_bloquea_aunque_no_haya_categorias(string body, string? expected)
+    {
+        using var handler = new BlocklistHandler(body); using var client = new HttpClient(handler);
+        var safety = new ProviderSafety(client, Options.Create(new ProviderSafetyOptions { Endpoint = "https://moderation.example.test", ApiKey = "sin-valor-de-prueba", Blocklist = "nexo-groserias-es" }),
+            new MongoClient(infra.MongoConnectionString).GetDatabase("safety"));
+        Assert.Equal(expected, (await safety.ModerateAsync("Texto de prueba", default)).Error?.Code);
+        Assert.Contains("\"blocklistNames\":[\"nexo-groserias-es\"]", handler.Sent);
+        Assert.Contains("\"haltOnBlocklistHit\":true", handler.Sent);
+    }
+
     [Fact]
     public async Task Subida_exige_propietario_aprobacion_finalidad_y_URL_segura()
     {
