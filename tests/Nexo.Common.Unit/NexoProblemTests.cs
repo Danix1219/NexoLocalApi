@@ -21,5 +21,11 @@ public sealed class NexoProblemTests
     [InlineData(NexoCodes.ConversationBlocked, 403)]
     [InlineData(NexoCodes.ConversationBlockedByOther, 403)]
     [InlineData(NexoCodes.ConversationSelf, 400)]
+    [InlineData(NexoCodes.ConversationNotParticipant, 403)]
+    [InlineData(NexoCodes.ContactPhoneNotAvailable, 403)]
+    [InlineData(NexoCodes.ContactNotAllowed, 403)]
+    [InlineData(NexoCodes.ContactDailyLimit, 429)]
+    [InlineData(NexoCodes.ReportAlreadyReported, 409)]
+    [InlineData(NexoCodes.ReportOwnContent, 403)]
     public void Codigo_de_negocio_no_cae_en_500(string code, int status) => Assert.Equal(status, NexoProblem.Describe(code).Status);
 }

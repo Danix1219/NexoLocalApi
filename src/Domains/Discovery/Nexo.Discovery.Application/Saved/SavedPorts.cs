@@ -13,6 +13,8 @@ public interface ISavedStore
 {
     Task<SavedMutation?> SetAsync(Guid accountId, string kind, Guid targetId, bool saved, DateTime now, CancellationToken ct);
     Task<SavedPage> ListAsync(Guid accountId, string? kind, string? cursor, int limit, CancellationToken ct);
+    /// <summary>Owner account of a public provider/work/request; null when missing or not public.</summary>
+    Task<Guid?> TargetOwnerAsync(string kind, Guid targetId, CancellationToken ct);
 }
 
 public sealed class SavedUnavailableException(Exception? inner = null) : Exception("Saved items are temporarily unavailable.", inner);

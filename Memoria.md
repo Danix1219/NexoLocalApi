@@ -1,5 +1,30 @@
 # Memoria — API_NexoLocal
 
+## 12-contacto-reportes implementado y app conectada a 08–12 (2026-11-16)
+
+Estado: `POST /v1/engagement/contacts/phone` y `POST /v1/engagement/reports` en Engagement
+(ContactReportService, MongoContactReportStore, colecciones `contact_log` con TTL de 1 año y
+`reports`). Celular: única salida de un número; prestador solo si activó `channels.call`, cliente solo
+para el prestador con pedido aceptado/resuelto (`403 contact.not_allowed`); 40 al día
+(`429 contact.daily_limit`); se registra en `contact_log` y outbox `contact.phone_copied`. El número
+sale por `IPhoneDisclosureContract` de Identity, que existía pero no estaba registrado en DI (se
+registró). Reportes: 202, uno por objetivo (`409 report.already_reported`), nunca contenido propio
+(`403 report.own_content`), evidencia de conversación solo si es parte, tope de 20 al día; el motivo
+se modera pero no se rechaza (`reasonFlagged`). Dueño de proveedor/trabajo/solicitud vía
+`ISavedStore.TargetOwnerAsync` (reutiliza la búsqueda de guardados).
+
+App (repo NexoLocalApp, rama `feature/conectar-pedidos-chat`): "Copiar número" desde el pedido
+mandaba `targetType: order` con el id del pedido, fuera del contrato; ahora manda `client`/`provider`
+con el id de la contraparte. Pedidos, opiniones, mensajes y contacto pasan a `remoteGroups`: ya no
+caen a datos de ejemplo si la red falla, muestran el error real. Prueba de resiliencia ajustada para
+usar notificaciones como grupo aún sin API. Flutter 276/276.
+
+Verificación API: build 0/0; Common 37/37, Engagement 45/45, Discovery 67/67; prueba de punta a punta
+nueva de celular y reportes; Architecture 7/7, Integration 57/57, Seguridad 119/119 con Docker.
+
+Deuda: worker de `report.created` (aviso por correo y ocultar tras 3 reportes) y de
+`contact.phone_copied` (estadística de clics); sin auditoría con cadena de hash en `audit_events`.
+
 ## Filtro de groserías con lista de bloqueo de Content Safety (2026-11-15)
 
 Estado: los moderadores de texto (`ProviderSafety`, que cubre perfiles, trabajos, solicitudes,

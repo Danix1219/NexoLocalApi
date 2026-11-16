@@ -107,6 +107,13 @@ public sealed class MongoSavedStore([FromKeyedServices(NexoDatabaseKeys.Discover
         }
     }
 
+    public async Task<Guid?> TargetOwnerAsync(string kind, Guid targetId, CancellationToken ct)
+    {
+        if (kind is not ("provider" or "work" or "request")) return null;
+        try { await EnsureAsync(ct); return await FindTargetOwnerAsync(kind, targetId, ct); }
+        catch (Exception e) when (DependencyErrors.IsUnavailable(e)) { throw new SavedUnavailableException(e); }
+    }
+
     /// <summary>Owner account of a public target, or null when it does not exist or is not public.</summary>
     private async Task<Guid?> FindTargetOwnerAsync(string kind, Guid targetId, CancellationToken ct)
     {

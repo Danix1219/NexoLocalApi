@@ -3,7 +3,7 @@
 Lista viva de lo que falta o quedó parcial. Se actualiza en cada entrega; el detalle de cada decisión
 está en [Memoria.md](../Memoria.md) y el estado por grupo en [estado-desarrollo-endpoints.md](estado-desarrollo-endpoints.md).
 
-Última revisión: 2026-11-15 (rama `feature/08-pedidos`).
+Última revisión: 2026-11-16 (rama `feature/08-pedidos`).
 
 ## Bloquea el despliegue
 
@@ -21,7 +21,6 @@ Nexo. Si se compila con `apiMode=live`, estas pantallas fallan.
 
 | Grupo | Rutas que la app ya llama |
 |---|---|
-| 12 Contacto y reportes | `POST /v1/engagement/contacts/phone`, `POST /v1/engagement/reports` |
 | 13 Notificaciones | `GET /v1/engagement/notifications`, `POST /v1/engagement/notifications/read` |
 | 15 Pantallas | Ninguna: la app compone sus pantallas con las rutas de cada grupo. Spec sin consumidor hoy |
 | Asistente | `POST /v1/assist/draft` (sin spec en `specs/endpoints`) |
@@ -45,8 +44,14 @@ Nexo. Si se compila con `apiMode=live`, estas pantallas fallan.
 - **Fotos en el chat no funcionan:** la app sube con `purpose=chat`, que `MediaRules` no acepta (400). Además las imágenes se sirven en URL pública; hace falta media privada antes de habilitarlo.
 - Sin hub SignalR (`ws-hubs-chat.md`); `deliveredToSocket` siempre `false`. La app actual consulta por HTTP.
 - Sin push de mensaje nuevo (outbox `message.sent` sin consumidor).
-- `alsoReport` del bloqueo se ignora hasta tener el grupo 12.
+- `alsoReport` del bloqueo se ignora: la app abre el formulario de reporte por su cuenta después de bloquear.
 - Sin auditoría `audit_events` del bloqueo ni contador `stats.contactClicks`.
+
+### 12 Contacto y reportes
+- Nadie revisa los reportes todavía: falta el worker de `report.created` que avise al equipo por correo y oculte el objetivo tras 3 reportes de cuentas distintas, y una pantalla o proceso para que una persona los resuelva (`status`, `resolution`, `reviewedBy`).
+- `contact.phone_copied` no incrementa aún `stats.contactClicks` del prestador.
+- Sin `audit_events` con cadena de hash (ni aquí ni en el bloqueo del chat).
+- Un prestador sin `channels.call` nunca muestra su número, aunque haya pedido aceptado: así lo dice la ficha; confirmar con el equipo si es lo deseado.
 
 ### 11 Guardados
 - `unavailableReason` siempre `unpublished`; la ficha distingue `deleted` / `unpublished` / `closed`.

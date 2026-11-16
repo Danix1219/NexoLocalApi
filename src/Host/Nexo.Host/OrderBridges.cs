@@ -77,3 +77,19 @@ public sealed class ConversationDirectoryBridge(IProviderStore providers, Nexo.D
         return state.IsSuccess && state.Value is { Status: "approved", Url: { } url } s ? new(url, s.ThumbUrl, s.Width, s.Height) : null;
     }
 }
+
+public sealed class ContactDirectoryBridge(IProviderStore providers, Nexo.Discovery.Application.Requests.IRequestClients clients,
+    Nexo.Identity.Contracts.IPhoneDisclosureContract phones, Nexo.Discovery.Application.Saved.ISavedStore saved)
+    : Nexo.Engagement.Application.Safety.IContactDirectory
+{
+    public async Task<Nexo.Engagement.Application.Safety.ContactTarget?> ProviderAsync(Guid providerId, CancellationToken ct) =>
+        (await providers.PublicAsync([providerId], null, ct)).FirstOrDefault() is { Published: true } p
+            ? new(p.AccountId, p.Profile.Name, p.Profile.Channels.Call) : null;
+
+    public async Task<string?> ClientNameAsync(Guid accountId, CancellationToken ct) =>
+        (await clients.ReadAsync([accountId], ct)).TryGetValue(accountId, out var c) && c.Active ? c.DisplayName : null;
+
+    public Task<string?> PhoneAsync(Guid accountId, string reason, CancellationToken ct) => phones.GetPhoneAsync(accountId, reason, ct);
+
+    public Task<Guid?> OwnerAsync(string kind, Guid id, CancellationToken ct) => saved.TargetOwnerAsync(kind, id, ct);
+}

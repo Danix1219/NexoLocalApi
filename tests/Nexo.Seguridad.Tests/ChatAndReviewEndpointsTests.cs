@@ -108,6 +108,51 @@ public sealed class ChatAndReviewEndpointsTests(InfraDeSeguridad infra)
     }
 
     [Fact]
+    public async Task Celular_solo_con_canal_activo_o_pedido_aceptado_y_reporte_para_revision()
+    {
+        using var host = Host(); using var client = host.CreateClient(); using var provider = host.CreateClient(); using var other = host.CreateClient();
+        var clientId = await Login(host, client); var providerAccount = await Login(host, provider); await Login(host, other);
+        Assert.Equal(HttpStatusCode.OK, (await client.PostAsJsonAsync("/v1/identity/me/phone", new { phone = "7715550100" })).StatusCode);
+        Assert.Equal(HttpStatusCode.OK, (await provider.PostAsJsonAsync("/v1/identity/me/phone", new { phone = "7715550199" })).StatusCode);
+        var providerId = await Provider(host, providerAccount);
+
+        // Call channel off by default: the number stays private.
+        await Error(await client.PostAsJsonAsync("/v1/engagement/contacts/phone", new { targetId = providerId, targetType = "provider", context = "profile" }),
+            HttpStatusCode.Forbidden, NexoCodes.ContactPhoneNotAvailable);
+        using (var scope = host.Services.CreateScope())
+        {
+            var db = scope.ServiceProvider.GetRequiredKeyedService<MongoDB.Driver.IMongoDatabase>(Nexo.Common.Mongo.NexoDatabaseKeys.Discovery);
+            await db.GetCollection<MongoDB.Bson.BsonDocument>("provider_profiles").UpdateOneAsync(
+                new MongoDB.Bson.BsonDocument("_id", new MongoDB.Bson.BsonBinaryData(providerId, MongoDB.Bson.GuidRepresentation.Standard)),
+                new MongoDB.Bson.BsonDocument("$set", new MongoDB.Bson.BsonDocument("data.channels.call", true)));
+        }
+        var revealed = await Read(await client.PostAsJsonAsync("/v1/engagement/contacts/phone", new { targetId = providerId, targetType = "provider", context = "profile" }));
+        Assert.Equal("+527715550199", revealed.GetProperty("phone").GetString());
+        Assert.Equal("771 555 0199", revealed.GetProperty("displayPhone").GetString());
+        Assert.Equal(39, revealed.GetProperty("remainingToday").GetInt32());
+
+        // The provider gets the client's number only after accepting an order.
+        await Error(await provider.PostAsJsonAsync("/v1/engagement/contacts/phone", new { targetId = clientId, targetType = "client", context = "order" }),
+            HttpStatusCode.Forbidden, NexoCodes.ContactNotAllowed);
+        var orderId = (await Read(await Post(client, "/v1/engagement/orders", new { providerId, origin = "direct", description = "Revisar la instalación eléctrica.", attention = "shop" })))
+            .GetProperty("orderId").GetGuid();
+        Assert.Equal(HttpStatusCode.OK, (await provider.PostAsJsonAsync($"/v1/engagement/orders/{orderId}/accept", new { })).StatusCode);
+        Assert.Equal("+527715550100", (await Read(await provider.PostAsJsonAsync("/v1/engagement/contacts/phone", new { targetId = clientId, targetType = "client", context = "order" })))
+            .GetProperty("phone").GetString());
+
+        // Reports: 202, once per target, never one's own content.
+        var report = await Post(other, "/v1/engagement/reports", new { targetType = "provider", targetId = providerId, category = "scam", reason = "Pidió un anticipo y dejó de responder." });
+        Assert.Equal(HttpStatusCode.Accepted, report.StatusCode);
+        Assert.Equal("received", (await Read(report)).GetProperty("status").GetString());
+        await Error(await Post(other, "/v1/engagement/reports", new { targetType = "provider", targetId = providerId, category = "other", reason = "Otra vez el mismo prestador." }),
+            HttpStatusCode.Conflict, NexoCodes.ReportAlreadyReported);
+        await Error(await Post(provider, "/v1/engagement/reports", new { targetType = "provider", targetId = providerId, category = "other", reason = "Me reporto a mí mismo." }),
+            HttpStatusCode.Forbidden, NexoCodes.ReportOwnContent);
+        await Error(await Post(other, "/v1/engagement/reports", new { targetType = "work", targetId = Guid.CreateVersion7(), category = "other", reason = "Trabajo que no existe." }),
+            HttpStatusCode.NotFound, NexoCodes.ResourceNotFound);
+    }
+
+    [Fact]
     public async Task Opinion_solo_tras_pedido_resuelto_una_vez_y_sin_ligar_al_cliente()
     {
         using var host = Host(); using var client = host.CreateClient(); using var provider = host.CreateClient(); using var anonymous = host.CreateClient();

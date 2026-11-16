@@ -11,6 +11,7 @@ using Nexo.Engagement.Application.Interests;
 using Nexo.Engagement.Application.Orders;
 using Nexo.Engagement.Application.Reviews;
 using Nexo.Engagement.Application.Conversations;
+using Nexo.Engagement.Application.Safety;
 
 namespace Nexo.Engagement.Endpoints;
 
@@ -143,6 +144,24 @@ public static class EngagementEndpointMapping
             .WithSummary("Listar opiniones aprobadas de un prestador");
 
         MapChat(group);
+
+        group.MapPost("/contacts/phone", async (ContactReportService.PhoneBody? body, ContactReportService service, HttpContext http, CancellationToken ct) =>
+        {
+            http.Response.Headers.CacheControl = "private, no-store";
+            try { return (await service.RevealPhoneAsync(User(http), body, ct)).Match(Results.Ok, e => NexoProblem.From(e, http)); }
+            catch (Exception e) when (e is ContactReportUnavailableException || ReviewDown(e) || e is ConversationUnavailableException) { return Dependency(http); }
+        }).RequireAuthorization().RequireRateLimiting(NexoRateLimits.User).WithSummary("Revelar un celular (acción deliberada, limitada y registrada)");
+
+        group.MapPost("/reports", async (ContactReportService.ReportBody? body, ContactReportService service, HttpContext http, CancellationToken ct) =>
+        {
+            http.Response.Headers.CacheControl = "private, no-store";
+            try
+            {
+                return (await service.ReportAsync(User(http), http.Request.Headers["Idempotency-Key"].FirstOrDefault(), body, ct))
+                    .Match(v => Results.Json(v, statusCode: StatusCodes.Status202Accepted), e => NexoProblem.From(e, http));
+            }
+            catch (Exception e) when (e is ContactReportUnavailableException || ReviewDown(e) || e is ConversationUnavailableException) { return Dependency(http); }
+        }).RequireAuthorization().RequireRateLimiting(NexoRateLimits.User).WithSummary("Reportar para revisión humana");
         return app;
 
         void MapTransition(RouteGroupBuilder routes, string pattern, string target)
