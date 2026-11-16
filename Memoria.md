@@ -1,5 +1,31 @@
 # Memoria — API_NexoLocal
 
+## 13-notificaciones: campana real, worker de outbox de Engagement y push FCM listo (2026-11-16)
+
+Estado: `GET /v1/engagement/notifications` y `POST /v1/engagement/notifications/read`. Las filas solo
+las escribe `EngagementOutboxHandler` al consumir el outbox de la base Engagement, que hasta hoy no
+leía nadie (el `OutboxDispatcher` existente solo drenaba Identity). Se hizo `OutboxDispatcher`
+extensible (`Resolve`) y `EngagementOutboxDispatcher` drena Engagement con la misma lógica de
+reclamo. Eventos con aviso: pedido creado/aceptado/rechazado/cancelado/resuelto/domicilio, mensaje
+(una fila por conversación, sin texto), opinión recibida e interés ("N prestadores interesados",
+agrupado por solicitud). Upsert por (cuenta, tipo, grupo): idempotente ante reintentos y vuelve a
+no leída. TTL 90 días. Los enlaces usan solo secciones que la app acepta (orders, requests, chat,
+provider). Marcar leídas ignora ids ajenos sin error.
+
+Push: `FcmPushSender` con FirebaseAdmin (ya estaba en Directory.Packages.props) envía a todos los
+dispositivos de la cuenta y borra tokens que FCM declara muertos. Apagado mientras
+`Firebase__CredentialsJson` esté vacío; la campana funciona igual. Un fallo de push no reprocesa el
+evento.
+
+App: notificaciones pasa a `remoteGroups`; solo el asistente sigue con datos de ejemplo.
+
+Verificación: build 0/0, format PASS; Common 37, Discovery 67, Engagement 45, Identity 4, Architecture 7,
+Integration 57 y Seguridad 120/120 (prueba nueva: evento de pedido → aviso solo al destinatario,
+push invocado, ids ajenos ignorados). Flutter 276/276.
+
+Ojo al desplegar: el worker procesará también los eventos de outbox ya acumulados en producción, así
+que pueden aparecer avisos de hechos anteriores.
+
 ## 12-contacto-reportes implementado y app conectada a 08–12 (2026-11-16)
 
 Estado: `POST /v1/engagement/contacts/phone` y `POST /v1/engagement/reports` en Engagement

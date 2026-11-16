@@ -14,6 +14,8 @@ está en [Memoria.md](../Memoria.md) y el estado por grupo en [estado-desarrollo
 
 | 3 | Poner `ContentSafety__Blocklist=nexo-groserias-es` en el App Service. La lista ya existe en Azure (160 entradas, creada y probada el 2026-11-16) y la variable ya está en el `.env` local. Para cambiar palabras: editar `scripts/blocklist/groserias-es.txt` y correr `python -I scripts/blocklist/sync_blocklist.py` (`--check "texto"` para probar) | En Azure las groserías leves seguirán pasando hasta configurarla | `scripts/blocklist/` |
 
+| 4 | **Push FCM.** Crear/usar el proyecto de Firebase, registrar la app Android, poner `google-services.json` en la app y la cuenta de servicio en `Firebase__CredentialsJson` (App Service y `.env`) | Sin esto no llegan avisos al teléfono; la campana sí funciona | `FcmPushSender.cs`, app `android/app/` |
+
 ## Grupos sin implementar (la app muestra datos de ejemplo)
 
 La app en modo `auto` usa datos de ejemplo con aviso "demo" cuando una ruta responde 404 sin código
@@ -21,7 +23,6 @@ Nexo. Si se compila con `apiMode=live`, estas pantallas fallan.
 
 | Grupo | Rutas que la app ya llama |
 |---|---|
-| 13 Notificaciones | `GET /v1/engagement/notifications`, `POST /v1/engagement/notifications/read` |
 | 15 Pantallas | Ninguna: la app compone sus pantallas con las rutas de cada grupo. Spec sin consumidor hoy |
 | Asistente | `POST /v1/assist/draft` (sin spec en `specs/endpoints`) |
 
@@ -60,7 +61,13 @@ Nexo. Si se compila con `apiMode=live`, estas pantallas fallan.
 ### 14 Imágenes
 - Sin CDN/Front Door en la API: no existe variable ni código que la use; las imágenes salen por `/v1/discovery/media/{id}`.
 
+### 13 Notificaciones
+- Push apagado hasta configurar Firebase (ver tabla de despliegue).
+- Sin SignalR: la campana se actualiza al abrirla o al refrescar, no en vivo.
+- Sin avisos de `work.recommended`, `request.closed` ni `account.security` (tipos de la ficha sin evento que los produzca hoy).
+- Al desplegar se procesarán los eventos de outbox acumulados: pueden aparecer avisos antiguos.
+
 ## Transversal
 - `NexoProblem.Describe` devuelve **500** para cualquier código no mapeado. Están mapeados los de 08, 09, 10 y 11; faltan los de 12 y algunos de uploads (`upload.too_large`, `upload.expired`, etc.) que aún no se usan. Al añadir un código nuevo, añadir su estado y un caso en `NexoProblemTests`.
-- Ningún worker procesa la colección `outbox`: es la pieza común que falta para push, notificaciones (13) y reintentos.
+- El outbox de Engagement ya se consume (notificaciones). Siguen sin consumidor útil: reintentar la sincronización pedido↔solicitud, revisión de reportes (correo/ocultar) y estadística de clics de contacto.
 - Política `publish` de rate limit definida pero no registrada; las rutas usan `user`/`chat` más topes diarios propios.

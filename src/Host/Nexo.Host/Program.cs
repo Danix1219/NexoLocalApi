@@ -116,6 +116,8 @@ static async Task RunApiAsync(string[] args)
     // Un solo proceso: el despachador vive dentro de la API. El reclamo en Mongo es atomico,
     // asi que varias replicas no procesan el mismo mensaje.
     builder.Services.AddHostedService<OutboxDispatcher>();
+    // Engagement keeps its own outbox: this worker turns its events into notifications and push.
+    builder.Services.AddHostedService<Nexo.Engagement.Infrastructure.Notifications.EngagementOutboxDispatcher>();
 
     var app = builder.Build();
 

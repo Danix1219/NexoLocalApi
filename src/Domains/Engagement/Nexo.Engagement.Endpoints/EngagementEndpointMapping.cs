@@ -12,6 +12,7 @@ using Nexo.Engagement.Application.Orders;
 using Nexo.Engagement.Application.Reviews;
 using Nexo.Engagement.Application.Conversations;
 using Nexo.Engagement.Application.Safety;
+using Nexo.Engagement.Application.Notifications;
 
 namespace Nexo.Engagement.Endpoints;
 
@@ -162,6 +163,21 @@ public static class EngagementEndpointMapping
             }
             catch (Exception e) when (e is ContactReportUnavailableException || ReviewDown(e) || e is ConversationUnavailableException) { return Dependency(http); }
         }).RequireAuthorization().RequireRateLimiting(NexoRateLimits.User).WithSummary("Reportar para revisión humana");
+
+        group.MapGet("/notifications", async (HttpRequest request, NotificationService service, HttpContext http, CancellationToken ct) =>
+        {
+            http.Response.Headers.CacheControl = "private, no-store";
+            if (request.Query.Any(q => q.Value.Count != 1) || !Int(request.Query, "limit", 20, out var limit)) return Invalid(http);
+            try { return (await service.ListAsync(User(http), request.Query["filter"].FirstOrDefault(), request.Query["cursor"].FirstOrDefault(), limit, ct)).Match(Results.Ok, e => NexoProblem.From(e, http)); }
+            catch (Exception e) when (ReviewDown(e)) { return Dependency(http); }
+        }).RequireAuthorization().RequireRateLimiting(NexoRateLimits.User).WithSummary("Historial de notificaciones");
+
+        group.MapPost("/notifications/read", async (NotificationService.ReadBody? body, NotificationService service, HttpContext http, CancellationToken ct) =>
+        {
+            http.Response.Headers.CacheControl = "private, no-store";
+            try { return (await service.ReadAsync(User(http), body, ct)).Match(Results.Ok, e => NexoProblem.From(e, http)); }
+            catch (Exception e) when (ReviewDown(e)) { return Dependency(http); }
+        }).RequireAuthorization().RequireRateLimiting(NexoRateLimits.User).WithSummary("Marcar notificaciones como leídas");
         return app;
 
         void MapTransition(RouteGroupBuilder routes, string pattern, string target)

@@ -16,7 +16,7 @@ Revisión de código local: 2026-11-10. No equivale a despliegue ni aceptación 
 | 10-mensajes | Implementado por HTTP (2026-11-15): abrir, bandeja, mensajes, enviar, leídos y bloqueo | Sin SignalR ni push; fotos de chat pendientes de media privada; ver Memoria |
 | 11-guardados | Implementado y auditado (2026-11-15): guardar, quitar y listar con lista blanca de campos | `unavailableReason` sin distinguir borrado/cerrado; ver Memoria |
 | 12-contacto-reportes | Implementado (2026-11-16): revelar celular limitado y registrado; reportes para revisión humana | Sin worker de moderación (correo, ocultar tras 3 reportes) ni estadística de clics; ver Memoria |
-| 13-notificaciones | Pendiente | Eventos reales de los grupos anteriores |
+| 13-notificaciones | Implementado (2026-11-16): campana alimentada por el outbox de Engagement; push FCM listo, apagado sin credenciales | Falta configurar Firebase; sin SignalR; ver Memoria |
 | 14-imágenes-cdn | Pendiente transversal | Refinar antes de habilitar subida en 03/05/06; Blob/moderación no configurados. No hace falta simular imágenes para desarrollar texto |
 | 15-pantallas | Pendiente | Componer únicamente operaciones ya implementadas |
 
