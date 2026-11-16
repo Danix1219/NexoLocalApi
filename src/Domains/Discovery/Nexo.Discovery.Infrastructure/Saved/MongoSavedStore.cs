@@ -45,8 +45,9 @@ public sealed class MongoSavedStore([FromKeyedServices(NexoDatabaseKeys.Discover
             var identity = new BsonDocument { ["accountId"] = Id(accountId), ["kind"] = kind, ["targetId"] = Id(targetId) };
             if (desired)
             {
-                var target = await FindTargetAsync(accountId, kind, targetId, ct);
-                if (target is null) return null;
+                var owner = await FindTargetOwnerAsync(kind, targetId, ct);
+                if (owner is null) return null;
+                if (owner == accountId) return new SavedMutation(kind, targetId, false, await CountsAsync(accountId, ct), OwnContent: true);
                 await saved.UpdateOneAsync(identity,
                     new BsonDocument("$setOnInsert", new BsonDocument("createdAt", now)),
                     new UpdateOptions { IsUpsert = true }, ct);
@@ -106,22 +107,27 @@ public sealed class MongoSavedStore([FromKeyedServices(NexoDatabaseKeys.Discover
         }
     }
 
-    private async Task<BsonDocument?> FindTargetAsync(Guid accountId, string kind, Guid targetId, CancellationToken ct)
+    /// <summary>Owner account of a public target, or null when it does not exist or is not public.</summary>
+    private async Task<Guid?> FindTargetOwnerAsync(string kind, Guid targetId, CancellationToken ct)
     {
-        return kind switch
+        var (collection, filter, ownerField) = kind switch
         {
-            "provider" => await providers.Find(new BsonDocument { ["_id"] = Id(targetId), ["published"] = true })
-                .Project(new BsonDocument { ["accountId"] = 1 }).FirstOrDefaultAsync(ct) is { } provider &&
-                provider.GetValue("accountId", BsonNull.Value).IsBsonBinaryData && provider["accountId"].AsBsonBinaryData.ToGuid() != accountId ? provider : null,
-            "work" => await works.Find(new BsonDocument { ["_id"] = targetId.ToString("D"), ["moderation.status"] = "approved" })
-                .Project(new BsonDocument { ["ownerId"] = 1 }).FirstOrDefaultAsync(ct) is { } work &&
-                work.GetValue("ownerId", BsonNull.Value).IsBsonBinaryData && work["ownerId"].AsBsonBinaryData.ToGuid() != accountId ? work : null,
-            "request" => await requests.Find(new BsonDocument { ["_id"] = targetId.ToString("D"), ["status"] = new BsonDocument("$in", new BsonArray { "open", "assigned" }), ["moderation.status"] = "approved" })
-                .Project(new BsonDocument { ["clientId"] = 1 }).FirstOrDefaultAsync(ct) is { } request &&
-                request.GetValue("clientId", BsonNull.Value).IsBsonBinaryData && request["clientId"].AsBsonBinaryData.ToGuid() != accountId ? request : null,
-            _ => null
+            "provider" => (providers, new BsonDocument { ["_id"] = Id(targetId), ["published"] = true }, "accountId"),
+            "work" => (works, new BsonDocument { ["_id"] = targetId.ToString("D"), ["moderation.status"] = "approved" }, "ownerId"),
+            _ => (requests, new BsonDocument { ["_id"] = targetId.ToString("D"), ["status"] = new BsonDocument("$in", new BsonArray { "open", "assigned" }), ["moderation.status"] = "approved" }, "clientId")
         };
+        var doc = await collection.Find(filter).Project(new BsonDocument(ownerField, 1)).FirstOrDefaultAsync(ct);
+        return doc?.GetValue(ownerField, BsonNull.Value) is BsonBinaryData owner ? owner.ToGuid() : null;
     }
+
+    // Allow-list, not deny-list: provider data also holds owner name and contact channels, requests hold the contact.
+    private static readonly Dictionary<string, string[]> PublicFields = new()
+    {
+        ["provider"] = ["providerId", "kind", "name", "bio", "activity", "trades", "categories", "specialties", "attention", "radiusKm",
+            "publicZone", "schedule", "visit", "prices", "photoUrl", "coverUrl", "jobs", "recs", "ratingAverage", "ratingCount", "createdAt", "updatedAt"],
+        ["work"] = ["workId", "providerId", "category", "title", "text", "problem", "did", "time", "tag", "publicPoint", "zoneLabel", "images", "recs", "createdAt"],
+        ["request"] = ["requestId", "category", "title", "description", "urgency", "publicPoint", "zoneLabel", "imageUrl", "imageUrls", "status", "interestCount", "createdAt", "closedAt"]
+    };
 
     private async Task<Dictionary<(string Kind, Guid Id), JsonElement>> ReadPayloadsAsync(SavedKey[] entries, CancellationToken ct)
     {
@@ -137,25 +143,15 @@ public sealed class MongoSavedStore([FromKeyedServices(NexoDatabaseKeys.Discover
                 _ => new BsonDocument { ["_id"] = new BsonDocument("$in", new BsonArray(ids.Select(id => (BsonValue)id.ToString("D")))), ["status"] = new BsonDocument("$in", new BsonArray { "open", "assigned" }), ["moderation.status"] = "approved" }
             };
             var collection = kind switch { "provider" => providers, "work" => works, _ => requests };
-            var docs = await collection.Find(filter).Project(new BsonDocument { ["_id"] = 1, ["data"] = 1 }).ToListAsync(ct);
+            var projection = new BsonDocument("_id", 1);
+            foreach (var field in PublicFields[kind]) projection["data." + field] = 1;
+            var docs = await collection.Find(filter).Project(projection).ToListAsync(ct);
             foreach (var doc in docs)
             {
                 var id = kind == "provider" ? doc["_id"].AsBsonBinaryData.ToGuid() : Guid.Parse(doc["_id"].AsString);
                 var data = doc.GetValue("data", BsonNull.Value);
                 if (!data.IsBsonDocument) continue;
-                var json = JsonDocument.Parse(data.AsBsonDocument.ToJson(new JsonWriterSettings { OutputMode = JsonOutputMode.RelaxedExtendedJson }));
-                var safe = json.RootElement.Clone();
-                if (safe.ValueKind == JsonValueKind.Object && safe.TryGetProperty("location", out _))
-                {
-                    using var buffer = new MemoryStream();
-                    using (var writer = new Utf8JsonWriter(buffer))
-                    {
-                        writer.WriteStartObject();
-                        foreach (var property in safe.EnumerateObject()) if (property.Name != "location") property.WriteTo(writer);
-                        writer.WriteEndObject();
-                    }
-                    safe = JsonDocument.Parse(buffer.ToArray()).RootElement.Clone();
-                }
+                var safe = JsonDocument.Parse(data.AsBsonDocument.ToJson(new JsonWriterSettings { OutputMode = JsonOutputMode.RelaxedExtendedJson })).RootElement.Clone();
                 result[(kind, id)] = safe;
             }
         }

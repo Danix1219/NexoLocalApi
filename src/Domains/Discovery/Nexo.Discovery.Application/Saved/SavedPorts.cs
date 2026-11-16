@@ -7,7 +7,7 @@ public sealed record SavedCounts(int Provider, int Work, int Request);
 public sealed record SavedItem(string Kind, Guid TargetId, DateTime SavedAt, bool Available,
     string? UnavailableReason, JsonElement? Provider, JsonElement? Work, JsonElement? Request);
 public sealed record SavedPage(SavedCounts Counts, SavedItem[] Items, string? NextCursor, bool HasMore);
-public sealed record SavedMutation(string Kind, Guid TargetId, bool Saved, SavedCounts SavedCounts);
+public sealed record SavedMutation(string Kind, Guid TargetId, bool Saved, SavedCounts SavedCounts, bool OwnContent = false);
 
 public interface ISavedStore
 {
@@ -27,6 +27,7 @@ public sealed class SavedService(ISavedStore store, TimeProvider clock)
             return Result<SavedMutation>.Failure("validation_failed", "Revisa el tipo y el identificador del elemento.");
         var result = await store.SetAsync(accountId, kind, targetId, saved, clock.GetUtcNow().UtcDateTime, ct);
         if (result is null) return Result<SavedMutation>.Failure("resource.not_found", "El elemento no está disponible.");
+        if (result.OwnContent) return Result<SavedMutation>.Failure(Nexo.Common.Errors.NexoCodes.SavedOwnContent, "No puedes guardar tu propio contenido.");
         return Result<SavedMutation>.Success(result);
     }
 

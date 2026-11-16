@@ -69,6 +69,16 @@ public static class NexoProblem
         NexoCodes.InterestRequestAssigned or NexoCodes.InterestCannotWithdrawAssigned => (StatusCodes.Status409Conflict, "La solicitud ya tiene un prestador asignado"),
         NexoCodes.WorkOwnContent => (StatusCodes.Status403Forbidden, "No puedes recomendar tu propio trabajo"),
         NexoCodes.WorkCategoryNotInProfile => (StatusCodes.Status400BadRequest, "La categoría no pertenece a tu perfil"),
+        NexoCodes.SavedOwnContent => (StatusCodes.Status403Forbidden, "No puedes guardar tu propio contenido"),
+        NexoCodes.OrderActiveExists => (StatusCodes.Status409Conflict, "Ya tienes un pedido activo con este prestador"),
+        NexoCodes.OrderRequestAlreadyAssigned => (StatusCodes.Status409Conflict, "La solicitud ya tiene un prestador asignado"),
+        NexoCodes.OrderInvalidTransition => (StatusCodes.Status409Conflict, "El pedido ya no admite ese cambio"),
+        NexoCodes.OrderVersionConflict => (StatusCodes.Status412PreconditionFailed, "El pedido cambió; actualiza y vuelve a intentar"),
+        NexoCodes.OrderPriceOutOfRange => (StatusCodes.Status400BadRequest, "Precio fuera de rango"),
+        NexoCodes.OrderAttentionNotSupported => (StatusCodes.Status400BadRequest, "El prestador no atiende de ese modo"),
+        NexoCodes.ReviewAlreadyExists => (StatusCodes.Status409Conflict, "Ya calificaste este servicio"),
+        NexoCodes.ReviewOrderNotResolved => (StatusCodes.Status403Forbidden, "Solo puedes calificar un servicio resuelto"),
+        NexoCodes.ReviewStarsInvalid => (StatusCodes.Status400BadRequest, "Califica de 1 a 5 estrellas"),
 
         _ => (StatusCodes.Status500InternalServerError, "Error del servidor")
     };

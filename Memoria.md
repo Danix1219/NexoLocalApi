@@ -1,5 +1,24 @@
 # Memoria — API_NexoLocal
 
+## 11-guardados auditado y corregido; códigos de error sin mapear (2026-11-15)
+
+Estado: misma rama `feature/08-pedidos`. Las tres rutas de guardados ya existían (commit 49b85d0) pero
+no estaban registradas. Correcciones: `GET /saved` devolvía el `data` completo del objetivo (solo
+quitaba `location`), filtrando `owner` (nombre completo del dueño) del prestador y `contact` y
+`assignedProviderId` de solicitudes; ahora proyecta una lista blanca de campos públicos por tipo.
+Guardar lo propio responde `403 saved.own_content` (antes 404). Además, `NexoProblem.Describe` no
+tenía los códigos de pedidos y opiniones, que caían en 500: se mapearon (409 active_exists,
+request_already_assigned, invalid_transition, review.already_exists; 412 version_conflict según
+ficha; 400 precio/atención/estrellas; 403 order_not_resolved, saved.own_content). La app ya trataba
+409/412 refrescando el pedido.
+
+Verificación: build 0/0; Common 26/26 (NexoProblemTests nuevas), Discovery 67/67, Engagement 39/39,
+Architecture 7/7, Integration 55/55 y Seguridad 116/116 con Docker (prueba nueva de privacidad y
+propio contenido en guardados).
+
+Deuda: `unavailableReason` siempre `unpublished` (la ficha distingue deleted/closed); códigos de 10,
+12 y upload sin mapear (sin uso aún); sin caché de guardados.
+
 ## 09-opiniones implementado (2026-11-15)
 
 Estado: misma rama `feature/08-pedidos` (sin commit). `POST /v1/engagement/reviews` y
@@ -18,7 +37,7 @@ con `Cache-Control: public, max-age=60` en vez de Redis L2 + ETag de la ficha.
 
 Verificación: build 0/0, format PASS, Engagement.Unit 39/39 (12 nuevas), Discovery.Unit 67/67,
 Architecture 7/7. Con Docker (Testcontainers Mongo/Redis): Integration 55/55 y Seguridad 115/115,
-suites previas sin casos propios de pedidos/opiniones.
+incluye OrderEndpointsTests; opiniones sin casos de integración propios.
 
 Deuda: sin caché L2/ETag ni invalidación; sin push al prestador (outbox sin consumidor); moderación
 retirada no implementada (todas nacen approved).
