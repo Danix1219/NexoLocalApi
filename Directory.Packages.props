@@ -7,7 +7,8 @@
     <PackageVersion Include="MongoDB.Driver" Version="3.13.0" />
     <PackageVersion Include="StackExchange.Redis" Version="3.4.31" />
     <PackageVersion Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.14" />
-    <PackageVersion Include="Microsoft.AspNetCore.SignalR.StackExchangeRedis" Version="10.0.14" />
+    <PackageVersion Include="Microsoft.AspNetCore.SignalR.StackExchangeRedis" Version="10.0.15" />
+    <PackageVersion Include="Microsoft.AspNetCore.SignalR.Client" Version="10.0.15" />
   </ItemGroup>
   <ItemGroup Label="Identidad (01-auth)">
     <PackageVersion Include="Konscious.Security.Cryptography.Argon2" Version="1.3.1" />

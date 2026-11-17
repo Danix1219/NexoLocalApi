@@ -46,6 +46,10 @@ static async Task RunApiAsync(string[] args)
     builder.Services.AddScoped<Nexo.Engagement.Application.Orders.IOrderRequestLink, Nexo.Host.OrderRequestLinkBridge>();
     builder.Services.AddScoped<Nexo.Engagement.Application.Reviews.IReviewDirectory, Nexo.Host.ReviewDirectoryBridge>();
     builder.Services.AddScoped<Nexo.Engagement.Application.Conversations.IConversationDirectory, Nexo.Host.ConversationDirectoryBridge>();
+    // Live chat: Redis backplane so a message reaches the receiver even on the other App Service instance.
+    builder.Services.AddSignalR().AddStackExchangeRedis(builder.Configuration["Redis:ConnectionString"] ?? "",
+        o => o.Configuration.ChannelPrefix = StackExchange.Redis.RedisChannel.Literal("nexo-signalr"));
+    builder.Services.AddSingleton<Nexo.Engagement.Application.Conversations.IChatRealtime, Nexo.Engagement.Endpoints.SignalRChatRealtime>();
     builder.Services.AddScoped<Nexo.Engagement.Application.Safety.IContactDirectory, Nexo.Host.ContactDirectoryBridge>();
     builder.Services.AddSharedRedis(builder.Configuration);
     builder.Services.AddMongoDatabases(builder.Configuration);
@@ -200,6 +204,7 @@ static async Task RunApiAsync(string[] args)
     app.MapIdentityEndpoints();
     app.MapDiscoveryEndpoints();
     app.MapEngagementEndpoints();
+    app.MapHub<Nexo.Engagement.Endpoints.ChatHub>(Nexo.Engagement.Endpoints.ChatHub.Path);
     app.MapScreensEndpoints();
 
     await app.RunAsync();
