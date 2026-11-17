@@ -145,6 +145,7 @@ public static class EngagementEndpointMapping
             .WithSummary("Listar opiniones aprobadas de un prestador");
 
         MapChat(group);
+        ChatHub.MapTicket(group);
 
         group.MapPost("/contacts/phone", async (ContactReportService.PhoneBody? body, ContactReportService service, HttpContext http, CancellationToken ct) =>
         {
