@@ -7,7 +7,7 @@ using Nexo.Engagement.Application.Reviews;
 namespace Nexo.Engagement.Application.Conversations;
 
 public sealed class ConversationService(IConversationStore store, IOrderProviderAccess providers, IConversationDirectory directory,
-    IOrderSafety safety, TimeProvider clock)
+    IOrderSafety safety, IChatRealtime live, TimeProvider clock)
 {
     private static readonly string[] Active = ["pending", "accepted"];
     private static readonly string[] Chosen = ["pending", "accepted", "resolved"];
@@ -149,8 +149,15 @@ public sealed class ConversationService(IConversationStore store, IOrderProvider
         var preview = body.Kind == "image" ? "Envió una foto" : text!.Length > 120 ? text[..120] : text;
         var saved = await store.SendAsync(conversation, message, preview, key, ct);
         if (saved == null) return Fail<object>(NexoCodes.ConversationBlocked);
-        // No live socket yet (the app polls); the outbox row drives the future push.
-        var sent = Message(saved, me); sent["deliveredToSocket"] = false;
+        // Each side gets its own `mine`; the sender's other devices see it too.
+        var other = conversation.IsClient(me) ? conversation.ProviderAccountId : conversation.ClientId;
+        var theirs = Message(saved, other); theirs["conversationId"] = id;
+        var mine = Message(saved, me); mine["conversationId"] = id;
+        await live.SendAsync(other, "messageReceived", theirs, ct);
+        await live.SendAsync(me, "messageReceived", mine, ct);
+        var sent = Message(saved, me);
+        // shortcut: we do not track presence, so this cannot say whether the other side was connected; push covers offline.
+        sent["deliveredToSocket"] = false;
         return Result<object>.Success(sent);
     }
 
@@ -158,7 +165,11 @@ public sealed class ConversationService(IConversationStore store, IOrderProvider
     {
         var conversation = await store.FindAsync(id, me, ct);
         if (conversation == null) return Fail<object>(NexoCodes.ConversationNotFound);
-        var (marked, unread) = await store.MarkReadAsync(conversation, me, upTo, clock.GetUtcNow().UtcDateTime, ct);
+        var now = clock.GetUtcNow().UtcDateTime;
+        var (marked, unread) = await store.MarkReadAsync(conversation, me, upTo, now, ct);
+        if (marked > 0)
+            await live.SendAsync(conversation.IsClient(me) ? conversation.ProviderAccountId : conversation.ClientId, "messageRead",
+                new { conversationId = id, upToMessageId = upTo, readAt = now }, ct);
         return Result<object>.Success(new
         {
             conversationId = id,
@@ -177,6 +188,9 @@ public sealed class ConversationService(IConversationStore store, IOrderProvider
         if (!blocked && !conversation.BlockedBy.Contains(me) && conversation.BlockedBy.Length > 0) return Fail<object>(NexoCodes.ConversationBlockedByOther);
         var updated = await store.BlockAsync(id, me, blocked, ct);
         if (updated == null) return Fail<object>(NexoCodes.ConversationNotFound);
+        // Neutral signal only: it says sending is closed, never who blocked.
+        foreach (var party in new[] { updated.ClientId, updated.ProviderAccountId })
+            await live.SendAsync(party, "conversationBlocked", new { conversationId = id, canSend = updated.BlockedBy.Length == 0 }, ct);
         var accepted = (await store.PairOrdersAsync([(updated.ClientId, updated.ProviderId)], ["accepted"], ct)).Length > 0;
         return Result<object>.Success(new
         {

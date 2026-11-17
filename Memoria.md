@@ -1,5 +1,24 @@
 # Memoria — API_NexoLocal
 
+## Chat en vivo con SignalR (2026-11-16)
+
+Estado: hub `/hubs/chat` con backplane Redis (`AddStackExchangeRedis`, prefijo `nexo-signalr`) para las dos
+réplicas del App Service. Conexión con ticket de un solo uso (`POST /v1/engagement/hubs/chat/ticket`, Redis
+60 s, `GETDEL` al conectar), nunca el JWT en la URL. Cada conexión entra a `user:{accountId}`; el servidor elige
+destinatarios, así que no hay `JoinConversation` que autorizar. Eventos: `messageReceived` (con `mine` por
+destinatario), `messageRead` y `conversationBlocked` (neutro, no dice quién bloqueó). Enviar sigue por HTTP. Un
+fallo del hub nunca falla la petición. Paquete subido a 10.0.15 por CVE-2026-114147 (DoS) en 10.0.14.
+
+App (rama `feature/chat-en-vivo`): `chat_live.dart` con `signalr_netcore`, solo WebSocket y sin negociación
+(no requiere afinidad de sesión); la recarga periódica pasa de 4 s a 20 s como respaldo.
+
+Pendiente: activar **Web sockets = On** en el App Service (Configuración → Configuración general); sin eso la
+app sigue con la recarga de respaldo. Sin `typing`, `orderEvent`, `conversationUpdated` ni límite de 3
+conexiones por cuenta (ficha `ws-hubs-chat.md`); `deliveredToSocket` sigue en false (no se rastrea presencia).
+
+Verificación: build 0/0, format PASS; Seguridad 121/121 con `ChatHubTests` (ticket → conexión → mensaje en
+vivo con `mine=false`; ticket reutilizado rechazado), Integration 57/57, unitarias completas. App: 276/276.
+
 ## Estado del consumo API ↔ app móvil (2026-11-16)
 
 Conectado: la app (`NexoLocalApp`, `HybridNexoApi.remoteGroups`) consume siempre la API real en 14

@@ -42,7 +42,7 @@ Nexo. Si se compila con `apiMode=live`, estas pantallas fallan.
 
 ### 10 Mensajes
 - **Fotos en el chat no funcionan:** la app sube con `purpose=chat`, que `MediaRules` no acepta (400). Además las imágenes se sirven en URL pública; hace falta media privada antes de habilitarlo.
-- Sin hub SignalR (`ws-hubs-chat.md`); `deliveredToSocket` siempre `false`. La app actual consulta por HTTP.
+- SignalR hecho (2026-11-16). Falta **Web sockets = On** en el App Service. Sin `typing`, `orderEvent`, `conversationUpdated` ni límite de 3 conexiones; `deliveredToSocket` siempre `false`.
 - Sin push de mensaje nuevo (outbox `message.sent` sin consumidor).
 - `alsoReport` del bloqueo se ignora: la app abre el formulario de reporte por su cuenta después de bloquear.
 - Sin auditoría `audit_events` del bloqueo ni contador `stats.contactClicks`.
