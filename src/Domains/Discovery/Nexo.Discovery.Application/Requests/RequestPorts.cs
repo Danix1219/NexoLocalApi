@@ -19,6 +19,7 @@ public interface IRequestInterests
 }
 public interface IRequestStore
 {
+    Task<Result<bool>> DeleteAsync(Guid owner, Guid id, CancellationToken ct);
     Task<RequestReceipt?> ReceiptAsync(Guid owner, Guid key, CancellationToken ct);
     Task<ServiceRequest?> OwnAsync(Guid owner, Guid id, CancellationToken ct);
     Task<RequestCandidate?> VisibleAsync(Guid viewer, Guid id, ProviderPoint point, double radiusKm, CancellationToken ct);

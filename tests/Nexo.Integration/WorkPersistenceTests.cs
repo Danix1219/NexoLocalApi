@@ -30,6 +30,66 @@ public sealed class WorkPersistenceTests(InfraFixture infra)
     }
     private static Work Work(Guid provider) => new(Guid.CreateVersion7(), provider, "plomeria", "Trabajo de prueba", "Reparación terminada con todos los detalles necesarios.",
         null, null, null, null, new ProviderPoint(20.05, -99.34).Blur(), "Zona aproximada", [], 0, DateTime.UtcNow, DateTime.UtcNow);
+    private sealed class SavedRequestClients(Guid owner) : Nexo.Discovery.Application.Requests.IRequestClients
+    {
+        public Task<IReadOnlyDictionary<Guid, Nexo.Discovery.Application.Requests.RequestClient>> ReadAsync(Guid[] ids, CancellationToken ct) =>
+            Task.FromResult<IReadOnlyDictionary<Guid, Nexo.Discovery.Application.Requests.RequestClient>>(
+                new Dictionary<Guid, Nexo.Discovery.Application.Requests.RequestClient> { [owner] = new(true, "Autor de solicitud", null) });
+    }
+    [Fact]
+    public async Task Saved_request_uses_public_author_without_private_contact()
+    {
+        var s = await Setup(); var client = Guid.NewGuid(); var request = Guid.NewGuid(); var viewer = Guid.NewGuid();
+        await s.Db.GetCollection<BsonDocument>("service_requests").InsertOneAsync(new BsonDocument
+        {
+            ["_id"] = request.ToString("D"),
+            ["clientId"] = new BsonBinaryData(client, GuidRepresentation.Standard),
+            ["status"] = "open",
+            ["moderation"] = new BsonDocument("status", "approved"),
+            ["data"] = new BsonDocument
+            {
+                ["requestId"] = request.ToString("D"),
+                ["title"] = "Solicitud",
+                ["description"] = "Descripcion publica",
+                ["contact"] = "private-contact",
+                ["address"] = "private-address"
+            }
+        });
+        var store = new Nexo.Discovery.Infrastructure.Saved.MongoSavedStore(s.Db);
+        await store.SetAsync(viewer, "request", request, true, DateTime.UtcNow, default);
+        var service = new Nexo.Discovery.Application.Saved.SavedService(store, new SavedRequestClients(client), TimeProvider.System);
+        var page = await service.ListAsync(viewer, null, null, 50, default);
+        Assert.True(page.IsSuccess);
+        var data = Assert.Single(page.Value!.Items).Request!.Value;
+        Assert.Equal("Autor de solicitud", data.GetProperty("client").GetProperty("displayName").GetString());
+        Assert.DoesNotContain("private-contact", data.GetRawText());
+        Assert.DoesNotContain("private-address", data.GetRawText());
+        Assert.DoesNotContain(client.ToString(), data.GetRawText());
+    }
+
+    [Fact]
+    public async Task Saved_work_contains_public_author_and_no_owner_contact()
+    {
+        var s = await Setup();
+        var work = Work(s.Provider);
+        Assert.True((await s.Works.CreateAsync(s.Owner, Guid.NewGuid(), "saved-author", work, default)).IsSuccess);
+        var saved = new Nexo.Discovery.Infrastructure.Saved.MongoSavedStore(s.Db);
+        var viewer = Guid.NewGuid();
+        Assert.NotNull(await saved.SetAsync(viewer, "work", work.WorkId, true, DateTime.UtcNow, default));
+        var page = await saved.ListAsync(viewer, null, null, 50, default);
+        var item = Assert.Single(page.Items);
+        var data = item.Work!.Value;
+        Assert.Equal("Prestador de prueba", data.GetProperty("provider").GetProperty("name").GetString());
+        Assert.Equal(s.Provider.ToString(), data.GetProperty("provider").GetProperty("providerId").GetString());
+        Assert.True(data.GetProperty("saved").GetBoolean());
+        Assert.DoesNotContain("accountId", data.GetRawText());
+        Assert.DoesNotContain("phone", data.GetRawText());
+        await s.Db.GetCollection<BsonDocument>("provider_profiles").UpdateOneAsync(
+            new BsonDocument("_id", new BsonBinaryData(s.Provider, GuidRepresentation.Standard)),
+            new BsonDocument("$set", new BsonDocument("published", false)));
+        Assert.False(Assert.Single((await saved.ListAsync(viewer, null, null, 50, default)).Items).Available);
+    }
+
     [Fact]
     public async Task Alta_concurrente_misma_clave_es_atomica_en_trabajo_cuota_perfil_y_evento()
     {

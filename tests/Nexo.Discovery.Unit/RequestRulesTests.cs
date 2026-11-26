@@ -63,6 +63,8 @@ public sealed class RequestRulesTests
     }
     private sealed class Ports : IRequestStore, IProviderStore, IProviderAccounts, IProviderSafety, IDirectoryProfiles, IRequestClients, IRequestInterests
     {
+        public Task<Result<bool>> DeleteAsync(Guid owner, Guid id, CancellationToken ct) => Task.FromResult(Result<bool>.Success(true));
+
         public ProviderAccountState Account = new(true, true, true);
         public readonly Guid Owner = Guid.NewGuid();
         public ServiceRequest? Value;

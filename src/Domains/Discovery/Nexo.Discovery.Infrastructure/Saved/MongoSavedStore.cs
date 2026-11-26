@@ -107,6 +107,19 @@ public sealed class MongoSavedStore([FromKeyedServices(NexoDatabaseKeys.Discover
         }
     }
 
+    public async Task<IReadOnlyDictionary<Guid, Guid>> RequestClientIdsAsync(Guid[] requestIds, CancellationToken ct)
+    {
+        if (requestIds.Length == 0) return new Dictionary<Guid, Guid>();
+        var docs = await requests.Find(new BsonDocument
+        {
+            ["_id"] = new BsonDocument("$in", new BsonArray(requestIds.Select(id => (BsonValue)id.ToString("D")))),
+            ["moderation.status"] = "approved",
+            ["status"] = new BsonDocument("$in", new BsonArray { "open", "assigned" })
+        })
+            .Project(new BsonDocument { ["_id"] = 1, ["clientId"] = 1 }).ToListAsync(ct);
+        return docs.ToDictionary(d => Guid.Parse(d["_id"].AsString), d => d["clientId"].AsBsonBinaryData.ToGuid());
+    }
+
     public async Task<Guid?> TargetOwnerAsync(string kind, Guid targetId, CancellationToken ct)
     {
         if (kind is not ("provider" or "work" or "request")) return null;
@@ -160,6 +173,40 @@ public sealed class MongoSavedStore([FromKeyedServices(NexoDatabaseKeys.Discover
                 if (!data.IsBsonDocument) continue;
                 var safe = JsonDocument.Parse(data.AsBsonDocument.ToJson(new JsonWriterSettings { OutputMode = JsonOutputMode.RelaxedExtendedJson })).RootElement.Clone();
                 result[(kind, id)] = safe;
+            }
+        }
+        var workEntries = result.Where(x => x.Key.Item1 == "work").ToArray();
+        var providerIds = workEntries.Select(x => x.Value.TryGetProperty("providerId", out var value) &&
+            Guid.TryParse(value.GetString(), out var id) ? id : Guid.Empty).Where(id => id != Guid.Empty).Distinct().ToArray();
+        if (providerIds.Length > 0)
+        {
+            var publicProviders = await providers.Find(new BsonDocument
+            {
+                ["_id"] = new BsonDocument("$in", new BsonArray(providerIds.Select(Id))),
+                ["published"] = true
+            })
+                .Project(new BsonDocument { ["_id"] = 1, ["data.name"] = 1, ["data.photoUrl"] = 1, ["data.kind"] = 1 })
+                .ToListAsync(ct);
+            var authors = publicProviders.ToDictionary(d => d["_id"].AsBsonBinaryData.ToGuid(), d => d["data"].AsBsonDocument);
+            foreach (var entry in workEntries)
+            {
+                var payload = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(entry.Value.GetRawText())!;
+                var found = payload.TryGetValue("providerId", out var value) && Guid.TryParse(value.GetString(), out var id) && authors.ContainsKey(id);
+                if (!found) { result.Remove(entry.Key); continue; }
+                payload["saved"] = JsonSerializer.SerializeToElement(true);
+                payload["canContact"] = JsonSerializer.SerializeToElement(found);
+                if (found)
+                {
+                    var author = authors[Guid.Parse(value.GetString()!)];
+                    payload["provider"] = JsonSerializer.SerializeToElement(new
+                    {
+                        providerId = value.GetString(),
+                        name = author.GetValue("name", "").AsString,
+                        photoUrl = author.GetValue("photoUrl", BsonNull.Value).IsString ? author["photoUrl"].AsString : null,
+                        kind = author.GetValue("kind", "person").AsString
+                    });
+                }
+                result[entry.Key] = JsonSerializer.SerializeToElement(payload);
             }
         }
         return result;

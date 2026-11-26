@@ -32,6 +32,12 @@ public static class RequestEndpoints
             catch (Exception e) when (Unavailable(e)) { return Dependency(http); }
         })).Produces(201).WithSummary("Publicar una solicitud moderada")
             .WithDescription("Idempotency-Key UUID obligatorio. Título 5–90, descripción 10–600, urgency today/week/noRush, contact chat/chatCall y location real. Solo sale punto difuminado. Cuota 10/día UTC. chatCall exige correo confirmado y móvil declarado; hasta seis imágenes aprobadas.");
+        Document(group.MapDelete("/requests/{id:guid}", async (Guid id, HttpContext http, RequestService service, CancellationToken ct) =>
+        {
+            Private(http);
+            try { return (await service.DeleteAsync(User(http), id, ct)).Match<IResult>(_ => Results.NoContent(), e => Error(e, http)); }
+            catch (Exception e) when (Unavailable(e)) { return Dependency(http); }
+        })).Produces(204).WithSummary("Retirar una solicitud propia sin borrar historial de pedidos");
         Document(group.MapPatch("/requests/{id}", async (string id, JsonElement body, HttpContext http, RequestService service, CancellationToken ct) =>
         {
             Private(http); if (!Guid.TryParse(id, out var requestId)) return Invalid(http);

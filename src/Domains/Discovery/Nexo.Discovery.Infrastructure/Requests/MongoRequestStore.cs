@@ -24,7 +24,7 @@ public sealed class MongoRequestStore([FromKeyedServices(NexoDatabaseKeys.Discov
     private bool initialized;
     private static BsonBinaryData Id(Guid id) => new(id, GuidRepresentation.Standard);
     private static string Key(Guid owner, Guid key) => owner.ToString("N") + ":" + key.ToString("N");
-    private static BsonDocument Own(Guid owner, Guid id) => new() { ["_id"] = id.ToString("D"), ["clientId"] = Id(owner) };
+    private static BsonDocument Own(Guid owner, Guid id) => new() { ["_id"] = id.ToString("D"), ["clientId"] = Id(owner), ["deleted"] = new BsonDocument("$ne", true) };
     private static ServiceRequest Read(BsonDocument d) => JsonSerializer.Deserialize<ServiceRequest>(d["data"].AsBsonDocument.ToJson(
         new JsonWriterSettings { OutputMode = JsonOutputMode.RelaxedExtendedJson }), ProviderService.Json)!;
     private static BsonDocument Safe => new() { ["location"] = 0, ["searchText"] = 0, ["outcome"] = 0, ["declaredProviderId"] = 0 };
@@ -60,6 +60,24 @@ public sealed class MongoRequestStore([FromKeyedServices(NexoDatabaseKeys.Discov
             catch (MongoCommandException e) when (e.Code == 11000 && attempt < 3) { }
         }
         throw new RequestUnavailableException();
+    }, ct);
+    public Task<Result<bool>> DeleteAsync(Guid owner, Guid id, CancellationToken ct) => TransactionAsync(async (session, token) =>
+    {
+        var identity = new BsonDocument { ["_id"] = id.ToString("D"), ["clientId"] = Id(owner) };
+        var previous = await requests.Find(session, identity).FirstOrDefaultAsync(token);
+        if (previous is null) return Fail<bool>(NexoCodes.RequestNotFound);
+        if (previous.GetValue("deleted", false).ToBoolean()) return Result<bool>.Success(true);
+        if (previous["status"] == "assigned") return Fail<bool>(NexoCodes.OrderRequestAlreadyAssigned);
+        var filter = Own(owner, id); filter["status"] = previous["status"];
+        var change = await requests.UpdateOneAsync(session, filter, new BsonDocument("$set", new BsonDocument
+        {
+            ["deleted"] = true,
+            ["status"] = "deleted",
+            ["data.status"] = "deleted"
+        }), cancellationToken: token);
+        if (change.ModifiedCount != 1) return Fail<bool>(NexoCodes.OrderVersionConflict);
+        await EmitAsync(session, Read(previous), "request.deleted", token);
+        return Result<bool>.Success(true);
     }, ct);
     public Task<RequestReceipt?> ReceiptAsync(Guid owner, Guid key, CancellationToken ct) => QueryAsync(async () =>
     {
@@ -155,7 +173,7 @@ public sealed class MongoRequestStore([FromKeyedServices(NexoDatabaseKeys.Discov
     }, ct);
     public Task<ServiceRequest[]> MineAsync(Guid owner, string status, Guid? after, int limit, CancellationToken ct) => QueryAsync(async () =>
     {
-        var filter = new BsonDocument("clientId", Id(owner));
+        var filter = new BsonDocument { ["clientId"] = Id(owner), ["deleted"] = new BsonDocument("$ne", true) };
         if (status != "all") filter["status"] = status;
         if (after is { } id) filter["_id"] = new BsonDocument("$lt", id.ToString("D"));
         var docs = await requests.Find(filter).Project(Safe).Sort(new BsonDocument("_id", -1)).Limit(limit).ToListAsync(ct);
