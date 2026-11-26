@@ -1,4 +1,5 @@
 using System.Collections.Concurrent;
+using System.Diagnostics;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
@@ -53,6 +54,7 @@ public sealed class AzureOrderAddressKeyWrapper : IOrderAddressKeyWrapper
 /// </summary>
 public sealed class OrderAddressProtection : IOrderAddressProtection
 {
+    private static readonly TimeSpan KeyVaultTimeout = TimeSpan.FromSeconds(8);
     private readonly IConfiguration _configuration;
     private readonly IOrderAddressKeyWrapper? _keyWrapper;
 
@@ -77,13 +79,23 @@ public sealed class OrderAddressProtection : IOrderAddressProtection
             try
             {
                 using (var aes = new AesGcm(dek, tag.Length)) aes.Encrypt(nonce, plain, cipher, tag);
-                var wrapped = await _keyWrapper.WrapAsync(keyId, dek, ct);
+                // Key Vault with no usable credential can hang longer than the app waits for an answer.
+                using var limit = CancellationTokenSource.CreateLinkedTokenSource(ct);
+                limit.CancelAfter(KeyVaultTimeout);
+                var wrapped = await _keyWrapper.WrapAsync(keyId, dek, limit.Token).WaitAsync(limit.Token);
                 var envelope = new Envelope(keyId, Convert.ToBase64String(wrapped), Convert.ToBase64String(nonce),
                     Convert.ToBase64String(tag), Convert.ToBase64String(cipher));
                 return "v2." + Convert.ToBase64String(JsonSerializer.SerializeToUtf8Bytes(envelope));
             }
-            catch (OperationCanceledException) { throw; }
-            catch (Exception e) { throw new OrderUnavailableException(e); }
+            catch (OperationCanceledException) when (ct.IsCancellationRequested) { throw; }
+            catch (Exception e)
+            {
+                // Type only: Azure messages may echo identifiers or tenant data.
+                Trace.TraceError("Order address encryption failed ({0}). Check Orders:KeyVaultKeyId and the Azure credential.",
+                    e.GetType().Name);
+                Console.Error.WriteLine($"[orders] Key Vault no disponible ({e.GetType().Name}). Revisa la credencial de Azure.");
+                throw new OrderUnavailableException(e);
+            }
             finally
             {
                 CryptographicOperations.ZeroMemory(dek);

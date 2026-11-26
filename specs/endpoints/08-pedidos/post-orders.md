@@ -173,3 +173,11 @@ Escrituras derivadas:
 5. `order_events` con `prevHash`/`hash` encadenados: el historial del pedido es verificable y nadie
    puede reescribir quién hizo qué y cuándo.
 6. `allowedActions` viene del servidor: la app no decide qué transiciones son válidas.
+
+## Aclaración 2026-11-25 · `category`
+
+| Campo | Tipo | Requerido | Regla |
+|---|---|---|---|
+| `category` | string | no | Categoría mostrada al cliente. Solo se conserva si el prestador la ofrece; en otro caso se usa su primera categoría |
+
+La app la envía desde esta fecha.
