@@ -43,6 +43,7 @@ public static class IdentityInfrastructureRegistration
         services.AddScoped<Nexo.Identity.Contracts.IPhoneDisclosureContract, ProviderIdentityContract>();
         services.AddScoped<Nexo.Identity.Contracts.IRequestClientContract, RequestClientContract>();
         services.AddScoped<AccountManagement>();
+        services.AddScoped<IProfileShareStore, MongoProfileShareStore>();
         services.Configure<ContentSafetyOptions>(configuration.GetSection("ContentSafety"));
         services.AddHttpClient<IAccountProfileSafety, AccountProfileSafety>(client => client.Timeout = TimeSpan.FromSeconds(8));
         services.AddHostedService<AccountEventRelay>();
