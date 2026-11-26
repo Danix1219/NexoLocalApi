@@ -18,6 +18,10 @@ public static class EngagementInfrastructureRegistration
         services.AddScoped<Nexo.Engagement.Application.Reviews.ReviewService>();
         services.AddSingleton<Nexo.Engagement.Application.Conversations.IConversationStore, MongoConversationStore>();
         services.AddScoped<Nexo.Engagement.Application.Conversations.ConversationService>();
+        services.AddSingleton<Nexo.Engagement.Application.Conversations.IChatKeyStore, MongoChatKeyStore>();
+        services.AddScoped<Nexo.Engagement.Application.Conversations.ChatKeyService>();
+        services.AddScoped<Nexo.Engagement.Application.Conversations.EncryptedChatService>();
+        services.AddSingleton<Nexo.Engagement.Application.Conversations.IPrivateChatAttachments, AzurePrivateChatAttachments>();
         services.AddSingleton<Nexo.Engagement.Application.Safety.IContactReportStore, MongoContactReportStore>();
         services.AddScoped<Nexo.Engagement.Application.Safety.ContactReportService>();
         services.AddSingleton<Nexo.Engagement.Application.Notifications.INotificationStore, Notifications.MongoNotificationStore>();

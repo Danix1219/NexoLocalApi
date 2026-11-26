@@ -2,14 +2,14 @@ namespace Nexo.Engagement.Application.Conversations;
 
 /// <summary>One conversation per client–provider pair. The provider side is identified by its account, like orders.</summary>
 public sealed record Conversation(Guid Id, Guid ClientId, Guid ProviderId, Guid ProviderAccountId, Guid? RequestId, DateTime CreatedAt,
-    DateTime SortAt, string? LastPreview, DateTime? LastMessageAt, int UnreadClient, int UnreadProvider, Guid[] BlockedBy)
+    DateTime SortAt, string? LastPreview, DateTime? LastMessageAt, int UnreadClient, int UnreadProvider, Guid[] BlockedBy, bool Encrypted = false)
 {
     public bool IsClient(Guid account) => account == ClientId;
     public int UnreadFor(Guid account) => IsClient(account) ? UnreadClient : UnreadProvider;
 }
 
 public sealed record ChatMessage(Guid Id, Guid ConversationId, Guid SenderId, string Kind, string? Text, string? ImageUrl, string? ThumbUrl,
-    int? Width, int? Height, DateTime CreatedAt, DateTime? ReadAt);
+    int? Width, int? Height, DateTime CreatedAt, DateTime? ReadAt, DateTime? DeliveredAt = null, DateTime? EditedAt = null);
 
 public sealed record PairOrder(Guid OrderId, Guid ClientId, Guid ProviderId, string Status);
 public sealed record ChatParty(string DisplayName, string? PhotoUrl);
@@ -17,6 +17,10 @@ public sealed record ChatImage(string Url, string? ThumbUrl, int? Width, int? He
 
 public interface IConversationStore
 {
+    Task<ChatMessage?> MutateAsync(Conversation conversation, Guid author, Guid target, string? encryptedBody,
+        Guid operation, DateTime now, CancellationToken ct) => Task.FromResult<ChatMessage?>(null);
+    Task<int> MarkDeliveredAsync(Conversation conversation, Guid reader, Guid upTo, DateTime now, CancellationToken ct) => Task.FromResult(0);
+    Task<bool> EnableEncryptionAsync(Guid id, Guid account, CancellationToken ct) => Task.FromResult(false);
     Task<(Conversation Conversation, bool Created)> OpenAsync(Guid clientId, Guid providerId, Guid providerAccountId, Guid? requestId, DateTime now, CancellationToken ct);
     /// <summary>Participation is part of the filter: a non-participant gets null, same as a missing id.</summary>
     Task<Conversation?> FindAsync(Guid id, Guid account, CancellationToken ct);

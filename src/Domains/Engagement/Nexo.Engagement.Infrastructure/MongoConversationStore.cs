@@ -11,6 +11,14 @@ namespace Nexo.Engagement.Infrastructure;
 /// <summary>Chat persistence. The inbox reads only `conversations` (denormalized preview/unread); messages are paged by UUID v7 `_id`.</summary>
 public sealed class MongoConversationStore([FromKeyedServices(NexoDatabaseKeys.Engagement)] IMongoDatabase database) : IConversationStore
 {
+    public async Task<bool> EnableEncryptionAsync(Guid id, Guid account, CancellationToken ct)
+    {
+        var filter = new BsonDocument { ["_id"] = Id(id), ["blockedBy"] = new BsonDocument("$size", 0) };
+        filter.AddRange(Participant(account));
+        var result = await conversations.UpdateOneAsync(filter,
+            new BsonDocument("$set", new BsonDocument { ["encrypted"] = true, ["lastPreview"] = "Conversación cifrada" }), cancellationToken: ct);
+        return result.MatchedCount == 1;
+    }
     private readonly IMongoCollection<BsonDocument> conversations = database.GetCollection<BsonDocument>("conversations");
     private readonly IMongoCollection<BsonDocument> messages = database.GetCollection<BsonDocument>("messages");
     private readonly IMongoCollection<BsonDocument> orders = database.GetCollection<BsonDocument>("orders");
@@ -147,7 +155,12 @@ public sealed class MongoConversationStore([FromKeyedServices(NexoDatabaseKeys.E
             {
                 // Block check and counters in the same conditional write as the message.
                 var bumped = await conversations.UpdateOneAsync(s,
-                    new BsonDocument { ["_id"] = Id(c.Id), ["blockedBy"] = new BsonDocument("$size", 0) },
+                    new BsonDocument
+                    {
+                        ["_id"] = Id(c.Id),
+                        ["blockedBy"] = new BsonDocument("$size", 0),
+                        ["encrypted"] = m.Kind == "encrypted" ? BsonBoolean.True : new BsonDocument("$ne", true)
+                    },
                     new BsonDocument
                     {
                         ["$set"] = new BsonDocument { ["lastMessageAt"] = m.CreatedAt, ["sortAt"] = m.CreatedAt, ["lastPreview"] = preview },
@@ -184,6 +197,52 @@ public sealed class MongoConversationStore([FromKeyedServices(NexoDatabaseKeys.E
         {
             return ReadMessage(await messages.Find(new BsonDocument { ["senderId"] = Id(m.SenderId), ["idempotencyKey"] = Id(key) }).FirstAsync(ct));
         }
+    }, ct);
+
+    public Task<ChatMessage?> MutateAsync(Conversation c, Guid author, Guid target, string? encryptedBody,
+        Guid operation, DateTime now, CancellationToken ct) => Run(async () =>
+    {
+        // Ownership and conversation are part of the write filter, never client claims.
+        var filter = new BsonDocument { ["_id"] = Id(target), ["conversationId"] = Id(c.Id), ["senderId"] = Id(author) };
+        var previous = await messages.Find(filter).FirstOrDefaultAsync(ct);
+        if (previous is null || previous["kind"] == "system") return null;
+        if (previous["kind"] == "deleted") return encryptedBody is null ? ReadMessage(previous) : null;
+        // A retry of an older revision must not overwrite a more recent edit.
+        if (previous.GetValue("revisionOperations", new BsonArray()).AsBsonArray.Contains(Id(operation))) return ReadMessage(previous);
+        if (encryptedBody is not null && previous["kind"] != "encrypted") return null;
+        filter["kind"] = new BsonDocument("$nin", new BsonArray { "system", "deleted" });
+        var update = new BsonDocument
+        {
+            ["kind"] = encryptedBody is null ? "deleted" : "encrypted",
+            ["text"] = encryptedBody is null ? BsonNull.Value : new BsonString(encryptedBody),
+            ["imageUrl"] = BsonNull.Value,
+            ["thumbUrl"] = BsonNull.Value,
+            ["revisionOperation"] = Id(operation),
+            ["editedAt"] = now
+        };
+        var saved = await messages.FindOneAndUpdateAsync(filter, new BsonDocument
+        { ["$set"] = update, ["$addToSet"] = new BsonDocument("revisionOperations", Id(operation)) },
+            new FindOneAndUpdateOptions<BsonDocument> { ReturnDocument = ReturnDocument.After }, ct);
+        if (saved is null) return null;
+        // A preview must not retain text of a removed/edited legacy message.
+        await conversations.UpdateOneAsync(new BsonDocument { ["_id"] = Id(c.Id), ["lastMessageAt"] = previous["createdAt"] },
+            new BsonDocument("$set", new BsonDocument("lastPreview", encryptedBody is null ? "Mensaje eliminado" : "Mensaje cifrado")), cancellationToken: ct);
+        return ReadMessage(saved);
+    }, ct);
+
+    public Task<int> MarkDeliveredAsync(Conversation c, Guid reader, Guid upTo, DateTime now, CancellationToken ct) => Run(async () =>
+    {
+        var boundary = await messages.Find(new BsonDocument { ["_id"] = Id(upTo), ["conversationId"] = Id(c.Id) }).AnyAsync(ct);
+        if (!boundary) return 0;
+        var filter = new BsonDocument
+        {
+            ["conversationId"] = Id(c.Id),
+            ["senderId"] = new BsonDocument("$ne", Id(reader)),
+            ["_id"] = new BsonDocument("$lte", Id(upTo)),
+            ["deliveredAt"] = BsonNull.Value
+        };
+        var result = await messages.UpdateManyAsync(filter, new BsonDocument("$set", new BsonDocument("deliveredAt", now)), cancellationToken: ct);
+        return (int)result.ModifiedCount;
     }, ct);
 
     public Task<(int Marked, int Unread)> MarkReadAsync(Conversation c, Guid reader, Guid? upTo, DateTime now, CancellationToken ct) => Run(async () =>
@@ -245,7 +304,7 @@ public sealed class MongoConversationStore([FromKeyedServices(NexoDatabaseKeys.E
         d.GetValue("lastPreview", BsonNull.Value).IsBsonNull ? null : d["lastPreview"].AsString,
         d.GetValue("lastMessageAt", BsonNull.Value).IsBsonNull ? null : d["lastMessageAt"].ToUniversalTime(),
         d["unread"]["client"].ToInt32(), d["unread"]["provider"].ToInt32(),
-        d.GetValue("blockedBy", new BsonArray()).AsBsonArray.Select(x => x.AsBsonBinaryData.ToGuid()).ToArray());
+        d.GetValue("blockedBy", new BsonArray()).AsBsonArray.Select(x => x.AsBsonBinaryData.ToGuid()).ToArray(), d.GetValue("encrypted", false).AsBoolean);
 
     private static ChatMessage ReadMessage(BsonDocument d) => new(d["_id"].AsBsonBinaryData.ToGuid(), d["conversationId"].AsBsonBinaryData.ToGuid(),
         d["senderId"].AsBsonBinaryData.ToGuid(), d["kind"].AsString,
@@ -253,5 +312,7 @@ public sealed class MongoConversationStore([FromKeyedServices(NexoDatabaseKeys.E
         d.GetValue("imageUrl", BsonNull.Value).IsBsonNull ? null : d["imageUrl"].AsString,
         d.GetValue("thumbUrl", BsonNull.Value).IsBsonNull ? null : d["thumbUrl"].AsString,
         d.GetValue("w", BsonNull.Value).IsBsonNull ? null : d["w"].ToInt32(), d.GetValue("h", BsonNull.Value).IsBsonNull ? null : d["h"].ToInt32(),
-        d["createdAt"].ToUniversalTime(), d.GetValue("readAt", BsonNull.Value).IsBsonNull ? null : d["readAt"].ToUniversalTime());
+        d["createdAt"].ToUniversalTime(), d.GetValue("readAt", BsonNull.Value).IsBsonNull ? null : d["readAt"].ToUniversalTime(),
+        d.GetValue("deliveredAt", BsonNull.Value).IsBsonNull ? null : d["deliveredAt"].ToUniversalTime(),
+        d.GetValue("editedAt", BsonNull.Value).IsBsonNull ? null : d["editedAt"].ToUniversalTime());
 }
