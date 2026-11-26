@@ -80,6 +80,7 @@ public static class NexoProblem
         NexoCodes.ContactDailyLimit => (StatusCodes.Status429TooManyRequests, "Llegaste al límite de números por hoy"),
         NexoCodes.ReportAlreadyReported => (StatusCodes.Status409Conflict, "Ya reportaste esto"),
         NexoCodes.ReportOwnContent => (StatusCodes.Status403Forbidden, "No puedes reportar tu propio contenido"),
+        NexoCodes.AssistUnavailable => (StatusCodes.Status503ServiceUnavailable, "El asistente no está disponible ahora"),
         NexoCodes.SavedOwnContent => (StatusCodes.Status403Forbidden, "No puedes guardar tu propio contenido"),
         NexoCodes.OrderActiveExists => (StatusCodes.Status409Conflict, "Ya tienes un pedido activo con este prestador"),
         NexoCodes.OrderRequestAlreadyAssigned => (StatusCodes.Status409Conflict, "La solicitud ya tiene un prestador asignado"),

@@ -16,6 +16,7 @@ public sealed class NexoProblemTests
     [InlineData(NexoCodes.ReviewOrderNotResolved, 403)]
     [InlineData(NexoCodes.ReviewStarsInvalid, 400)]
     [InlineData(NexoCodes.SavedOwnContent, 403)]
+    [InlineData(NexoCodes.AssistUnavailable, 503)]
     [InlineData(NexoCodes.ConversationNotFound, 404)]
     [InlineData(NexoCodes.ConversationNotAllowed, 403)]
     [InlineData(NexoCodes.ConversationBlocked, 403)]
