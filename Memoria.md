@@ -732,3 +732,42 @@ Límites: no hay consumidores outbox para push/estadísticas/contador; integraci
 Estado local: `GET /v1/discovery/feed` integrado a trabajos y perfiles de Discovery. Combina publicaciones aprobadas a <=3 km o de prestadores activos que atienden el punto; cursor ligado a coordenadas, orden UUID v7, marcas personales solo autenticado y salida pública sin coordenadas exactas ni datos del cliente. La app ya consume esta ruta.
 Verificación: Release build de solución 0 errores/0 advertencias; `FeedTests` 4/4. Prueba Mongo/Testcontainers agregada y compiló, pero su ejecución fue bloqueada por Docker no disponible (`npipe://./pipe/docker_engine`, acceso denegado). Sin prueba real de Atlas/Azure ni despliegue.
 Deuda: caché Redis/L2; ejecución de prueba Mongo cuando Docker esté disponible. El botón Guardar requiere grupo 11 (`GET saved`, `POST/DELETE saved/{kind}/{id}`); contacto y reporte dependen del grupo 12. Recomendación ya existe en grupo 05. No confundir implementación local con prueba end-to-end productiva.
+
+### 2026-11-19 - Redis timeout de revocacion
+Estado: filtro explicito RedisTimeoutException y BacklogPolicy.FailFast. Evidencia: Common Unit 42/42 (incluye 5 regresiones con dobles). No se cambia politica de revocacion ni se silencia escritura fallida. Deuda: reinicio Host y validacion fisica. Ver docs/redis-timeout-local.md.
+Cierre tecnico Redis: dotnet format whitespace de los dos archivos corregidos aprobado; Common Unit 42/42. La comprobacion inicial de formato requirio reintento fuera de sandbox por acceso denegado al canal MSBuild, luego termino con codigo 0.
+
+### 2026-11-20 - Cancelacion de peticiones
+Estado: RequestCancellationMiddleware registrado antes de autenticacion. RequestAborted termina con 499 sin cuerpo; cancelacion de dependencia sin aborto cliente devuelve 503 server.dependency_unavailable y no-store. Se limpian cabeceras previas; una respuesta ya iniciada se aborta. No se transforma en error de sesion. Evidencia: Common Unit 47/47 (5 casos de cancelacion con dobles), SDD-INTEGRITY-OK. Restore desde cache local con NuGetAudit=false solo en comando: auditoria remota bloqueada por conexion a NuGet. Deuda: reiniciar Host y verificar recorrido fisico; no acredita produccion.
+
+2026-11-20 - NU1900 local: Directory.Build.props conserva NuGetAudit habilitado y reporta indisponibilidad de auditoria como advertencia en desarrollo. CI/GITHUB_ACTIONS/TF_BUILD/ContinuousIntegrationBuild conservan NU1900 como error. Restore de src/Nexo.sln aprobado; evaluacion MSBuild confirma excepcion local y politica estricta CI. Esto no acredita auditoria remota de vulnerabilidades.
+Validacion NU1900: dotnet build src/Nexo.sln --no-restore -c Release -m:1 -nr:false aprobado: 0 errores, 0 advertencias (38.59 s).
+
+2026-11-21 FR/AC-ASRS: Azure SignalR Default opcional por configuracion, negociacion con ticket GETDEL y claim validada; sin Azure conserva Redis directo. Autoridad contractual: specs/endpoints/10-mensajes/ws-hubs-chat.md; operacion/rollback: docs/azure-signalr.md. Sin cambios a E2EE ni autoridad de persistencia. Validacion cloud y dispositivos pendiente.
+
+Evidencia 2026-11-21: build API completo Release 0 errores/0 advertencias; ChatNegotiationTests 6/6 con dobles; integridad SDD local aprobada. Prueba cloud aislada con SDK .NET, ChatHub real y Redis local: negociacion Azure, entrega a grupo privado y rechazo de ticket reutilizado 401 aprobados. Cliente Flutter ChatLive real: 1/1 prueba cloud recibiendo evento al grupo privado. Contratos HTTP Flutter 10/10 con dobles; analyze sin incidencias. No se acredita prueba de carga, despliegue ni recorrido en dispositivos. Se inicio Redis local para esta validacion; no se reinicio la API del usuario.
+Comprobacion documental completa ASRS: check_sdd.ps1 sigue reportando 769 observaciones SDD-FAIL, incluidos enlaces a contextos hermanos ausentes; no se declara SDD global aprobado. check_sdd_integrity.py aprobado. Host final Release 0 errores/advertencias.
+
+ASRS: APK debug/live generado correctamente con API local 5188. Instalacion en dispositivos y reinicio de API pendientes.
+
+
+## 2026-11-21 - Guardados y perfil compartido
+Corregida proyeccion publica del autor de trabajos guardados; solicitudes enriquecidas por IRequestClients sin acceso directo a Identity. Perfil compartido del solicitante con opt-in explicito, identificador aleatorio diferente al accountId, respuesta solo nombre/foto y revocacion. Cuenta inactiva no resuelve. Host Release compila; tres pruebas con MongoDB/Redis de Testcontainers aprobadas (autor trabajo, autor solicitud sin contacto privado, opt-in/revocacion). API local del usuario no reiniciada. No equivale a validacion productiva ni pruebas HTTP de todas las politicas.
+
+
+## 2026-11-21 - Retirada de solicitudes
+DELETE propietario activo con tombstone e idempotencia; no retira solicitudes asignadas ni borra pedidos. 67 pruebas Discovery unitarias aprobadas y regresion Mongo de propietario/ajeno/idempotencia/visibilidad/asignacion aprobada. API local no reiniciada.
+
+## 2026-11-25 · Interesados, pedidos y correos
+Estado: `canMessage` admite `chatCall`; nombre de la contraparte de pedidos según la regla de privacidad; plantilla de correo con logo adjunto.
+Evidencia: Release local; pruebas Engagement 54/54, Identity 4/4, Common 47/47, Discovery 67/67, Architecture 7/7 y compilación de Nexo.Host sin advertencias. No se ejecutó Nexo.Integration ni se envió un correo real.
+Deuda: la API local del usuario debe reiniciarse para cargar los cambios.
+
+## 2026-11-26 · Pedidos en desarrollo local
+Estado: `.env` local usa llave AES propia para direcciones (la línea de Key Vault quedó comentada). Sin cambios de código ni de configuración desplegada.
+Evidencia: cifrado y guardado en base temporal; falta el pedido real desde la app tras reiniciar la API.
+A evitar: probar pedidos locales con Key Vault sin credencial de Azure; si hay pedidos `v1` guardados, conservar la llave local para poder leerlos.
+
+## 2026-11-26 · Pedidos locales con Key Vault
+Estado: `.env` local con la llave de Key Vault y `AZURE_TOKEN_CREDENTIALS=dev`; sin llave local.
+Pendiente: reiniciar la API y validar un pedido; si falla, el tipo de error aparece en la consola como `[orders] Key Vault no disponible (...)`.

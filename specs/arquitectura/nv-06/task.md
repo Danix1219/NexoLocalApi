@@ -74,3 +74,9 @@ T-990 permanece pendiente de conciliación y revisión humana de arquitectura. L
 
 ## Tarea de directorio público
 - [ ] T-991 →FR-991,FR-992,NFR-991. Refinar catálogo compatible, sugerencias, búsqueda y mapa de prestadores en capas Discovery existentes. Acepta: AC-991/AC-992/AC-993 mediante DirectoryTests, DirectoryPersistenceTests y DirectoryEndpointsTests; errores explícitos, privacidad y bajas. Depende de: T-002. Registro de implementación separado de aceptación humana.
+
+
+Incremento 2026-11-21: guardados con autores publicos y perfil compartido por opt-in. Validar proyeccion minima, cuenta inactiva, revocacion y ausencia de datos privados. Evidencia en docs/qa/guardados-perfiles-2026-11-21.md; revision humana pendiente.
+
+
+Incremento solicitudes 2026-11-21: retirada con tombstone, autorizacion por propietario, proteccion de asignacion y reintento. Regresion Mongo RequestPersistenceTests.Delete_is_owner_only_idempotent_and_preserves_assigned_orders aprobada; 67 unitarias Discovery aprobadas. UI y aceptacion en dispositivo en contexto app.

@@ -53,3 +53,6 @@ Orden aplicable: refinamiento y preparacion de rutas preceden Ready; construccio
 - [ ] T-960 →FR-960,NFR-960. Refinar el [perfil G01](../../../docs/arquitectura/servicios/g01-gateway.md) para la historia seleccionada, sin crear servicios vacíos. Acepta: AC-960 con patrón/motivo, invariantes, contrato, rutas, atomicidad, permisos y fallos comprobables; proveedores y revisión pendientes se registran sin inventarlos. Depende de: T-950.
 
 - [ ] T-961 →FR-961,NFR-960. Preparar base física de todos los propietarios por encargo explícito posterior. Acepta: AC-961 con solución original, 28 proyectos y referencias por dueño, hosts separados y evidencia de build/arquitectura/arranque; S08 condicional, sin negocio/proveedores. No sustituye contratos ni cierre de integración. Depende de: T-960.
+
+
+Incremento 2026-11-21: guardados con autores publicos y perfil compartido por opt-in. Validar proyeccion minima, cuenta inactiva, revocacion y ausencia de datos privados. Evidencia en docs/qa/guardados-perfiles-2026-11-21.md; revision humana pendiente.

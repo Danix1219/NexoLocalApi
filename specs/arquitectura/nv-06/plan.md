@@ -114,3 +114,6 @@ Geocodificación real anónima para alta y restauración privada de ubicación. 
 
 ## Plan T-991 — directorio público
 Dueño Discovery; entradas implementadas de perfiles/Identity/ubicación. Rutas objetivo, decisiones, proyecciones y pruebas AC-991/992/993 detalladas en [contrato](../../endpoints/04-descubrimiento/implementacion-directorio.md). Application/Directory, Infrastructure/Directory y Providers/MongoProviderStore, Endpoints/DirectoryEndpoints y registros actuales; sin proyectos nuevos. Suites existentes Discovery.Unit, Integration, Seguridad.Tests y Architecture.Tests. Sin cambios en móvil, secretos ni despliegue. Revisión humana pendiente.
+
+
+Incremento 2026-11-21: guardados con autores publicos y perfil compartido por opt-in. Validar proyeccion minima, cuenta inactiva, revocacion y ausencia de datos privados. Evidencia en docs/qa/guardados-perfiles-2026-11-21.md; revision humana pendiente.

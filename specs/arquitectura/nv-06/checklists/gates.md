@@ -81,3 +81,6 @@ Resultado del subset: 127 pruebas aprobadas: 7 arquitectura, 16 Common.Unit, 14 
 - [ ] AC-991/AC-992/AC-993: ejecutar las suites existentes y conciliar evidencia en implementacion-directorio.md; revisión humana pendiente. No declarar probado Atlas, moderación cloud, feed o solicitudes.
 
 T-991: ejecución local final registrada: AC-991/AC-992/AC-993 con 170 casos aprobados entre suites actuales. Detalle en implementacion-directorio.md; las casillas de revisión humana no se firman automáticamente.
+
+
+Incremento 2026-11-21: guardados con autores publicos y perfil compartido por opt-in. Validar proyeccion minima, cuenta inactiva, revocacion y ausencia de datos privados. Evidencia en docs/qa/guardados-perfiles-2026-11-21.md; revision humana pendiente.

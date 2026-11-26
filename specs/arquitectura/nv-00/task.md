@@ -108,3 +108,9 @@ Sin ciclos. T-014 cierra.
 | T-015 | NFR-004 | AC-010 |
 
 Los 9 FR y los 4 NFR tienen tarea; los 10 AC tienen comprobación asignada.
+
+Mantenimiento FR-006 / AC-006: corregir filtro de timeout de revocacion; regresion SessionRevocationTests (5/5) y Common Unit (42/42). Formato verificado. Reinicio del Host y recorrido fisico pendientes.
+
+Mantenimiento transversal de errores (2026-11-20): cancelacion de cliente 499 sin cuerpo, dependencia cancelada 503/no-store; no altera validacion de sesion FR-006 ni acredita AC-006. Common Unit 47/47, incluidos 5 casos RequestCancellationTests con dobles. Recorrido fisico pendiente.
+
+2026-11-20 - NU1900 local: Directory.Build.props conserva NuGetAudit habilitado y reporta indisponibilidad de auditoria como advertencia en desarrollo. CI/GITHUB_ACTIONS/TF_BUILD/ContinuousIntegrationBuild conservan NU1900 como error. Restore de src/Nexo.sln aprobado; evaluacion MSBuild confirma excepcion local y politica estricta CI. Esto no acredita auditoria remota de vulnerabilidades.
