@@ -29,7 +29,7 @@ Revisado el 2026-11-27 sobre `develop` + rama `fix/auditoria-backend`. Cada resp
 | 9 | Herramientas DevSecOps en CD | Perfil de publicación guardado como secreto de GitHub (`AZURE_BACKAPP_PUBLISH_PROFILE`), entorno protegido `produccion`, sondas de salud en 2 instancias, **OWASP ZAP baseline (DAST)**, etiqueta de versión, `infra.yml` con Terraform y login a Azure por **OIDC** |
 | 10 | Endpoints / sin spec | **89 rutas** (más el hub `/hubs/chat` y `/connect/token`). Tras la auditoría **todas tienen ficha** en `specs/endpoints` (91 fichas). Antes faltaban las 14 listadas arriba |
 | 11 | Agentes de IA | **2**: Codex y Claude Code (`AGENTS.md`, `CLAUDE.md`, `docs/herramientas-ia.md`) |
-| 12 | Skills | **0 en el repositorio**: por regla del equipo no se versionan carpetas `.claude/.codex` vacías ni supuestas (`docs/herramientas-ia.md`) |
+| 12 | Skills | **Sí, en el entorno de Claude Code** (instaladas a nivel de usuario, no versionadas en el repo por regla del equipo): `code-review` y `security-review` (integradas), `ui-ux-pro-max` (diseño de pantallas), `playwright-cli` (pruebas de navegador) y `graphify` (mapa del código) |
 | 13 | Memoria.md | **Sí**, `Memoria.md` en la raíz, con una entrada por incremento (decisión, verificación, pendientes) |
 | 14 | Pruebas unitarias | **Sí: 191 aprobadas** (Common 48, Discovery 78, Engagement 54, Identity 4, Arquitectura 7) en `develop`; con el buscador, Discovery sube a 90 |
 | 15 | Pruebas de seguridad | **Sí**: `tests/Nexo.Seguridad.Tests`, 91 casos (auth, IDOR, rate limit, cabeceras, borrado de cuenta, negociación del chat). Requieren Docker; corren en CI |
