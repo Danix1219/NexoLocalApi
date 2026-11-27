@@ -33,6 +33,12 @@ public sealed class IdentityOutboxHandler(IEmailSender sender, ILogger<IdentityO
             return;
         }
 
+        if (message.Type == AccountDeletedNotice.Type)
+        {
+            await SendDeletedNoticeAsync(message, cancellationToken);
+            return;
+        }
+
         if (message.Type == "identity.account_notice")
         {
             var notice = JsonSerializer.Deserialize<AccountNotice>(message.Payload)
@@ -41,8 +47,8 @@ public sealed class IdentityOutboxHandler(IEmailSender sender, ILogger<IdentityO
             await sender.SendAsync(notice.Email,
                 pending ? "Solicitud de baja de Nexo Local" : "Tu cuenta de Nexo Local sigue activa",
                 pending
-                    ? $"Solicitaste la baja de tu cuenta. Fecha efectiva prevista: {notice.EffectiveAt:yyyy-MM-dd}. Puedes iniciar sesion para cancelarla durante la ventana de gracia."
-                    : "Se cancelo la solicitud de baja. Tu cuenta vuelve a estar activa. Los dispositivos se registran de nuevo y los efectos en otros modulos se procesan por separado.",
+                    ? $"Solicitaste la baja de tu cuenta. Fecha efectiva prevista: {notice.EffectiveAt:yyyy-MM-dd}. Puedes iniciar sesión para cancelarla antes de esa fecha. Las solicitudes abiertas que se cierran y los pedidos pendientes que se cancelan no se recuperan."
+                    : "Se canceló la solicitud de baja y tu cuenta vuelve a estar activa. Tu perfil y tus publicaciones vuelven a mostrarse. Las solicitudes cerradas y los pedidos cancelados no se recuperan.",
                 cancellationToken);
             return;
         }
@@ -77,4 +83,21 @@ public sealed class IdentityOutboxHandler(IEmailSender sender, ILogger<IdentityO
             payload.Purpose, message.MessageId);
     }
 
+    private async Task SendDeletedNoticeAsync(OutboxMessage message, CancellationToken cancellationToken)
+    {
+        if (message.Payload == AccountDeletedNotice.Erased) return;
+        var notice = JsonSerializer.Deserialize<AccountDeletedNotice>(message.Payload)
+            ?? throw new InvalidOperationException("Aviso de cuenta eliminada invalido.");
+
+        if (DateTimeOffset.UtcNow - message.OccurredAt <= AccountDeletedNotice.Lifetime)
+            await sender.SendAsync(notice.Email, AccountDeletedNotice.Subject, AccountDeletedNotice.Body, cancellationToken);
+        else
+            logger.LogWarning("Aviso final descartado: el mensaje {MessageId} vencio sin poder enviarse.", message.MessageId);
+
+        // El outbox conserva los mensajes procesados; este no puede guardar la direccion de una cuenta borrada.
+        await collections.Outbox.UpdateOneAsync(
+            new BsonDocument("_id", new BsonBinaryData(message.MessageId, GuidRepresentation.Standard)),
+            new BsonDocument("$set", new BsonDocument("Payload", AccountDeletedNotice.Erased)),
+            cancellationToken: cancellationToken);
+    }
 }

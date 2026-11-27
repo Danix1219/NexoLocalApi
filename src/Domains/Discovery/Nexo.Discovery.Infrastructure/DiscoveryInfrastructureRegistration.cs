@@ -17,6 +17,9 @@ public static class DiscoveryInfrastructureRegistration
     public static IServiceCollection AddDiscoveryInfrastructure(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddSingleton<Nexo.Discovery.Application.ISearchLocationStore, MongoSearchLocationStore>();
+        services.AddScoped<DiscoveryAccountLifecycle>();
+        services.AddScoped<Nexo.Common.Accounts.IAccountDataLifecycle>(sp => sp.GetRequiredService<DiscoveryAccountLifecycle>());
+        services.AddScoped<Nexo.Common.Accounts.IAccountSubjectResolver>(sp => sp.GetRequiredService<DiscoveryAccountLifecycle>());
         services.AddOptions<GeocodingOptions>().Configure<IConfiguration>((o, c) => c.GetSection("Geocoding").Bind(o));
         services.AddHttpClient("geocoding", c => c.Timeout = TimeSpan.FromSeconds(6)).RemoveAllLoggers();
         services.AddSingleton<Nexo.Discovery.Application.IPlaceGeocoder>(sp => new PhotonGeocoder(

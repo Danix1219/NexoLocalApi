@@ -22,6 +22,7 @@ public static class EngagementEndpointMapping
     public static IEndpointRouteBuilder MapEngagementEndpoints(this IEndpointRouteBuilder app)
     {
         var group = app.MapGroup("/v1/engagement").WithTags("Engagement");
+        group.MapChatKeyEndpoints();
         group.MapPost("/requests/{id:guid}/interest", async (Guid id, [FromBody(EmptyBodyBehavior = EmptyBodyBehavior.Allow)] InterestNoteBody? body,
             InterestService service, HttpContext http, CancellationToken ct) =>
         {
@@ -225,6 +226,13 @@ public static class EngagementEndpointMapping
             (await service.SendAsync(User(http), id, http.Request.Headers["Idempotency-Key"].FirstOrDefault(), body, ct))
                 .Match(v => Results.Json(v, statusCode: StatusCodes.Status201Created), e => NexoProblem.From(e, http))))
             .RequireAuthorization().RequireRateLimiting(NexoRateLimits.Chat).WithSummary("Enviar un mensaje");
+
+        group.MapPost("/conversations/{id:guid}/delivered", (Guid id, ConversationService.ReadBody? body,
+            ConversationService service, HttpContext http, CancellationToken ct) => Run(http, async () =>
+        {
+            if (body?.UpToMessageId is not { } upTo) return Results.BadRequest();
+            return (await service.DeliveredAsync(User(http), id, upTo, ct)).Match<IResult>(Results.Ok, e => NexoProblem.From(e, http));
+        })).RequireAuthorization().RequireRateLimiting(NexoRateLimits.Chat);
 
         group.MapPost("/conversations/{id:guid}/read", (Guid id, [FromBody(EmptyBodyBehavior = EmptyBodyBehavior.Allow)] ConversationService.ReadBody? body,
             ConversationService service, HttpContext http, CancellationToken ct) => Run(http, async () =>

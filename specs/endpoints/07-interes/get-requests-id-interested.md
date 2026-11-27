@@ -131,3 +131,7 @@ viven allá. Para que el cursor sea estable, el desempate final es `interests._i
 4. `actions.canOrder` lo decide el servidor: así la app no puede ofrecer "Pedir servicio" cuando ya
    hay un pedido activo, lo que acabaría en `409 order.active_exists`.
 5. El prestador que retiró su interés **no aparece**, aunque el documento siga existiendo.
+
+## Corrección 2026-11-25 · `actions.canMessage`
+
+`canMessage` es `true` cuando el contacto publicado de la solicitud es `chat` o `chatCall` (ambos incluyen el chat de la app). La implementación anterior comparaba con `both`, valor que no existe en el contrato de solicitudes. Prueba: `OrderRequestFlowRulesTests`.

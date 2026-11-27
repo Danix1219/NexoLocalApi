@@ -24,3 +24,19 @@ Estado: **parcial; requiere configurar el App Service y completar los bloqueos i
 - `dotnet build src/Host/Nexo.Host/Nexo.Host.csproj -c Release --no-restore -m:1 --nologo`: **compilación correcta, 0 advertencias y 0 errores**.
 
 Esta evidencia es local; no acredita despliegue, acceso efectivo a Key Vault ni validación contra Atlas/Azure.
+
+## Revisión 2026-11-25
+
+Corregido el nombre de la contraparte en lista y detalle. `order.created` tiene consumidor de notificaciones (`EngagementOutboxHandler`), por lo que el punto «faltan consumidores para notificación» de la sección Pendiente queda superado en código; la entrega real del aviso no se verificó en esta revisión. `dotnet test` de Engagement: 54/54.
+
+## 2026-11-26 · Key Vault
+
+`OrderAddressProtection` limita a 8 s la envoltura de la llave y registra solo el tipo de excepción. En desarrollo local se necesita una de dos: credencial de Azure con permiso de cifrado sobre la llave de `Orders__KeyVaultKeyId`, o quitar esa variable y definir `Orders__AddressEncryptionKeyBase64` (32 bytes en Base64, solo desarrollo).
+
+## 2026-11-26 · causa reproducida en local
+
+Una prueba desechable con `OrderAddressProtection` y la configuración local falló con `TaskCanceledException` a los 8 s contra Key Vault. En el `.env` de desarrollo se comentó `Orders__KeyVaultKeyId` y se definió `Orders__AddressEncryptionKeyBase64`; después, cifrar, descifrar y guardar el pedido en una base temporal (eliminada) funcionó. No había pedidos previos cifrados con Key Vault. Requiere reiniciar la API.
+
+## 2026-11-26 · se vuelve a Key Vault
+
+A petición del usuario se restauró `Orders__KeyVaultKeyId` y se eliminó la llave local (no había pedidos guardados). Se añadió `AZURE_TOKEN_CREDENTIALS=dev` al `.env` local para usar solo credenciales de desarrollo. El equipo necesita una sesión de Azure (Visual Studio o Azure CLI) con permiso de envolver y desenvolver sobre la llave (rol «Key Vault Crypto User» o permisos equivalentes). No verificado con la sesión real.
