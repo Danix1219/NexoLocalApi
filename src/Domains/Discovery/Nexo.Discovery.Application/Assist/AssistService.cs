@@ -34,7 +34,8 @@ public sealed partial class AssistService(IAssistModel model, IAssistQuota quota
         // Re-redact on the server: the app already did, but the boundary does not trust the client.
         var clean = Redact(text);
         var input = await safety.ModerateAsync(clean, ct);
-        if (input.IsFailure) return Result<object>.Failure(input.Error!);
+        // Offensive input is the person's fault (403); moderation down means the assistant is down (503).
+        if (input.IsFailure) return input.Error!.Code == NexoCodes.ContentInappropriate ? Result<object>.Failure(input.Error) : Fail(NexoCodes.AssistUnavailable);
         if (!await quota.TryConsumeAsync(account, clock.GetUtcNow().UtcDateTime.Date, DailyLimit, ct)) return Fail(NexoCodes.RateLimitExceeded);
 
         var draft = await model.DraftAsync(body.Kind!, category, clean, limit, ct);
