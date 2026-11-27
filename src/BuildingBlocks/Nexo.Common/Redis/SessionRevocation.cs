@@ -21,7 +21,7 @@ public sealed class RedisSessionRevocationStore(
         {
             await redis.GetDatabase().StringSetAsync($"session:revoked:{sessionId}", "1", ttl);
         }
-        catch (RedisException exception)
+        catch (Exception exception) when (exception is RedisException or RedisTimeoutException)
         {
             logger.LogWarning(exception, "No se pudo publicar la revocacion de la sesion {SessionId}.", sessionId);
             throw;
@@ -34,7 +34,7 @@ public sealed class RedisSessionRevocationStore(
         {
             return await redis.GetDatabase().KeyExistsAsync($"session:revoked:{sessionId}");
         }
-        catch (RedisException exception)
+        catch (Exception exception) when (exception is RedisException or RedisTimeoutException)
         {
             logger.LogWarning(exception, "Revocacion no disponible para {SessionId}; se consulta MongoDB.", sessionId);
             return false;

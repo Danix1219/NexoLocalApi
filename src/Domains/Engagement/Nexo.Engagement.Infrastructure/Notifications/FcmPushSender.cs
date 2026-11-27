@@ -44,12 +44,22 @@ public sealed class FcmPushSender : IPushSender
         // The app registers FCM registration tokens (firebase_messaging getToken), which is what Tokens takes;
         // Fids are installation ids, a different identifier. Upgrade when the app migrates.
 #pragma warning disable CS0618
+        // Chat previews are built after authenticated fetch/decryption on the
+        // recipient device. Never send names, photos or plaintext through FCM.
+        var chat = Uri.TryCreate(deepLink, UriKind.Absolute, out var link) &&
+            link.Scheme == "nexolocal" && link.Host == "chat";
         var result = await messaging.SendEachForMulticastAsync(new MulticastMessage
         {
             Tokens = list,
 #pragma warning restore CS0618
-            Notification = new Notification { Title = title, Body = body },
-            Data = deepLink == null ? null : new Dictionary<string, string> { ["deepLink"] = deepLink }
+            Notification = chat ? null : new Notification { Title = title, Body = body },
+            Android = chat ? new AndroidConfig { Priority = Priority.High, TimeToLive = TimeSpan.FromMinutes(30) } : null,
+            Data = deepLink == null ? null : new Dictionary<string, string>
+            {
+                ["deepLink"] = deepLink,
+                ["accountId"] = account.ToString("D"),
+                ["type"] = chat ? "chat.message" : "activity"
+            }
         }, ct);
         // Tokens FCM says are dead (app uninstalled) are dropped so they stop costing calls.
         for (var i = 0; i < result.Responses.Count; i++)

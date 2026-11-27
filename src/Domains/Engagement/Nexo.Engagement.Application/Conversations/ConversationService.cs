@@ -52,6 +52,7 @@ public sealed class ConversationService(IConversationStore store, IOrderProvider
             activeOrder = OrderBadge(activeOrder),
             created,
             canSend = conversation.BlockedBy.Length == 0,
+            encrypted = conversation.Encrypted,
             quickReplies = conversation.IsClient(me) ? ClientReplies : ProviderReplies
         }, created ? 201 : 200));
     }
@@ -115,7 +116,9 @@ public sealed class ConversationService(IConversationStore store, IOrderProvider
         {
             conversationId = id,
             counterpart = names[id],
+            encrypted = conversation.Encrypted,
             items = page.Select(m => Message(m, me)),
+            peerAccountId = conversation.IsClient(me) ? conversation.ProviderAccountId : conversation.ClientId,
             nextCursor = rows.Length > limit ? page[^1].Id.ToString("D") : null,
             hasMore = rows.Length > limit,
             activeOrder = OrderBadge(active),
@@ -134,6 +137,8 @@ public sealed class ConversationService(IConversationStore store, IOrderProvider
         var conversation = await store.FindAsync(id, me, ct);
         if (conversation == null) return Fail<object>(NexoCodes.ConversationNotFound);
         if (conversation.BlockedBy.Length > 0) return Fail<object>(NexoCodes.ConversationBlocked);
+
+        if (conversation.Encrypted) return Fail<object>(NexoCodes.ValidationFailed);
 
         ChatImage? image = null;
         if (body.Kind == "text")
@@ -159,6 +164,18 @@ public sealed class ConversationService(IConversationStore store, IOrderProvider
         // shortcut: we do not track presence, so this cannot say whether the other side was connected; push covers offline.
         sent["deliveredToSocket"] = false;
         return Result<object>.Success(sent);
+    }
+
+    public async Task<Result<object>> DeliveredAsync(Guid me, Guid id, Guid upTo, CancellationToken ct)
+    {
+        var conversation = await store.FindAsync(id, me, ct);
+        if (conversation is null) return Fail<object>(NexoCodes.ConversationNotFound);
+        var now = clock.GetUtcNow().UtcDateTime;
+        var marked = await store.MarkDeliveredAsync(conversation, me, upTo, now, ct);
+        if (marked > 0)
+            await live.SendAsync(conversation.IsClient(me) ? conversation.ProviderAccountId : conversation.ClientId,
+                "messageDelivered", new { conversationId = id, upToMessageId = upTo, deliveredAt = now }, ct);
+        return Result<object>.Success(new { marked });
     }
 
     public async Task<Result<object>> ReadAsync(Guid me, Guid id, Guid? upTo, CancellationToken ct)
@@ -236,12 +253,15 @@ public sealed class ConversationService(IConversationStore store, IOrderProvider
         {
             ["messageId"] = m.Id,
             ["kind"] = m.Kind,
-            ["text"] = m.Text,
+            ["text"] = m.Kind == "encrypted" ? null : m.Text,
             ["mine"] = mine,
             ["senderId"] = m.SenderId,
             ["createdAt"] = m.CreatedAt,
-            ["readAt"] = mine ? m.ReadAt : null
+            ["editedAt"] = m.EditedAt,
+            ["readAt"] = mine ? m.ReadAt : null,
+            ["deliveredAt"] = mine ? m.DeliveredAt : null
         };
+        if (m.Kind == "encrypted") row["encrypted"] = System.Text.Json.JsonSerializer.Deserialize<EncryptedChatBody>(m.Text!);
         if (m.Kind == "image") { row["imageUrl"] = m.ImageUrl; row["thumbUrl"] = m.ThumbUrl; row["w"] = m.Width; row["h"] = m.Height; }
         return row;
     }

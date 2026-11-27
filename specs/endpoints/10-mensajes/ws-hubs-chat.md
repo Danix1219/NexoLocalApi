@@ -131,3 +131,6 @@ difunde. Si el hub cayera, los mensajes seguirían guardándose y la app los rec
    anómalas.
 6. El cierre `4401` al caducar el token mantiene la sesión del WebSocket alineada con la del HTTP:
    un logout corta también el canal en vivo.
+
+## Integracion Azure SignalR (2026-11-21)
+FR/AC-ASRS: si Azure:SignalR:ConnectionString esta configurada, usar servicio Default; ticket devuelve negotiate=true. Consumir ticket Redis GETDEL una vez en POST /hubs/chat/negotiate; propagar solo identidad validada al hub. Ticket invalido/reutilizado devuelve 401. Flutter negocia redireccion, sin clave Azure. Sin configuracion se conserva WebSocket directo/Redis. Redis sigue gestionando sesiones, tickets y limites. E2EE y persistencia HTTP no cambian. Validar aislamiento, rechazo y compatibilidad; prueba cloud no sustituida por unitarios.

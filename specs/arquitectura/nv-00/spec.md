@@ -174,3 +174,5 @@ Los dominios del documento de requisitos siguen siendo el mapa funcional; cambia
 | S06 Confianza y contenido | API de Coordinación + adaptador de moderación |
 | S07 Notificaciones | API de Coordinación + worker |
 | S08 Relaciones con grafos | **Retirado** (D-2): `$graphLookup` sobre MongoDB |
+
+Correccion FR-006 (2026-11-19): distinguir RedisTimeoutException de RedisException; conservar politica de fallo de lectura/escritura de revocacion y evitar backlog durante desconexion. Evidencia local: SessionRevocationTests 5/5, Common Unit 42/42; no acredita disponibilidad productiva.

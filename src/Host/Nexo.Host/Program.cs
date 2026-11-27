@@ -46,9 +46,16 @@ static async Task RunApiAsync(string[] args)
     builder.Services.AddScoped<Nexo.Engagement.Application.Orders.IOrderRequestLink, Nexo.Host.OrderRequestLinkBridge>();
     builder.Services.AddScoped<Nexo.Engagement.Application.Reviews.IReviewDirectory, Nexo.Host.ReviewDirectoryBridge>();
     builder.Services.AddScoped<Nexo.Engagement.Application.Conversations.IConversationDirectory, Nexo.Host.ConversationDirectoryBridge>();
-    // Live chat: Redis backplane so a message reaches the receiver even on the other App Service instance.
-    builder.Services.AddSignalR().AddStackExchangeRedis(builder.Configuration["Redis:ConnectionString"] ?? "",
-        o => o.Configuration.ChannelPrefix = StackExchange.Redis.RedisChannel.Literal("nexo-signalr"));
+    var azureChat = !string.IsNullOrWhiteSpace(builder.Configuration["Azure:SignalR:ConnectionString"]);
+    var signalR = builder.Services.AddSignalR();
+    if (azureChat)
+        signalR.AddAzureSignalR(options =>
+        {
+            options.ClaimsProvider = context => context.User.Claims.Where(c => c.Type == ChatNegotiationMiddleware.AccountClaim);
+        });
+    else
+        signalR.AddStackExchangeRedis(builder.Configuration["Redis:ConnectionString"] ?? "",
+            o => o.Configuration.ChannelPrefix = StackExchange.Redis.RedisChannel.Literal("nexo-signalr"));
     builder.Services.AddSingleton<Nexo.Engagement.Application.Conversations.IChatRealtime, Nexo.Engagement.Endpoints.SignalRChatRealtime>();
     builder.Services.AddScoped<Nexo.Engagement.Application.Safety.IContactDirectory, Nexo.Host.ContactDirectoryBridge>();
     builder.Services.AddSharedRedis(builder.Configuration);
@@ -124,8 +131,10 @@ static async Task RunApiAsync(string[] args)
     builder.Services.AddHostedService<Nexo.Engagement.Infrastructure.Notifications.EngagementOutboxDispatcher>();
 
     var app = builder.Build();
+    app.Logger.LogInformation("Chat realtime transport: {Transport}", azureChat ? "Azure SignalR" : "Redis backplane");
 
     app.UseExceptionHandler();
+    app.UseMiddleware<Nexo.Common.Errors.RequestCancellationMiddleware>();
     app.UseResponseCompression();
     app.UseAuthentication();
     app.UseRateLimiter();
@@ -204,6 +213,7 @@ static async Task RunApiAsync(string[] args)
     app.MapIdentityEndpoints();
     app.MapDiscoveryEndpoints();
     app.MapEngagementEndpoints();
+    if (azureChat) app.UseMiddleware<ChatNegotiationMiddleware>();
     app.MapHub<Nexo.Engagement.Endpoints.ChatHub>(Nexo.Engagement.Endpoints.ChatHub.Path);
     app.MapScreensEndpoints();
 

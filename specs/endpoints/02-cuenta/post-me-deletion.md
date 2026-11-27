@@ -17,7 +17,7 @@ válida. Desde este incremento, login/refresh emiten un token `recovery_only` du
 Permite consultar cuenta, cancelar baja y cerrar sesión. Al solicitar baja se invalidan todos los
 tokens anteriores mediante `auth_epoch`; hay que iniciar sesión de nuevo para cancelar.
 
-Efectos globales previstos de nv-12 tras consumir el evento (todavía no implementados en los otros dominios):
+Efectos globales (implementados el 2026-11-26; ver el incremento de nv-12, que prevalece sobre las notas anteriores de este archivo):
 
 - El perfil profesional **deja de aparecer** en búsqueda, mapa y feed.
 - Las solicitudes abiertas se **cierran**.
@@ -126,3 +126,7 @@ integrarse antes de habilitar esos dominios junto con baja de cuenta.
    de nv-12; la solicitud local no prueba esas reglas distribuidas.
 5. El evento queda en `audit_events` con cadena de hash para poder demostrar **cuándo** se pidió y
    **cuándo** se ejecutó.
+
+## 9. Implementación 2026-11-26
+
+El ciclo revisa las cuentas cada 10 s; no consume el evento `account.deletion_requested`, que queda como registro. Oculta al solicitar, restaura al cancelar y a los 30 días borra y anonimiza. El detalle y lo que sigue pendiente están en [nv-12](../../arquitectura/nv-12/spec.md). Al completar la baja se envía un último correo y se borran los adjuntos cifrados del chat que subió la cuenta. Lo descrito arriba sobre CDN y progreso del trámite **no** está implementado.

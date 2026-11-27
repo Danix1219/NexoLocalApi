@@ -9,6 +9,9 @@
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="Messaging/Assets/nexo-logo.png" LogicalName="Nexo.Identity.Messaging.nexo-logo.png" />
+  </ItemGroup>
+  <ItemGroup>
     <PackageReference Include="MongoDB.Driver" />
     <PackageReference Include="StackExchange.Redis" />
   </ItemGroup>

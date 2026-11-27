@@ -18,12 +18,17 @@ public sealed class CodeEmailTemplateTests
         Assert.Contains("#FFC043", content.Html);
         Assert.Contains("10/11/2026 00:00 (hora del centro de México)", content.Text);
         Assert.DoesNotContain("<script", content.Html);
-        Assert.DoesNotContain("<img", content.Html);
+        // Solo el logo adjunto: ninguna imagen remota (sin rastreo).
+        Assert.Single(content.Html.Split("<img").Skip(1));
+        Assert.Contains("src=\"cid:nexo-logo\"", content.Html);
+        Assert.DoesNotContain("src=\"http", content.Html);
         if (purpose == "signup" && Environment.GetEnvironmentVariable("NEXO_EMAIL_PREVIEW_PATH") is { Length: > 0 } preview)
             File.WriteAllText(preview, content.Html);
         var message = SmtpEmailSender.CreateMessage(new MailOptions { From = "nexo@example.test" },
             "persona@example.test", content.Subject, content.Text, content.Html);
         Assert.IsType<MultipartAlternative>(message.Body);
+        var logo = Assert.Single(message.BodyParts.OfType<MimePart>(), part => part.ContentId == "nexo-logo");
+        Assert.Equal("image/png", logo.ContentType.MimeType);
         Assert.Equal(content.Text.ReplaceLineEndings("\n"), Assert.IsType<string>(message.TextBody).ReplaceLineEndings("\n"));
         Assert.Equal(content.Html.ReplaceLineEndings("\n"), Assert.IsType<string>(message.HtmlBody).ReplaceLineEndings("\n"));
     }
@@ -32,6 +37,6 @@ public sealed class CodeEmailTemplateTests
     {
         var content = CodeEmailTemplate.Render("signup", "<img src=x>", DateTimeOffset.UtcNow);
         Assert.Contains("&lt;img src=x&gt;", content.Html);
-        Assert.DoesNotContain("<img", content.Html);
+        Assert.DoesNotContain("<img src=x>", content.Html);
     }
 }

@@ -47,6 +47,13 @@ public sealed class Account
     public string? AuditHash { get; set; }
     public List<PendingAccountEvent> PendingEvents { get; set; } = [];
 
+    // Avance de la baja entre dominios (nv-12). Un fallo deja el trámite a medias y se reintenta.
+    public DateTime? SuspendedAt { get; set; }
+    public bool SuspensionDone { get; set; }
+    public DateTime? LifecycleLeaseUntil { get; set; }
+    public List<string> ErasedDomains { get; set; } = [];
+    public DateTime? DeletedAt { get; set; }
+
     public bool IsDeleted => Status == AccountStatus.Deleted;
 
     /// <summary>Una cuenta en baja puede recuperar contrasena: es la via para entrar y cancelarla.</summary>

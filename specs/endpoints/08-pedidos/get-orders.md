@@ -122,3 +122,10 @@ riesgo de que se escape en un log.
    permisos.
 5. `readPreference` primario: un estado de pedido desactualizado llevaría a intentar una transición
    inválida.
+
+## Corrección 2026-11-25 · `counterpart.displayName` (también en el detalle)
+
+- `role=client`: nombre público del prestador en cualquier estado.
+- `role=provider`: nombre corto del cliente (`Ana L.`) mientras el pedido esté `pending`; completo en los demás estados.
+
+Antes ambos recibían una cadena vacía en `pending`. Prueba: `OrderRequestFlowRulesTests`. Pendiente: la foto del prestador para el cliente sigue sin devolverse.

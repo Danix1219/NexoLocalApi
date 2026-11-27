@@ -56,3 +56,5 @@ Orden aplicable: refinamiento y preparacion de rutas preceden Ready; construccio
 ## Refinamiento del perfil de arquitectura
 
 - [ ] T-960 →FR-960,NFR-960. Refinar el [perfil S05](../../../docs/arquitectura/servicios/s05-messaging.md) para la historia seleccionada, sin crear servicios vacíos. Acepta: AC-960 con patrón/motivo, invariantes, contrato, rutas, atomicidad, permisos y fallos comprobables; proveedores y revisión pendientes se registran sin inventarlos. Depende de: T-950.
+
+2026-11-21 FR/AC-ASRS: Azure SignalR Default opcional por configuracion, negociacion con ticket GETDEL y claim validada; sin Azure conserva Redis directo. Autoridad contractual: specs/endpoints/10-mensajes/ws-hubs-chat.md; operacion/rollback: docs/azure-signalr.md. Sin cambios a E2EE ni autoridad de persistencia. Validacion cloud y dispositivos pendiente.

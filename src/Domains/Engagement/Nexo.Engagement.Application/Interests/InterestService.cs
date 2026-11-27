@@ -91,7 +91,7 @@ public sealed class InterestService(IInterestStore store, IInterestRequestAccess
             interestedAt = x.Interest.CreatedAt,
             conversationId = x.Actions,
             orderStatus = x.Order,
-            actions = new { canMessage = request.Contact is "chat" or "both", canOrder = x.CanOrder, canCompare = true }
+            actions = new { canMessage = AllowsChat(request.Contact), canOrder = x.CanOrder, canCompare = true }
         }).ToArray();
         var next = start + page.Length < all.Length && page.Length > 0 ? page[^1].Interest.ProviderId.ToString("D") : null;
         return Result<object>.Success(new
@@ -107,4 +107,7 @@ public sealed class InterestService(IInterestStore store, IInterestRequestAccess
     }
 
     private static Result<T> Fail<T>(string code) => Result<T>.Failure(code, "No se pudo completar la operación de interés.");
+
+    /// <summary>Every published channel includes the in-app chat (post-requests.md: chat | chatCall).</summary>
+    public static bool AllowsChat(string contact) => contact is "chat" or "chatCall";
 }
