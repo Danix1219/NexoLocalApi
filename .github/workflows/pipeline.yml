@@ -48,6 +48,33 @@ jobs:
           docker run --rm -v "$PWD:/repo:ro" zricethezav/gitleaks:v8.18.4 \
             detect --source /repo --config /repo/.gitleaks.toml --redact --no-banner
 
+  sast:
+    name: 1 · Análisis estático (SAST e IaC)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+
+      # Semgrep (OWASP Top 10 y reglas de C#). Bloquea solo hallazgos de severidad ERROR;
+      # los WARNING quedan en el resumen para revisarlos sin frenar cada PR.
+      - name: SAST con Semgrep
+        run: |
+          set -euo pipefail
+          docker run --rm -v "$PWD:/src" -w /src semgrep/semgrep:1.95.0 \
+            semgrep scan --config p/owasp-top-ten --config p/csharp --metrics=off \
+            --exclude tests --exclude artifacts --severity ERROR --error --text
+
+      # Trivy sobre Terraform y Dockerfiles: errores de configuración HIGH/CRITICAL de la nube.
+      - name: IaC con Trivy
+        run: |
+          set -euo pipefail
+          docker run --rm -v "$PWD:/src:ro" aquasec/trivy:0.57.1 \
+            config --severity HIGH,CRITICAL --exit-code 0 /src/infra/terraform | tee trivy.txt
+          { echo "## Trivy (IaC)"; echo '```'; tail -n 40 trivy.txt; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
+
   compilacion:
     name: 2 · Compilación y estilo
     runs-on: ubuntu-24.04
@@ -286,7 +313,7 @@ jobs:
   puerta-de-calidad:
     name: 5 · Puerta de calidad
     if: always()
-    needs: [secretos, compilacion, dependencias, infraestructura, arquitectura, pruebas-unitarias, pruebas-integracion, pruebas-seguridad]
+    needs: [secretos, sast, compilacion, dependencias, infraestructura, arquitectura, pruebas-unitarias, pruebas-integracion, pruebas-seguridad]
     runs-on: ubuntu-24.04
     timeout-minutes: 5
     steps:
