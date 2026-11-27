@@ -25,6 +25,7 @@ public sealed class IdentityCollections
         RevokedTokens = database.GetCollection<BsonDocument>(RevokedTokensName);
         Uploads = database.GetCollection<BsonDocument>("uploads");
         AuditEvents = database.GetCollection<BsonDocument>("audit_events");
+        Outbox = database.GetCollection<BsonDocument>("outbox");
     }
 
     public IMongoCollection<Account> Accounts { get; }
@@ -34,6 +35,7 @@ public sealed class IdentityCollections
     public IMongoCollection<BsonDocument> RevokedTokens { get; }
     public IMongoCollection<BsonDocument> Uploads { get; }
     public IMongoCollection<BsonDocument> AuditEvents { get; }
+    public IMongoCollection<BsonDocument> Outbox { get; }
 
     /// <summary>Indices y TTL, creacion idempotente: repetirlo no cambia nada.</summary>
     public async Task EnsureIndexesAsync(CancellationToken ct)
@@ -42,6 +44,13 @@ public sealed class IdentityCollections
             new CreateIndexModel<Account>(
                 Builders<Account>.IndexKeys.Ascending(account => account.Email),
                 new CreateIndexOptions { Name = "ux_accounts_email", Unique = true }),
+            cancellationToken: ct);
+
+        // Lo usa la revisión periódica de bajas (nv-12) para no recorrer todas las cuentas.
+        await Accounts.Indexes.CreateOneAsync(
+            new CreateIndexModel<Account>(
+                Builders<Account>.IndexKeys.Ascending(account => account.Status).Ascending(account => account.DeletionRequestedAt),
+                new CreateIndexOptions { Name = "ix_accounts_lifecycle" }),
             cancellationToken: ct);
 
         await Devices.Indexes.CreateManyAsync(

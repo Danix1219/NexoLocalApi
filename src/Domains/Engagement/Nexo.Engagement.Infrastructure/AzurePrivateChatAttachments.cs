@@ -30,6 +30,12 @@ public sealed class AzurePrivateChatAttachments(IConfiguration configuration) : 
         }, ct);
     }
 
+    public async Task DeleteAsync(Guid conversation, Guid attachment, CancellationToken ct)
+    {
+        var blob = await BlobAsync(conversation, attachment, ct);
+        await blob.DeleteIfExistsAsync(DeleteSnapshotsOption.IncludeSnapshots, cancellationToken: ct);
+    }
+
     public async Task<byte[]?> GetAsync(Guid conversation, Guid attachment, CancellationToken ct)
     {
         var blob = await BlobAsync(conversation, attachment, ct);

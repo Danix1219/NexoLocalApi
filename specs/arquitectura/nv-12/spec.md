@@ -151,3 +151,24 @@ Dueño de este incremento: S01/S07 y cada propietario activo. [Mapa backend](../
 |---|---|---|
 | FR-950 | T-950, T-001 | AC-950 |
 | NFR-950 | T-950, T-001 | AC-950 |
+
+## Incremento 2026-11-26 · baja de cuenta completa entre dominios
+
+Estado: implementado y probado de forma local; revisión humana y aceptación pendientes.
+
+- FR-DEL-001: Cada dominio implementa `IAccountDataLifecycle` (ocultar, restaurar, borrar) sobre su propia base. Las tres operaciones son idempotentes.
+- FR-DEL-002: Al pedir la baja se ocultan perfil y trabajos, se cierran las solicitudes abiertas, se cancelan los pedidos `pending` y las conversaciones no admiten mensajes nuevos. El ciclo corre cada 10 s.
+- FR-DEL-003: Al cancelar dentro del plazo vuelven perfil, trabajos y conversaciones. Solicitudes cerradas y pedidos cancelados no vuelven.
+- FR-DEL-004: A los 30 días se borra en todos los dominios. Los pedidos `accepted` se cancelan. Solo sobreviven pedidos resueltos (sin texto ni domicilio) y opiniones. El perfil queda como cascarón sin datos porque lo referencian.
+- FR-DEL-005: Cada dominio confirma al terminar (`erasedDomains`). La cuenta se anonimiza al final y el correo queda libre. Un borrado parcial sigue como pendiente y se reintenta.
+- FR-DEL-006: Un lease por cuenta permite varias réplicas. `Accounts:Deletion:DisableWorker=true` detiene el ciclo sin tocar datos.
+- NFR-DEL-001: Los registros no incluyen datos personales; se borran los mensajes de outbox de Identity que contienen el correo o la cuenta.
+- FR-DEL-007: `chat_attachments` anota quién sube cada adjunto cifrado antes de guardarlo; otra cuenta no puede usar ese identificador (409). A los 30 días se borran los objetos de la cuenta; los de la otra persona se conservan. Los subidos antes de este registro no tienen autor conocido.
+- FR-DEL-008: Al completar la baja se envía un último correo. La dirección vive solo en ese mensaje y se sustituye por `{}` al enviarlo o a los 7 días si no se pudo enviar.
+
+Pendiente y decisiones por ratificar (D05):
+- Respaldos (AC-100): hay un [procedimiento propuesto](../../../docs/runbook-release.md) para no resucitar cuentas al restaurar, sin ensayar. Faltan decidir la retención y dónde guardar la lista de bajas fuera de la base. La retención de borrado reversible del almacenamiento de archivos tampoco está definida.
+- Los reportes se conservan sin el texto libre; los contadores de cuota no se purgan.
+- Los pedidos no resueltos se eliminan, así que la contraparte deja de verlos en su historial.
+- EP-013 (consultar el progreso) no está implementado: su contrato sigue en diseño y ninguna pantalla lo consume.
+- Si el correo falla, el error del envío queda en `lastError` del mensaje hasta que se envía o vence.

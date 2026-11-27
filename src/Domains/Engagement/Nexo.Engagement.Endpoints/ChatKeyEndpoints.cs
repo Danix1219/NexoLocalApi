@@ -25,7 +25,8 @@ public static class ChatKeyEndpoints
             { return NexoProblem.From(NexoCodes.ServerDependencyUnavailable, null, context.HttpContext); }
         });
         group.MapPut("/conversations/{conversationId:guid}/attachments/{attachmentId:guid}", async
-            (Guid conversationId, Guid attachmentId, IConversationStore conversations, IPrivateChatAttachments attachments, HttpContext http, CancellationToken ct) =>
+            (Guid conversationId, Guid attachmentId, IConversationStore conversations, IPrivateChatAttachments attachments,
+                IChatAttachmentOwners owners, TimeProvider clock, HttpContext http, CancellationToken ct) =>
         {
             var conversation = await conversations.FindAsync(conversationId, Me(http.User), ct);
             if (conversation is null) return Results.NotFound();
@@ -41,6 +42,9 @@ public static class ChatKeyEndpoints
                 await buffer.WriteAsync(chunk.AsMemory(0, read), ct);
             }
             if (buffer.Length != http.Request.ContentLength) return Results.BadRequest();
+            // El autor se anota antes de subir: ningún objeto queda sin poder borrarse con su cuenta.
+            if (!await owners.ClaimAsync(new(conversationId, attachmentId), Me(http.User), clock.GetUtcNow().UtcDateTime, ct))
+                return Results.Conflict();
             await attachments.PutAsync(conversationId, attachmentId, buffer.ToArray(), ct);
             return Results.NoContent();
         });

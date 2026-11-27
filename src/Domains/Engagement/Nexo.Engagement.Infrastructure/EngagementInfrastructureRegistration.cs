@@ -11,6 +11,7 @@ public static class EngagementInfrastructureRegistration
         services.AddSingleton<Nexo.Engagement.Application.Interests.IInterestStore, MongoInterestStore>();
         services.AddScoped<Nexo.Engagement.Application.Interests.InterestService>();
         services.AddSingleton<Nexo.Engagement.Application.Orders.IOrderStore, MongoOrderStore>();
+        services.AddScoped<Nexo.Common.Accounts.IAccountDataLifecycle, EngagementAccountLifecycle>();
         services.AddSingleton<IOrderAddressKeyWrapper, AzureOrderAddressKeyWrapper>();
         services.AddSingleton<Nexo.Engagement.Application.Orders.IOrderAddressProtection, OrderAddressProtection>();
         services.AddScoped<Nexo.Engagement.Application.Orders.OrderService>();
@@ -22,6 +23,7 @@ public static class EngagementInfrastructureRegistration
         services.AddScoped<Nexo.Engagement.Application.Conversations.ChatKeyService>();
         services.AddScoped<Nexo.Engagement.Application.Conversations.EncryptedChatService>();
         services.AddSingleton<Nexo.Engagement.Application.Conversations.IPrivateChatAttachments, AzurePrivateChatAttachments>();
+        services.AddSingleton<Nexo.Engagement.Application.Conversations.IChatAttachmentOwners, MongoChatAttachmentOwners>();
         services.AddSingleton<Nexo.Engagement.Application.Safety.IContactReportStore, MongoContactReportStore>();
         services.AddScoped<Nexo.Engagement.Application.Safety.ContactReportService>();
         services.AddSingleton<Nexo.Engagement.Application.Notifications.INotificationStore, Notifications.MongoNotificationStore>();

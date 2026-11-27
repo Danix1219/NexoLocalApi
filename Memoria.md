@@ -771,3 +771,10 @@ A evitar: probar pedidos locales con Key Vault sin credencial de Azure; si hay p
 ## 2026-11-26 · Pedidos locales con Key Vault
 Estado: `.env` local con la llave de Key Vault y `AZURE_TOKEN_CREDENTIALS=dev`; sin llave local.
 Pendiente: reiniciar la API y validar un pedido; si falla, el tipo de error aparece en la consola como `[orders] Key Vault no disponible (...)`.
+
+## 2026-11-26 · Eliminación de cuenta completa
+Estado: antes solo existían solicitud y cancelación; nada ocultaba el contenido en otros módulos ni borraba a los 30 días. Implementado el ciclo ocultar/restaurar/borrar por dominio.
+Evidencia local: 3 pruebas de punta a punta con MongoDB y Redis reales; la primera ejecución encontró que la limpieza del outbox usaba nombres de campo erróneos y conservaba el correo (corregido).
+Atención al desplegar: las cuentas que ya lleven más de 30 días en baja se borran en el primer ciclo. En la base local no había ninguna pendiente.
+Después: adjuntos cifrados con autor registrado y borrables, y correo final sin conservar la dirección. El borrado de objetos se comprobó contra Azurite con el adaptador real.
+Deuda: retención y respaldos (procedimiento propuesto sin ensayar), progreso del trámite y adjuntos subidos antes del registro de autor.

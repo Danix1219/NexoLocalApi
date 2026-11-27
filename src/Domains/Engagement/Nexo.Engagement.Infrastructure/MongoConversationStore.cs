@@ -159,6 +159,7 @@ public sealed class MongoConversationStore([FromKeyedServices(NexoDatabaseKeys.E
                     {
                         ["_id"] = Id(c.Id),
                         ["blockedBy"] = new BsonDocument("$size", 0),
+                        ["closedByDeletion.0"] = new BsonDocument("$exists", false),
                         ["encrypted"] = m.Kind == "encrypted" ? BsonBoolean.True : new BsonDocument("$ne", true)
                     },
                     new BsonDocument
