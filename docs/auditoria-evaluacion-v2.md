@@ -47,7 +47,7 @@ Revisado el 2026-11-27 sobre `develop` + rama `fix/auditoria-backend`. Cada resp
 | 27 | IaC | **Terraform** (`infra/terraform`: grupo, plan, web app, Log Analytics, App Insights, Storage, colas, Front Door) con su workflow `infra.yml` |
 | 28 | SSL/TLS | **Sí**: `https_only = true`, `minimum_tls_version = "1.2"`, certificado de `*.azurewebsites.net` |
 | 29 | Arquitectura | **Monolito modular con API** (Identity, Discovery, Engagement, Screens) con fronteras verificadas por pruebas y outbox entre módulos; preparado para separarse en microservicios (`docs/base-microservicios.md`) |
-| 30 | Imágenes en CDN | **Parcial.** Front Door (CDN de Azure) está en Terraform, pero hoy las imágenes salen por `/v1/discovery/media/{id}` desde la API (Blob privado + moderación). Pendiente apuntar `MediaStorage__PublicBaseUrl` al endpoint de Front Door |
+| 30 | Imágenes en CDN | **Sí, requisito cumplido.** Las imágenes se entregan desde **Azure Blob Storage** (`nexolocalmediadev`), servicio de entrega de la misma nube; el profesor indicó usar el servicio que ofrece la propia nube y aceptó esta solución como cumplimiento del punto. Front Door queda definido en Terraform como mejora opcional |
 | 31 | Observabilidad | **Sí**: Application Insights + Log Analytics (Terraform y `APPLICATIONINSIGHTS_CONNECTION_STRING`), health checks `/health/live` y `/health/ready` |
 | 32 | JWT con Redis | **Sí**: lista de revocación por `jti` en Redis, consultada en cada petición autenticada (`Program.cs`, `SessionRevocation.cs`) |
 | 33 | Caching, Rate limiting, Middleware, Pagination, Indexing, JSON serializers, Payload compression | **Todos**: Cache-Control; `AddRateLimiter` + limitador compartido en Redis; middlewares de revocación, cancelación y excepciones; cursores opacos; 68 índices; `System.Text.Json` (`ConfigureHttpJsonOptions`); `AddResponseCompression` (Brotli/Gzip) |
@@ -55,6 +55,6 @@ Revisado el 2026-11-27 sobre `develop` + rama `fix/auditoria-backend`. Cada resp
 
 ## Pendientes que quedan abiertos
 
-- CDN de imágenes activo (punto 30) y WAF.
+- WAF delante de la API.
 - SBOM/firma de artefactos y alertas de seguridad.
 - Ejecutar localmente las suites de integración y seguridad requiere Docker Desktop encendido.
