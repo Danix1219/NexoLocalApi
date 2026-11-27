@@ -43,9 +43,14 @@ public static class IdentityInfrastructureRegistration
         services.AddScoped<Nexo.Identity.Contracts.IPhoneDisclosureContract, ProviderIdentityContract>();
         services.AddScoped<Nexo.Identity.Contracts.IRequestClientContract, RequestClientContract>();
         services.AddScoped<AccountManagement>();
+        services.AddScoped<IProfileShareStore, MongoProfileShareStore>();
         services.Configure<ContentSafetyOptions>(configuration.GetSection("ContentSafety"));
         services.AddHttpClient<IAccountProfileSafety, AccountProfileSafety>(client => client.Timeout = TimeSpan.FromSeconds(8));
         services.AddHostedService<AccountEventRelay>();
+        // Baja de cuenta entre dominios (nv-12). Se puede detener en un entorno sin tocar los datos.
+        services.AddScoped<AccountLifecycleCoordinator>();
+        if (!string.Equals(configuration["Accounts:Deletion:DisableWorker"], "true", StringComparison.OrdinalIgnoreCase))
+            services.AddHostedService<AccountLifecycleWorker>();
         services.AddScoped<IEmailVerificationStore, RedisEmailVerificationStore>();
         services.AddScoped<IVerificationTicketStore, RedisVerificationTicketStore>();
         services.AddScoped<IOtpQuota, RedisOtpQuota>();

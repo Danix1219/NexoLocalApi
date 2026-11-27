@@ -23,6 +23,9 @@ public static class RedisRegistration
             config.ConnectTimeout = options.ConnectTimeoutMilliseconds;
             config.SyncTimeout = options.SyncTimeoutMilliseconds;
             config.ConnectRetry = 1;
+            // Do not queue authentication/rate-limit operations across a disconnect.
+            // Their callers must observe the dependency failure immediately.
+            config.BacklogPolicy = BacklogPolicy.FailFast;
             return ConnectionMultiplexer.Connect(config);
         });
 

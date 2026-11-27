@@ -117,3 +117,6 @@ Escrituras derivadas:
    (constitución §7).
 5. `Idempotency-Key` evita el duplicado clásico de reintentar con mala cobertura.
 6. El límite de 60/min frena el acoso por volumen sin molestar a una conversación normal.
+
+## Incremento privado 2026-11-19
+Edicion y eliminacion propias: PATCH/DELETE /v1/engagement/chat-keys/conversations/{conversationId}/messages/{messageId}. Contrato y limites en docs/chat-edicion-eliminacion.md. FR-CHAT-MANAGE: autoria, pertenencia, cifrado, marca persistente y no resurreccion. Validacion: ChatEncryptionPersistenceTests contra Mongo real; recorrido humano pendiente.

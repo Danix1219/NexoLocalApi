@@ -87,7 +87,6 @@ public sealed class OrderService(IOrderStore store, IOrderProviderAccess provide
         var items = new List<object>(selected.Length);
         foreach (var o in selected)
         {
-            var pendingHidden = o.Status == "pending";
             var counterpart = role == "client" ? await providers.GetAsync(o.ProviderId, ct) : null;
             var client = role == "provider" ? await providers.GetClientAsync(o.ClientId, ct) : null;
             items.Add(new
@@ -99,7 +98,7 @@ public sealed class OrderService(IOrderStore store, IOrderProviderAccess provide
                 counterpart = new
                 {
                     accountId = role == "client" ? o.ProviderId : o.ClientId,
-                    displayName = pendingHidden ? "" : counterpart?.Name ?? client?.Name ?? "Persona",
+                    displayName = CounterpartName(role, o.Status, counterpart?.Name, client?.Name),
                     photoUrl = client?.PhotoUrl,
                     kind = role == "client" ? "provider" : "client"
                 },
@@ -145,7 +144,7 @@ public sealed class OrderService(IOrderStore store, IOrderProviderAccess provide
             counterpart = new
             {
                 accountId = role == "client" ? order.ProviderId : order.ClientId,
-                displayName = order.Status == "pending" ? "" : provider?.Name ?? client?.Name ?? "Persona",
+                displayName = CounterpartName(role, order.Status, provider?.Name, client?.Name),
                 photoUrl = client?.PhotoUrl,
                 kind = role == "client" ? "provider" : "client",
                 canCopyPhone = false
@@ -259,6 +258,16 @@ public sealed class OrderService(IOrderStore store, IOrderProviderAccess provide
         return false;
     }
 
+    /// <summary>The client picked a public provider, so that name is always shown. The provider only gets
+    /// the client's short name until accepting the order (get-orders.md).</summary>
+    public static string CounterpartName(string role, string status, string? providerName, string? clientName)
+    {
+        if (role == "client") return providerName ?? "Prestador";
+        var parts = (clientName ?? "").Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        if (parts.Length == 0) return "Cliente";
+        if (status != "pending" || parts.Length == 1) return string.Join(' ', parts);
+        return $"{parts[0]} {char.ToUpperInvariant(parts[^1][0])}.";
+    }
     private static string StatusText(string s, string role) => s switch { "pending" => role == "provider" ? "Esperando tu respuesta" : "Esperando respuesta", "accepted" => "Aceptado", "rejected" => "Rechazado", "cancelled" => "Cancelado", "resolved" => "Resuelto", _ => s };
     private string Ago(DateTime createdAt)
     {

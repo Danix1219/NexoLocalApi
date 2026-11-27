@@ -215,3 +215,18 @@ Reemplaza la limitaci?n hist?rica de im?genes de los incrementos 03/05/06. [Cont
 | PUT | /me/cover | JWT, cover aprobado propio |
 
 Avatar, portada profesional, trabajos y solicitudes se adjuntan usando los PATCH/POST existentes. La cola procesa bytes reales, modera y genera WebP. No se utiliza aprobaci?n simulada ni lectura an?nima de los contenedores.
+
+
+## Perfiles compartidos - 2026-11-21
+
+| Metodo | Ruta | Regla |
+|---|---|---|
+| POST | `/v1/identity/me/profile-share` | Cuenta activa autenticada; activa enlace aleatorio estable |
+| GET | `/v1/identity/profiles/{shareId}` | Nombre y foto de cuenta activa con enlace habilitado; no-store y limite de tasa |
+| DELETE | `/v1/identity/me/profile-share` | Propietario autenticado; revoca enlace previo |
+
+Los enlaces del solicitante usan `nexolocal://profile/{shareId}`. No incluyen accountId, correo, telefono ni domicilio. No se publica al abrir el visor, solo al solicitar compartir, copiar o QR. Guardados incluye resumen publico del prestador y autor de solicitud mediante puertos de dominio; nunca expone el documento privado.
+
+
+### Retirar solicitud propia
+DELETE `/v1/discovery/requests/{id}`: propietario activo, 204 idempotente; ajeno 404; asignada 409 con `order.request_already_assigned`. Tombstone conserva pedidos/historial y elimina visibilidad en mine, oportunidades y guardados. Titulo sigue en contrato, derivado del contenido por la app.

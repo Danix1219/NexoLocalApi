@@ -94,3 +94,10 @@ la advertencia de ignorar el correo si no fue quien lo pidió.
 4. Una cuenta en `pendingDeletion` **sí** puede recuperar contraseña: es la vía para entrar y
    cancelar la baja.
 5. El correo nunca aparece en claro en los logs ni en las trazas.
+
+## Plantilla de correo 2026-11-25 (registro, recuperación y cambio de correo)
+
+- Encabezado corporativo con el logo real de la app, adjunto en el mensaje (`Content-ID: nexo-logo`, PNG incrustado en `Nexo.Identity.Infrastructure`). Sin imágenes remotas, scripts ni rastreo.
+- Contenido por propósito: asunto, introducción, código, vigencia, «Qué sigue» en pasos, aviso de seguridad y qué hacer si no se solicitó.
+- Alternativa de texto plano con la misma información.
+- Pruebas: `CodeEmailTemplateTests` (solo una imagen y por `cid:`). Visto en navegador; la apariencia en clientes de correo reales queda pendiente.

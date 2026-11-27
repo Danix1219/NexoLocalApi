@@ -182,3 +182,7 @@ Dueño de este incremento: G01/S01 y fundamento comun. [Mapa backend](../../../d
 | Requisito local | Tareas definidas | Criterios vinculados |
 |---|---|---|
 | FR-961 | T-961 | AC-961 |
+
+
+### Incremento 2026-11-21 - perfiles compartidos y guardados
+Guardados debe incluir el resumen publico actual del prestador de cada trabajo, con id, nombre y foto; un prestador despublicado no habilita contacto. Identity permite que el propietario active al compartir un perfil minimo (nombre y foto moderada), mediante POST /v1/identity/me/profile-share. Devuelve shareId aleatorio estable; GET /v1/identity/profiles/{shareId} devuelve exclusivamente nombre y foto de cuenta activa. Antes de compartir no hay acceso; DELETE /me/profile-share revoca. No exponer correo, telefono, domicilio, accountId o historial. Compartir/QR deben resolver el mismo enlace; control de tasa y no-store. Aceptacion: opt-in, revocacion y cuenta inactiva producen 404 y pruebas de campos permitidos.

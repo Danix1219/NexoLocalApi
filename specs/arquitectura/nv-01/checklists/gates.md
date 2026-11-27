@@ -55,3 +55,6 @@
 - [ ] AC-960 / T-960: perfil propio refinado para la historia, patrones justificados, fallos y suites definidos; T-001 espera esta salida y revisión humana. Sin aprobación por existir documentación.
 
 - [ ] AC-961 / T-961: base física de todos los propietarios conciliada con build, límites y arranque reales; S08 condicional, sin negocio y sin confundir scaffold con aceptación funcional. Revisión humana pendiente identificada.
+
+
+Incremento 2026-11-21: guardados con autores publicos y perfil compartido por opt-in. Validar proyeccion minima, cuenta inactiva, revocacion y ausencia de datos privados. Evidencia en docs/qa/guardados-perfiles-2026-11-21.md; revision humana pendiente.

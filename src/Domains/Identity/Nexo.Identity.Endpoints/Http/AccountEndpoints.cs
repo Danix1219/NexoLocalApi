@@ -24,6 +24,25 @@ public static class AccountEndpoints
     public static RouteGroupBuilder MapAccountEndpoints(this RouteGroupBuilder group)
     {
         var own = group.MapGroup("").RequireAuthorization().RequireRateLimiting(NexoRateLimits.User);
+        own.MapPost("/me/profile-share", async (HttpContext http, IProfileShareStore shares, AccountManagement service, CancellationToken ct) =>
+        {
+            http.Response.Headers.CacheControl = "private, no-store";
+            var account = await service.GetAsync(UserId(http), ct);
+            if (account.IsFailure || account.Value!.Status != "active") return Results.NotFound();
+            return Results.Ok(new { shareId = await shares.EnableAsync(UserId(http), ct) });
+        });
+        own.MapDelete("/me/profile-share", async (HttpContext http, IProfileShareStore shares, CancellationToken ct) =>
+        {
+            await shares.RevokeAsync(UserId(http), ct);
+            return Results.NoContent();
+        });
+        group.MapGet("/profiles/{shareId:guid}", async (Guid shareId, HttpContext http, IProfileShareStore shares, CancellationToken ct) =>
+        {
+            http.Response.Headers.CacheControl = "no-store";
+            var profile = await shares.ReadAsync(shareId, ct);
+            return profile is null ? Results.NotFound() : Results.Ok(profile);
+        }).AllowAnonymous().RequireRateLimiting(NexoRateLimits.Auth);
+
         Document(own.MapGet("/me", async (HttpContext http, AccountManagement service, CancellationToken ct) =>
         {
             http.Response.Headers.CacheControl = "private, no-store";

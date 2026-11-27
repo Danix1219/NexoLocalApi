@@ -11,6 +11,12 @@ namespace Nexo.Discovery.Application.Requests;
 public sealed class RequestService(IRequestStore store, IProviderStore profiles, IProviderAccounts accounts, IProviderSafety safety,
     IDirectoryProfiles directory, IRequestClients clients, IRequestInterests interests, TimeProvider clock)
 {
+    public async Task<Result<bool>> DeleteAsync(Guid owner, Guid id, CancellationToken ct)
+    {
+        var account = await accounts.ReadAsync(owner, ct);
+        if (account?.Active != true) return Fail<bool>(NexoCodes.AccountPendingDeletion);
+        return await store.DeleteAsync(owner, id, ct);
+    }
     public async Task<Result<ServiceRequest>> PublishAsync(Guid owner, string? key, JsonElement json, CancellationToken ct)
     {
         if (!Guid.TryParse(key, out var parsedKey) || parsedKey == Guid.Empty) return Fail<ServiceRequest>(NexoCodes.RequestIdempotencyKeyMissing);

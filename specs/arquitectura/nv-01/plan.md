@@ -93,3 +93,6 @@ T-960 atiende FR-960/NFR-960 y AC-960 con el [perfil G01](../../../docs/arquitec
 El usuario autoriza el scaffold de todos los propietarios, además de G01/S01. [Estado y evidencia](../../../docs/inicio-backend/base-todos-microservicios.md). Proyectos/carpetas según perfil y host independiente; no equivale a implementación de patrones de negocio, Ready o aceptación. S08 permanece condicional; sin proveedores nuevos ni publicación. Consolidación Git/CI real y revisión siguen pendientes.
 
 T-961 atiende FR-961/NFR-960 y AC-961 como ampliación autorizada del scaffold. Depende de T-960; no obliga al resto de historias a esperar implementación de todos los dominios. Comprobación: restore/build solución original, verificador y pruebas de referencias, smoke de hosts. Evidencia en el informe de base ampliada; revisión humana y consolidación Git/CI no se dan por realizadas.
+
+
+Incremento 2026-11-21: guardados con autores publicos y perfil compartido por opt-in. Validar proyeccion minima, cuenta inactiva, revocacion y ausencia de datos privados. Evidencia en docs/qa/guardados-perfiles-2026-11-21.md; revision humana pendiente.

@@ -19,6 +19,25 @@ public sealed class RequestPersistenceTests(InfraFixture infra)
     private static ServiceRequest Request(string category = "plomeria", string urgency = "today") => new(Guid.CreateVersion7(), category, "Fuga en el baño",
         "Reparación urgente de una tubería debajo del lavabo.", urgency, "chat", Exact.Blur(), "Zona aproximada", null, "open", 0, 2, DateTime.UtcNow, DateTime.UtcNow);
     [Fact]
+    public async Task Delete_is_owner_only_idempotent_and_preserves_assigned_orders()
+    {
+        var s = Setup(); var owner = Guid.NewGuid(); var request = Request();
+        await s.Store.CreateAsync(owner, Guid.NewGuid(), "delete-test", request, Exact, default);
+        Assert.Equal(NexoCodes.RequestNotFound, (await s.Store.DeleteAsync(Guid.NewGuid(), request.RequestId, default)).Error!.Code);
+        Assert.True((await s.Store.DeleteAsync(owner, request.RequestId, default)).IsSuccess);
+        Assert.True((await s.Store.DeleteAsync(owner, request.RequestId, default)).IsSuccess);
+        Assert.Empty(await s.Store.MineAsync(owner, "all", null, 50, default));
+        Assert.Null(await s.Store.OwnAsync(owner, request.RequestId, default));
+        Assert.Empty(await s.Store.CandidatesAsync(Guid.NewGuid(), Exact, 5, null, "", false, default));
+        var assigned = Request();
+        await s.Store.CreateAsync(owner, Guid.NewGuid(), "assigned-test", assigned, Exact, default);
+        Assert.True(await s.Store.AssignAsync(owner, assigned.RequestId, Guid.NewGuid(), default));
+        Assert.Equal(NexoCodes.OrderRequestAlreadyAssigned, (await s.Store.DeleteAsync(owner, assigned.RequestId, default)).Error!.Code);
+        Assert.NotNull(await s.Store.OwnAsync(owner, assigned.RequestId, default));
+        Assert.Equal(1, await s.Db.GetCollection<BsonDocument>("discovery_events").CountDocumentsAsync(new BsonDocument("type", "request.deleted")));
+    }
+
+    [Fact]
     public async Task Alta_concurrente_reintento_cuota_y_evento_son_atomicos()
     {
         var s = Setup(); var owner = Guid.NewGuid(); var key = Guid.NewGuid();

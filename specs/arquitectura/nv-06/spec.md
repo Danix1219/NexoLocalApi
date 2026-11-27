@@ -253,3 +253,11 @@ Estado del incremento: implementación y pruebas registradas en el contrato incr
 | NFR-991 | T-991 | AC-993 |
 
 [Contrato refinado](../../endpoints/04-descubrimiento/implementacion-directorio.md). El incremento no declara Atlas Search, caché distribuida, feed o solicitudes implementados ni aceptación humana.
+
+
+### Incremento 2026-11-21 - perfiles compartidos y guardados
+Guardados debe incluir el resumen publico actual del prestador de cada trabajo, con id, nombre y foto; un prestador despublicado no habilita contacto. Identity permite que el propietario active al compartir un perfil minimo (nombre y foto moderada), mediante POST /v1/identity/me/profile-share. Devuelve shareId aleatorio estable; GET /v1/identity/profiles/{shareId} devuelve exclusivamente nombre y foto de cuenta activa. Antes de compartir no hay acceso; DELETE /me/profile-share revoca. No exponer correo, telefono, domicilio, accountId o historial. Compartir/QR deben resolver el mismo enlace; control de tasa y no-store. Aceptacion: opt-in, revocacion y cuenta inactiva producen 404 y pruebas de campos permitidos.
+
+
+### Eliminacion de solicitud propia - 2026-11-21
+DELETE /v1/discovery/requests/{id}: solo propietario activo; retirada atomica de publicacion abierta o cerrada mediante tombstone, sin borrar pedidos ni su historial. Asignada rechaza con order.request_already_assigned. Desaparece de mine, oportunidades, visible y guardados. Reintento del propietario es idempotente. Id ajeno devuelve 404. La app ofrece menu antes de editar/eliminar y confirmacion explicita. Titulo contractual sigue derivado del contenido, sin campo visual independiente.

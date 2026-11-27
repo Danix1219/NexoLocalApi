@@ -64,9 +64,21 @@ public sealed class SmtpEmailSender(IOptions<MailOptions> options) : IEmailSende
         message.From.Add(new MailboxAddress(mail.FromName, mail.From));
         message.To.Add(MailboxAddress.Parse(to));
         message.Subject = subject;
-        message.Body = html is null ? new TextPart(TextFormat.Plain) { Text = body }
-            : new BodyBuilder { TextBody = body, HtmlBody = html }.ToMessageBody();
+        message.Body = html is null ? new TextPart(TextFormat.Plain) { Text = body } : Rich(body, html);
         return message;
+    }
+
+    /// <summary>Text and HTML alternatives; the logo travels inside the message only if the HTML uses it.</summary>
+    private static MimeEntity Rich(string text, string html)
+    {
+        var builder = new BodyBuilder { TextBody = text, HtmlBody = html };
+        if (html.Contains($"cid:{CodeEmailTemplate.LogoContentId}", StringComparison.Ordinal))
+        {
+            var logo = builder.LinkedResources.Add("nexo-logo.png", CodeEmailTemplate.Logo(), new ContentType("image", "png"));
+            logo.ContentId = CodeEmailTemplate.LogoContentId;
+        }
+
+        return builder.ToMessageBody();
     }
 
     private async Task SendMessageAsync(MimeMessage message, CancellationToken cancellationToken)

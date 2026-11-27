@@ -38,3 +38,9 @@ Hoy: powershell -NoProfile -File scripts/check_sdd.ps1 desde la raíz correspond
 - [ ] T-950 →FR-950,NFR-950. Concretar dueño S01/S07 y cada propietario activo, ubicacion objetivo adaptadores/outbox/inbox de cada servicio y tests/EndToEnd/, archivos reales actuales y alcance: borrado inicia en identidad; cierre distribuido integra dueños sin acceder a sus bases. Registrar decisiones, contratos, dependencias de entrada y suites por caso; enlazar el mapa sin fabricar scaffolding o comandos de proyectos inexistentes. Acepta: AC-950 queda refinado en plan y evidencia documental, con limites/pendientes y revisor identificable antes de Ready; no ejecuta producto ni resuelve proveedores por inferencia. Depende de: T-006, T-020.
 
 Orden aplicable: refinamiento y preparacion de rutas preceden Ready; construccion solo tras encargo/Ready, integracion espera las tareas propias adicionales, seguridad y cierre conservan sus dependencias. No esperar cierre completo de otra fase cuando solo se requiere su entrada concreta.
+
+## Incremento 2026-11-26 · baja de cuenta completa
+
+- [ ] T-DEL-001 →FR-DEL-001…006, NFR-DEL-001. `AccountLifecycleCoordinator`, `DiscoveryAccountLifecycle`, `EngagementAccountLifecycle`; `AccountDeletionTests` (3 casos con MongoDB y Redis reales). Estado: implementada; aceptación pendiente.
+- [ ] T-DEL-002 Ratificar retención y respaldos; ensayo en el entorno desplegado.
+- [ ] T-DEL-003 →FR-DEL-007, FR-DEL-008. `MongoChatAttachmentOwners`, borrado en `AzurePrivateChatAttachments` y `AccountDeletedNotice`; cubierto en `AccountDeletionTests`; el borrado real se comprobó contra Azurite. Estado: implementada; aceptación pendiente.
