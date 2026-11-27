@@ -212,6 +212,7 @@ static async Task RunApiAsync(string[] args)
 
     app.MapIdentityEndpoints();
     app.MapDiscoveryEndpoints();
+    app.MapAssistEndpoints();
     app.MapEngagementEndpoints();
     if (azureChat) app.UseMiddleware<ChatNegotiationMiddleware>();
     app.MapHub<Nexo.Engagement.Endpoints.ChatHub>(Nexo.Engagement.Endpoints.ChatHub.Path);

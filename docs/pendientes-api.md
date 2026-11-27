@@ -23,7 +23,7 @@ Nexo. Si se compila con `apiMode=live`, estas pantallas fallan.
 | Grupo | Rutas que la app ya llama |
 |---|---|
 | 15 Pantallas | Ninguna: la app compone sus pantallas con las rutas de cada grupo. Spec sin consumidor hoy |
-| Asistente | `POST /v1/assist/draft` (sin spec en `specs/endpoints`) |
+| Asistente | Implementado (2026-11-26); falta configurar Azure OpenAI (`AzureOpenAI__Endpoint`, `__ApiKey`, `__Deployment`) |
 
 ## Parcial por grupo
 

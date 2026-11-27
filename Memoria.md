@@ -1,5 +1,22 @@
 # Memoria — API_NexoLocal
 
+## IA generativa: asistente EP-082 y ML conectado en la app (2026-11-26)
+
+API (rama `feature/asistente-ia`): `POST /v1/assist/draft` en Discovery (AssistService, AzureOpenAiAssistModel por
+REST sin SDK, MongoAssistQuota). Valida, quita teléfonos/correos/enlaces de entrada y salida, modera entrada (403) y
+salida (503), tope de 20 al día por cuenta, no guarda el texto. Sin `AzureOpenAI__*` responde `503 assist.unavailable`
+y la app deja escribir a mano. Ficha nueva `specs/endpoints/16-asistente/post-assist-draft.md`.
+
+App (rama `feature/ml-categoria-y-asistente`): el ML de categoría por foto (ML Kit) existía pero ninguna pantalla lo
+llamaba: `_guess` nunca se asignaba. Ahora Publicar llama a `categorySuggesterProvider` al agregar fotos sin categoría
+elegida. Prueba de pantalla nueva que falla sin el cambio. `image_picker_platform_interface` agregado solo para pruebas.
+
+Verificación: Discovery.Unit 78/78 (11 nuevas: reglas, redacción, cupo, moderación y cliente Azure OpenAI con HTTP
+simulado), Common 38/38. `AssistEndpointTests` (503 sin credenciales) escrita pero no ejecutada: Docker apagado.
+
+Pendiente: crear el recurso Azure OpenAI y desplegar un modelo de chat (`gpt-4.1-mini`; `gpt-4o-mini` ya no admite despliegues nuevos); configurar las tres
+variables en `.env` y App Service; probar en teléfono.
+
 ## Chat en vivo con SignalR (2026-11-16)
 
 Estado: hub `/hubs/chat` con backplane Redis (`AddStackExchangeRedis`, prefijo `nexo-signalr`) para las dos

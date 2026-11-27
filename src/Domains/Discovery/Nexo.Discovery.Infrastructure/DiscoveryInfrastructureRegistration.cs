@@ -43,6 +43,9 @@ public static class DiscoveryInfrastructureRegistration
         services.AddScoped<Nexo.Discovery.Application.Requests.RequestService>();
         services.AddOptions<ProviderSafetyOptions>().Configure<IConfiguration>((options, configuration) => configuration.GetSection("ContentSafety").Bind(options));
         services.AddHttpClient<IProviderSafety, ProviderSafety>(client => client.Timeout = TimeSpan.FromSeconds(8));
+        services.AddHttpClient<Nexo.Discovery.Application.Assist.IAssistModel, Assist.AzureOpenAiAssistModel>(c => c.Timeout = TimeSpan.FromSeconds(20)).RemoveAllLoggers();
+        services.AddSingleton<Nexo.Discovery.Application.Assist.IAssistQuota, Assist.MongoAssistQuota>();
+        services.AddScoped<Nexo.Discovery.Application.Assist.AssistService>();
         services.AddOptions<Nexo.Discovery.Infrastructure.Media.MediaOptions>().Configure<IConfiguration>((o, c) => c.GetSection("MediaStorage").Bind(o));
         services.AddSingleton<Nexo.Discovery.Infrastructure.Media.AzureMediaStorage>();
         services.AddSingleton<Nexo.Discovery.Infrastructure.Media.IMediaStorage>(sp => sp.GetRequiredService<Nexo.Discovery.Infrastructure.Media.AzureMediaStorage>());

@@ -87,3 +87,22 @@ public sealed class ChatHubTests(InfraDeSeguridad infra)
     }
     private static async Task<JsonElement> Read(HttpResponseMessage r) => JsonDocument.Parse(await r.Content.ReadAsStringAsync()).RootElement.Clone();
 }
+
+/// <summary>EP-082 without Azure OpenAI configured: the person gets 503 assist.unavailable and keeps writing by hand.</summary>
+[Collection("seguridad")]
+public sealed class AssistEndpointTests(InfraDeSeguridad infra)
+{
+    [Fact]
+    public async Task Sin_credenciales_responde_no_disponible_y_exige_sesion()
+    {
+        using var host = new HostDeSeguridad(infra.CadenaMongo, infra.CadenaRedis);
+        using var visitor = host.CreateClient(); using var user = host.CreateClient();
+        var body = new { kind = "request", categoryId = "plomeria", userText = "se me rompió la llave", lengthLimit = 600 };
+        Assert.Equal(System.Net.HttpStatusCode.Unauthorized, (await visitor.PostAsJsonAsync("/v1/assist/draft", body)).StatusCode);
+        var session = await Cuenta.CrearAsync(host, user, $"assist-{Guid.NewGuid():N}@example.test");
+        user.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", session.AccessToken);
+        var r = await user.PostAsJsonAsync("/v1/assist/draft", body);
+        Assert.Equal(System.Net.HttpStatusCode.ServiceUnavailable, r.StatusCode);
+        Assert.Equal("assist.unavailable", JsonDocument.Parse(await r.Content.ReadAsStringAsync()).RootElement.GetProperty("code").GetString());
+    }
+}
