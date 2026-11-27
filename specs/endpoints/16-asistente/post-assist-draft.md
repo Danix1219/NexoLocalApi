@@ -24,7 +24,7 @@ escribió. Nunca publica: el texto pasa al formulario solo con «Usar este texto
 
 ## Respuesta `200`
 ```json
-{ "draft": { "text": "…", "title": "…" }, "modelVersion": "gpt-4o-mini" }
+{ "draft": { "text": "…", "title": "…" }, "modelVersion": "gpt-4.1-mini" }
 ```
 
 ## Errores

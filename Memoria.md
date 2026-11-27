@@ -14,7 +14,7 @@ elegida. Prueba de pantalla nueva que falla sin el cambio. `image_picker_platfor
 Verificación: Discovery.Unit 78/78 (11 nuevas: reglas, redacción, cupo, moderación y cliente Azure OpenAI con HTTP
 simulado), Common 38/38. `AssistEndpointTests` (503 sin credenciales) escrita pero no ejecutada: Docker apagado.
 
-Pendiente: crear el recurso Azure OpenAI y desplegar un modelo de chat (p. ej. gpt-4o-mini); configurar las tres
+Pendiente: crear el recurso Azure OpenAI y desplegar un modelo de chat (`gpt-4.1-mini`; `gpt-4o-mini` ya no admite despliegues nuevos); configurar las tres
 variables en `.env` y App Service; probar en teléfono.
 
 ## Chat en vivo con SignalR (2026-11-16)
