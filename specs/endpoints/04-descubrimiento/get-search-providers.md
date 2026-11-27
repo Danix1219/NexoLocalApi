@@ -80,7 +80,8 @@ GET /v1/discovery/search/providers?q=fuga+calentador&cat=plomeria&lat=20.0539&ln
   "total": 23,
   "outOfZone": false,
   "appliedFilters": ["open", "free", "attention:home"],
-  "notice": null
+  "notice": null,
+  "interpreted": null
 }
 ```
 
@@ -91,6 +92,13 @@ GET /v1/discovery/search/providers?q=fuga+calentador&cat=plomeria&lat=20.0539&ln
 | `outOfZone` | bool | — | `true` cuando se usó `expanded` y estos resultados están fuera del radio |
 | `appliedFilters` | array | — | Para pintar los chips activos y poder quitarlos (`rmf`) |
 | `notice` | string 120 | — | Aviso de la maqueta cuando no había nada en zona |
+| `interpreted` | object \| null | — | `{ category, label, source }`. Solo cuando `q` no coincide con ningún perfil y no viene `cat`: la API detecta la categoría que describe el texto ("se me tapó el baño" → `plomeria`) y busca en ella sin `q`. `source`: `ml` (clasificador ML.NET en el servidor) o `ai` (Azure OpenAI, solo si ML no está seguro). La app muestra "Mostrando Plomería para «…»" con opción de quitarlo |
+
+**Interpretación del texto (2026-11-27).** El clasificador ML.NET se entrena en memoria al primer uso con
+frases de ejemplo (`SearchIntentTraining`); responde solo con confianza ≥ 0.45 y nunca con `otros`. El
+respaldo generativo usa las variables `AzureOpenAI__*`, corta a los 3 s y guarda en memoria hasta 2,000
+textos. El cursor queda ligado a la consulta interpretada, así que la página siguiente (mismo `q`) se
+interpreta igual.
 
 **No se devuelve nunca**: teléfono, punto exacto de prestadores a domicilio (solo `zoneLabel` y
 distancia aproximada), ni correo.

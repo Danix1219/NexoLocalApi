@@ -90,6 +90,19 @@ public sealed class DirectoryTests
         Assert.Equal(2, (await service.SearchAsync(query with { Attention = "all" }, default)).Value!.Total);
     }
     [Fact]
+    public async Task Texto_sin_coincidencias_busca_la_categoria_que_describe()
+    {
+        var service = new DirectoryService(new Profiles(Provider("Juan")), new Accounts(), new Catalog(),
+            [new RelevantProviderSort(), new NearestProviderSort(), new RecommendedProviderSort()], new Clock(),
+            [new Nexo.Discovery.Infrastructure.Search.MlNetSearchIntentModel()]);
+        var r = (await service.SearchAsync(new DirectoryQuery(Q: "se me tapó el baño"), default)).Value!;
+        Assert.Single(r.Items);
+        Assert.Equal(new SearchInterpretation("plomeria", "Plomería", "ml"), r.Interpreted);
+        // Literal matches win: no interpretation when the words already find someone.
+        Assert.Null((await service.SearchAsync(new DirectoryQuery(Q: "Juan"), default)).Value!.Interpreted);
+        Assert.Empty((await service.SearchAsync(new DirectoryQuery(Q: "pizza"), default)).Value!.Items);
+    }
+    [Fact]
     public async Task Cursor_compacto_desempata_sin_repetir_y_rechaza_filtros_distintos()
     {
         var values = new[] { Provider("Uno"), Provider("Dos"), Provider("Tres") };
