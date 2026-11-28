@@ -40,12 +40,13 @@ public sealed class RecommendedProviderSort : IProviderSortStrategy
 }
 public sealed record Suggestion(string Kind, string Slug, string Label, string Category);
 public sealed record SuggestResponse(Suggestion[] Suggestions);
-public sealed record DirectoryResponse(object[] Items, string? NextCursor, bool HasMore, int Total, bool OutOfZone, string[] AppliedFilters, string? Notice);
+public sealed record DirectoryResponse(object[] Items, string? NextCursor, bool HasMore, int Total, bool OutOfZone, string[] AppliedFilters, string? Notice,
+    SearchInterpretation? Interpreted = null);
 public sealed record DirectoryMapPoint(Guid Id, ProviderPoint Point, string State, string Title, string Subtitle, double? DistanceKm, bool Exact);
 public sealed record DirectoryMapResponse(string Kind, ProviderPoint Center, int RadiusKm, int Count, string Summary, DirectoryMapPoint[] Points);
 
 public sealed class DirectoryService(IDirectoryProfiles profiles, IProviderAccounts accounts, IDirectoryCatalog catalog,
-    IEnumerable<IProviderSortStrategy> strategies, TimeProvider clock)
+    IEnumerable<IProviderSortStrategy> strategies, TimeProvider clock, IEnumerable<ISearchIntentModel>? intentModels = null)
 {
     public static bool Serves(StoredProvider p) => p.DistanceKm is not { } d || d <= p.Profile.RadiusKm || (p.Profile.Attention is "shop" or "both" && d <= 10);
     public static double? PublicDistance(double? distance) => distance is { } km ? Math.Round(km * 2, MidpointRounding.AwayFromZero) / 2 : null;
@@ -70,12 +71,19 @@ public sealed class DirectoryService(IDirectoryProfiles profiles, IProviderAccou
     public async Task<Result<DirectoryResponse>> SearchAsync(DirectoryQuery query, CancellationToken ct)
     {
         if (query.Error is { } error) return Fail<DirectoryResponse>(error);
-        if (!DirectoryCursor.TryDecode(query.Cursor, query, out var after)) return Fail<DirectoryResponse>(NexoCodes.RequestCursorInvalid);
         var cats = await catalog.ReadAsync(ct);
         var now = clock.GetUtcNow().UtcDateTime;
-        var candidates = await VisibleAsync(query.Point, query.Cat, ct);
-        var values = Filter(candidates, query, cats, now).Where(p => query.Point == null ||
-            (p.Stored.DistanceKm <= query.RadiusKm && Serves(p.Stored))).ToList();
+        var values = InZone(Filter(await VisibleAsync(query.Point, query.Cat, ct), query, cats, now), query);
+        SearchInterpretation? interpreted = null;
+        // Words that match no profile ("se me tapó el baño"): search the category they describe instead.
+        if (values.Count == 0 && query.Cat == null && query.Q.Trim().Length > 0 && await InterpretAsync(query.Q, cats, ct) is { } meaning)
+        {
+            interpreted = meaning;
+            query = query with { Q = "", Cat = meaning.Category };
+            values = InZone(Filter(await VisibleAsync(query.Point, query.Cat, ct), query, cats, now), query);
+        }
+        // Cursor is bound to the query actually run; the next page (same q, no cat) is re-interpreted the same way.
+        if (!DirectoryCursor.TryDecode(query.Cursor, query, out var after)) return Fail<DirectoryResponse>(NexoCodes.RequestCursorInvalid);
         var outOfZone = false;
         if (values.Count == 0 && query.Expanded)
         {
@@ -90,7 +98,19 @@ public sealed class DirectoryService(IDirectoryProfiles profiles, IProviderAccou
         var selected = page.Take(query.Limit).ToArray();
         return Result<DirectoryResponse>.Success(new(selected.Select(p => Card(p, now)).ToArray(),
             hasMore ? DirectoryCursor.Encode(selected[^1].Profile.ProviderId, query) : null, hasMore, values.Count, outOfZone, Filters(query),
-            outOfZone ? "No encontramos prestadores en tu zona. Estos resultados están fuera del radio elegido." : null));
+            outOfZone ? "No encontramos prestadores en tu zona. Estos resultados están fuera del radio elegido." : null, interpreted));
+    }
+    private static List<VisibleCandidate> InZone(IEnumerable<VisibleCandidate> values, DirectoryQuery query) =>
+        values.Where(p => query.Point == null || (p.Stored.DistanceKm <= query.RadiusKm && Serves(p.Stored))).ToList();
+    private async Task<SearchInterpretation?> InterpretAsync(string q, CatalogResponse cats, CancellationToken ct)
+    {
+        var slugs = cats.Categories.Select(c => c.Slug).Where(s => s != "otros").ToArray();
+        foreach (var model in intentModels ?? [])
+        {
+            var slug = await model.ClassifyAsync(q, slugs, ct);
+            if (cats.Categories.FirstOrDefault(c => c.Slug != "otros" && c.Slug == slug) is { } category) return new(category.Slug, category.Name, model.Source);
+        }
+        return null;
     }
     private async Task<List<VisibleCandidate>> VisibleAsync(ProviderPoint? point, string? cat, CancellationToken ct, bool expanded)
     {

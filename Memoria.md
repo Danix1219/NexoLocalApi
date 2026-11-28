@@ -1,5 +1,20 @@
 # Memoria — API_NexoLocal
 
+## Buscador que entiende el problema: ML.NET + IA de respaldo (2026-11-27)
+
+Rama `feature/buscador-intencion`. Antes `GET /v1/discovery/search` exigía que todas las palabras aparecieran en el
+perfil: "se me tapó el baño" daba 0. Ahora, si el texto no encuentra a nadie y no viene `cat`, `DirectoryService`
+pregunta a `ISearchIntentModel` en orden: `MlNetSearchIntentModel` (ML.NET, n-gramas de palabras y de 4 letras + SDCA
+máxima entropía, entrenado en memoria al primer uso con `SearchIntentTraining`, umbral 0.45, clase `otros` para texto
+sin oficio) y, si no está seguro, `AzureOpenAiSearchIntentModel` (`gpt-4.1-mini`, 3 s, caché en memoria). Busca en la
+categoría sin `q` y devuelve `interpreted { category, label, source }`. Paquete nuevo `Microsoft.ML` 4.0.2.
+
+Decisión: se cambió el ML de la foto en la app por este, porque mucha más gente escribe que sube foto. La rama de la app
+`feature/ml-categoria-y-asistente` queda sin integrar.
+
+Verificación: Discovery.Unit 90/90 (11 frases no vistas en el entrenamiento, 2 sin oficio y la búsqueda completa).
+Pendiente: mostrar `interpreted` en la app; ampliar `SearchIntentTraining` con búsquedas reales sin resultados.
+
 ## IA generativa: asistente EP-082 y ML conectado en la app (2026-11-26)
 
 API (rama `feature/asistente-ia`): `POST /v1/assist/draft` en Discovery (AssistService, AzureOpenAiAssistModel por
