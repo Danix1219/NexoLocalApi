@@ -43,6 +43,13 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     environment: infraestructura
+    # Entradas como variables de entorno: interpolarlas en `run:` permitiria inyectar comandos.
+    env:
+      ACCION: ${{ inputs.accion }}
+      PREFIJO: ${{ inputs.prefijo }}
+      CONFIRMACION: ${{ inputs.confirmacion }}
+      TFSTATE_RG: ${{ vars.TFSTATE_RESOURCE_GROUP }}
+      TFSTATE_SA: ${{ vars.TFSTATE_STORAGE_ACCOUNT }}
     steps:
       # Antes de autenticar siquiera: destruir por un clic distraido es el accidente que esta
       # confirmacion evita.
@@ -50,7 +57,7 @@ jobs:
         if: inputs.accion == 'destroy'
         run: |
           set -euo pipefail
-          if [ "${{ inputs.confirmacion }}" != "destruir" ]; then
+          if [ "$CONFIRMACION" != "destruir" ]; then
             echo "::error::Para destruir hay que escribir exactamente 'destruir' en la confirmacion."
             exit 1
           fi
@@ -104,10 +111,10 @@ jobs:
         run: |
           set -euo pipefail
           terraform -chdir=infra/terraform init -input=false \
-            -backend-config="resource_group_name=${{ vars.TFSTATE_RESOURCE_GROUP }}" \
-            -backend-config="storage_account_name=${{ vars.TFSTATE_STORAGE_ACCOUNT }}" \
+            -backend-config="resource_group_name=${TFSTATE_RG}" \
+            -backend-config="storage_account_name=${TFSTATE_SA}" \
             -backend-config="container_name=tfstate" \
-            -backend-config="key=${{ inputs.prefijo }}.tfstate" \
+            -backend-config="key=${PREFIJO}.tfstate" \
             -backend-config="use_azuread_auth=true"
 
       - name: Ejecutar
@@ -123,7 +130,7 @@ jobs:
         run: |
           set -euo pipefail
           cd infra/terraform
-          case "${{ inputs.accion }}" in
+          case "$ACCION" in
             plan)
               terraform plan -input=false -no-color | tee salida.txt
               ;;
@@ -141,11 +148,11 @@ jobs:
         run: |
           set -euo pipefail
           {
-            echo "## Infraestructura · ${{ inputs.accion }}"
+            echo "## Infraestructura · ${ACCION}"
             echo
             echo "| | |"
             echo "|---|---|"
-            echo "| Prefijo | \`${{ inputs.prefijo }}\` |"
+            echo "| Prefijo | \`${PREFIJO}\` |"
             echo "| Nivel del plan | \`F1\` (gratuito) |"
             echo "| Instancias | 1 |"
             if [ -n "${URL_API:-}" ]; then

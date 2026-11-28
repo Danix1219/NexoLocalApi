@@ -21,6 +21,7 @@ if hasattr(sys.stdout, "reconfigure"):
 
 def leer(archivo):
     """Devuelve (clase, nombre, resultado, mensaje) por cada prueba del `.trx`."""
+    # nosemgrep: python.lang.security.use-defused-xml-parse.use-defused-xml-parse -- solo lee los .trx que generan nuestras pruebas en el runner
     raiz = ET.parse(archivo).getroot()
 
     # El resultado trae el id de la definicion, y solo la definicion trae la clase.

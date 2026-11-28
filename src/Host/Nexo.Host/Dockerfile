@@ -14,4 +14,7 @@ COPY --from=build /app ./
 ENV ASPNETCORE_URLS=http://+:8080
 EXPOSE 8080
 
+# Usuario sin privilegios que trae la imagen de .NET (UID 1654).
+USER app
+
 ENTRYPOINT ["dotnet", "Nexo.Host.dll"]

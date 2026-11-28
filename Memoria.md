@@ -810,3 +810,6 @@ Evidencia local: 3 pruebas de punta a punta con MongoDB y Redis reales; la prime
 Atención al desplegar: las cuentas que ya lleven más de 30 días en baja se borran en el primer ciclo. En la base local no había ninguna pendiente.
 Después: adjuntos cifrados con autor registrado y borrables, y correo final sin conservar la dirección. El borrado de objetos se comprobó contra Azurite con el adaptador real.
 Deuda: retención y respaldos (procedimiento propuesto sin ensayar), progreso del trámite y adjuntos subidos antes del registro de autor.
+
+## Auditoría v2 · Imágenes y CDN (2026-11-27)
+Decisión: el requisito "imágenes en CDN" se da por **cumplido** con Azure Blob Storage, por indicación del profesor (usar el servicio de entrega de la misma nube). Front Door en Terraform queda como mejora opcional, no como pendiente.
